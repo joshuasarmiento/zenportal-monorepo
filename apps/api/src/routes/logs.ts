@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { db } from '../db';
 import { workLogs } from '../db/schema';
 import { requireAuth } from '../lib/auth';
-import { eq, desc } from 'drizzle-orm';
+import { and, eq, desc } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 
 const app = new Hono<{ Variables: { userId: string } }>();
@@ -33,7 +33,8 @@ app.post('/', async (c) => {
     date: body.date,
     summary: body.summary,
     hoursWorked: body.hoursWorked,
-    videoUrl: body.videoUrl, // Loom link
+    videoUrl: body.videoUrl,
+    attachmentUrl: body.attachmentUrl,
     isBlocked: body.isBlocked || false,
     blockerDetails: body.blockerDetails,
   }).returning();
@@ -41,6 +42,20 @@ app.post('/', async (c) => {
   // TODO: Trigger Email Notification to Client here (using Resend)
 
   return c.json(newLog[0]);
+});
+
+// GET /logs/:id - Fetch Single Log Detail
+app.get('/:id', async (c) => {
+  const userId = c.get('userId');
+  const logId = c.req.param('id');
+
+  const log = await db.query.workLogs.findFirst({
+    where: and(eq(workLogs.id, logId), eq(workLogs.userId, userId)),
+    with: { client: true }, // Include client details
+  });
+
+  if (!log) return c.json({ error: 'Log not found' }, 404);
+  return c.json(log);
 });
 
 export { app as logsRouter };

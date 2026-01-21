@@ -1,19 +1,22 @@
 import { createRouter, createWebHistory } from 'vue-router'
+// import { useAuth } from '@clerk/vue'
 
 // 1. App Pages (Protected)
 import Dashboard from '../src/pages/Dashbard.vue'
 import Clients from '../src/pages/Client.vue'
 import Earnings from '../src/pages/Earnings.vue'
 import Settings from '../src/pages/Settings.vue'
-import Pricing from '../src/pages/Pricing.vue'
 import NewLog from '../src/pages/NewLog.vue'
 import AddClient from '../src/pages/AddClient.vue'
+import EditClient from '../src/pages/EditClient.vue'
 
 // 2. Auth & Public Pages
 import Login from '../src/pages/Login.vue'
 import LandingPage from '../src/pages/LandingPage.vue'
 import ClientReport from '../src/pages/ClientReport.vue'
 import NotFound from '../src/pages/404.vue'
+import Pricing from '../src/pages/Pricing.vue'
+import LogDetail from '../src/pages/LogDetail.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -46,8 +49,16 @@ const router = createRouter({
       component: Dashboard 
     },
     { 
+      path: '/log/:id', 
+      component: LogDetail 
+    },
+    { 
       path: '/clients', 
       component: Clients 
+    },
+    { 
+        path: '/clients/:id/edit', 
+        component: EditClient 
     },
     { 
       path: '/clients/new',

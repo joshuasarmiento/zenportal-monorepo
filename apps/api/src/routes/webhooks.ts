@@ -3,10 +3,64 @@ import { db } from '../db';
 import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import Stripe from 'stripe';
+import { Webhook } from 'svix';
 
 const app = new Hono();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-12-15.clover' });
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+
+// --- CLERK CONFIG ---
+const clerkWebhookSecret = process.env.CLERK_WEBHOOK_SECRET!; // We will add this to .env later
+
+// 2. CLERK WEBHOOK (The Fix)
+app.post('/clerk', async (c) => {
+  const payload = await c.req.json();
+  const headers = c.req.header();
+
+  // Verify the webhook signature (Security)
+  const wh = new Webhook(clerkWebhookSecret);
+  let evt: any;
+
+  try {
+    evt = wh.verify(JSON.stringify(payload), {
+      "svix-id": headers["svix-id"] as string,
+      "svix-timestamp": headers["svix-timestamp"] as string,
+      "svix-signature": headers["svix-signature"] as string,
+    });
+  } catch (err) {
+    return c.json({ error: "Invalid Signature" }, 400);
+  }
+
+  // Handle the Event
+  const eventType = evt.type;
+
+  if (eventType === 'user.created') {
+    const { id, email_addresses, first_name, last_name, image_url } = evt.data;
+    
+    // Get primary email
+    const email = email_addresses.find((e: any) => e.id === evt.data.primary_email_address_id)?.email_address;
+    const fullName = `${first_name || ''} ${last_name || ''}`.trim();
+
+    // Sync to Turso
+    await db.insert(users).values({
+      id: id, // IMPORTANT: We use Clerk's ID as our Primary Key
+      email: email,
+      fullName: fullName || 'New User',
+      avatarUrl: image_url,
+      tier: 'free', // Default to free
+    });
+
+    console.log(`✅ User ${id} synced to Turso!`);
+  }
+
+  if (eventType === 'user.deleted') {
+    const { id } = evt.data;
+    await db.delete(users).where(eq(users.id, id));
+    console.log(`🗑️ User ${id} deleted from Turso.`);
+  }
+
+  return c.json({ success: true });
+});
 
 app.post('/stripe', async (c) => {
   const signature = c.req.header('stripe-signature');

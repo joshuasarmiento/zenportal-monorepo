@@ -1,5 +1,31 @@
 <script setup lang="ts">
-// No custom components needed to match the raw HTML design exactly
+import { useUser } from '@clerk/vue'
+import { useRouter } from 'vue-router'
+import { useApi } from '../lib/api' // Ensure this path is correct
+
+const { isSignedIn, user } = useUser()
+const router = useRouter()
+const { fetchApi } = useApi()
+
+const handleUpgrade = async () => {
+  // 1. If not logged in, send to Signup
+  if (!isSignedIn.value) {
+    router.push('/login')
+    return
+  }
+
+  // 2. If logged in, Create Stripe Session (Backend)
+  try {
+    const res = await fetchApi('/billing/checkout', { // You'll need this endpoint later
+      method: 'POST'
+    })
+    // Redirect to Stripe Checkout URL
+    if (res.url) window.location.href = res.url
+  } catch (err) {
+    console.error('Checkout failed', err)
+    alert('Could not start checkout. Please try again.')
+  }
+}
 </script>
 
 <template>
@@ -7,8 +33,9 @@
     
     <nav class="max-w-5xl mx-auto w-full p-6 flex justify-between items-center">
       <div class="font-bold text-xl tracking-tight text-blue-400">ZenPortal</div>
-      <router-link to="/" class="text-slate-400 hover:text-white text-sm font-medium">
-        Back to Dashboard
+      
+      <router-link :to="isSignedIn ? '/dashboard' : '/'" class="text-slate-400 hover:text-white text-sm font-medium">
+        {{ isSignedIn ? 'Back to Dashboard' : 'Back to Home' }}
       </router-link>
     </nav>
 
@@ -31,7 +58,13 @@
             <li class="flex items-center gap-3"><i class="ph ph-x text-slate-600 text-lg"></i> <span class="text-slate-500 line-through">Custom Branding</span></li>
             <li class="flex items-center gap-3"><i class="ph ph-x text-slate-600 text-lg"></i> <span class="text-slate-500 line-through">Video Uploads</span></li>
           </ul>
-          <button class="w-full py-3 rounded-lg border border-slate-600 text-white font-medium hover:bg-slate-700 transition">Current Plan</button>
+          
+          <button v-if="!isSignedIn" @click="router.push('/login')" class="w-full py-3 rounded-lg border border-slate-600 text-white font-medium hover:bg-slate-700 transition">
+            Start for Free
+          </button>
+          <button v-else class="w-full py-3 rounded-lg border border-slate-600 text-white font-medium cursor-default opacity-50">
+            Current Plan
+          </button>
         </div>
 
         <div class="bg-gradient-to-b from-blue-600 to-blue-800 rounded-2xl p-8 relative shadow-2xl transform md:-translate-y-4">
@@ -60,8 +93,9 @@
             </li>
           </ul>
           
-          <button class="w-full py-4 rounded-xl bg-white text-blue-900 font-bold hover:bg-blue-50 transition shadow-lg flex items-center justify-center gap-2">
-            <i class="ph ph-lightning-fill text-yellow-500"></i> Upgrade Now
+          <button @click="handleUpgrade" class="w-full py-4 rounded-xl bg-white text-blue-900 font-bold hover:bg-blue-50 transition shadow-lg flex items-center justify-center gap-2">
+            <i class="ph ph-lightning-fill text-yellow-500"></i> 
+            {{ isSignedIn ? 'Upgrade Now' : 'Get Started' }}
           </button>
           <p class="text-center text-xs text-blue-200 mt-4">30-day money-back guarantee.</p>
         </div>

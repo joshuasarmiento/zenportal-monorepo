@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchApi } from '../lib/api'
+import { useApi } from '../lib/api'
 import Button from '../components/ui/Button.vue'
 
 const router = useRouter()
+const { fetchApi } = useApi()
 const loading = ref(false)
 
 const form = ref({

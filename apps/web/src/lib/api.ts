@@ -1,29 +1,32 @@
+// src/lib/api.ts
 import { useAuth } from '@clerk/vue'
 
-const API_URL = import.meta.env.VITE_API_URL
+// Change from a regular function to a Composable "useApi"
+export function useApi() {
+  const { getToken } = useAuth() // This now runs inside the component setup!
 
-export async function fetchApi(endpoint: string, options: RequestInit = {}) {
-  const { getToken } = useAuth()
-  const token = await getToken.value()
+  const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
+    // We get the token dynamically when the request is made
+    const token = await getToken.value()
 
-  // 1. Attach Auth Header
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(options.headers || {}),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    }
+
+    const res = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
+      ...options,
+      headers,
+    })
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({}))
+      throw new Error(error.message || 'API Request Failed')
+    }
+
+    return res.json()
   }
 
-  // 2. Make Request
-  const res = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers,
-  })
-
-  // 3. Handle Errors
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}))
-    throw new Error(error.message || 'API Request Failed')
-  }
-
-  return res.json()
+  return { fetchApi }
 }

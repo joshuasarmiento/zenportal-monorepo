@@ -1,5 +1,33 @@
+<script setup lang="ts">
+import { useUser } from '@clerk/vue'
+import { useRouter } from 'vue-router'
+import { onMounted, watch } from 'vue'
+
+const { isSignedIn, isLoaded } = useUser()
+const router = useRouter()
+
+const checkRedirect = () => {
+  // 1. Wait for Clerk to load
+  if (!isLoaded.value) return
+
+  // 2. If Logged In -> Go to Dashboard
+  if (isSignedIn.value) {
+    router.push('/dashboard')
+  }
+}
+
+// Check immediately and whenever auth state changes
+onMounted(checkRedirect)
+watch([isLoaded, isSignedIn], checkRedirect)
+</script>
+
 <template>
-  <div class="bg-white min-h-screen font-inter text-gray-900">
+  <div v-if="!isLoaded || isSignedIn" class="min-h-screen flex items-center justify-center bg-white">
+    <div class="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+  </div>
+
+  <div v-else class="bg-white min-h-screen font-inter text-gray-900">
+    
     <nav class="flex justify-between items-center max-w-6xl mx-auto px-6 py-6">
       <div class="font-bold text-xl tracking-tight text-blue-600">ZenPortal</div>
       <div class="space-x-4">
@@ -20,7 +48,7 @@
       </p>
       
       <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
-        <router-link to="/signup" class="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-blue-700 transition">
+        <router-link to="/pricing" class="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-blue-700 transition">
           Create My Portal
         </router-link>
         <a href="#" class="bg-gray-100 text-gray-700 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-200 transition">

@@ -1,10 +1,15 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { clerkMiddleware } from '@hono/clerk-auth';
+import { serve } from '@hono/node-server';
+import { handle } from 'hono/vercel';
+
 import { clientsRouter } from './routes/clients';
 import { logsRouter } from './routes/logs';
 import { publicRouter } from './routes/public';
-import { webhooksRouter } from './routes/webhooks'; // <-- ADD THIS
+import { webhooksRouter } from './routes/webhooks';
+import { statsRouter } from './routes/stats';
+import { authRouter } from './routes/auth';
 
 const app = new Hono();
 
@@ -20,8 +25,21 @@ app.route('/api/logs', logsRouter);
 app.route('/api/public', publicRouter);
 
 // 4. Webhooks (Stripe) - Must be Public!
-app.route('/api/webhooks', webhooksRouter); // <-- ADD THIS
+app.route('/api/webhooks', webhooksRouter); 
+
+app.route('/api/auth', authRouter);
+
+app.route('/api/stats', statsRouter);
 
 app.get('/', (c) => c.text('ZenPortal API is running! 🚀'));
 
-export default app;
+// Export for Vercel
+export const GET = handle(app);
+export const POST = handle(app);
+
+const port = 3000
+console.log(`🚀 Node Server running on http://localhost:${port}`)
+serve({ fetch: app.fetch, port })
+export default { port: 3000, fetch: app.fetch };
+
+// export default app;
