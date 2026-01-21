@@ -1,0 +1,35 @@
+import { Hono } from 'hono';
+import { db } from '../db';
+import { clients, workLogs } from '../db/schema';
+import { eq, desc } from 'drizzle-orm';
+
+const app = new Hono();
+
+// GET /public/report/:token
+app.get('/report/:token', async (c) => {
+  const token = c.req.param('token');
+
+  // 1. Find the client by the magic token
+  const clientData = await db.query.clients.findFirst({
+    where: eq(clients.accessToken, token),
+    with: { owner: true }, // Get the VA's details (for branding)
+  });
+
+  if (!clientData) {
+    return c.json({ error: 'Report not found or expired' }, 404);
+  }
+
+  // 2. Fetch logs for this specific client only
+  const logs = await db.query.workLogs.findMany({
+    where: eq(workLogs.clientId, clientData.id),
+    orderBy: [desc(workLogs.date)],
+    limit: 10,
+  });
+
+  return c.json({
+    client: clientData,
+    logs: logs,
+  });
+});
+
+export { app as publicRouter };
