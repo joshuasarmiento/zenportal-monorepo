@@ -2,22 +2,23 @@ import { createRouter, createWebHistory } from 'vue-router'
 // import { useAuth } from '@clerk/vue'
 
 // 1. App Pages (Protected)
-import Dashboard from '../src/pages/Dashbard.vue'
-import Clients from '../src/pages/Client.vue'
-import Earnings from '../src/pages/Earnings.vue'
-import Settings from '../src/pages/Settings.vue'
-import NewLog from '../src/pages/NewLog.vue'
-import AddClient from '../src/pages/AddClient.vue'
-import EditClient from '../src/pages/EditClient.vue'
+import Dashboard from '@/pages/Dashbard.vue'
+import Clients from '@/pages/Client.vue'
+import Earnings from '@/pages/Earnings.vue'
+import Settings from '@/pages/Settings.vue'
+import NewLog from '@/pages/NewLog.vue'
+import AddClient from '@/pages/AddClient.vue'
+import EditClient from '@/pages/EditClient.vue'
+import EditLog from '@/pages/EditLog.vue'
 
 // 2. Auth & Public Pages
-import Login from '../src/pages/Login.vue'
-import LandingPage from '../src/pages/LandingPage.vue'
-import ClientReport from '../src/pages/ClientReport.vue'
-import NotFound from '../src/pages/404.vue'
-import Pricing from '../src/pages/Pricing.vue'
-import LogDetail from '../src/pages/LogDetail.vue'
-import AgencyProfile from '../src/pages/AgencyProfile.vue'
+import Login from '@/pages/Login.vue'
+import LandingPage from '@/pages/LandingPage.vue'
+import ClientReport from '@/pages/ClientReport.vue'
+import NotFound from '@/pages/404.vue'
+import Pricing from '@/pages/Pricing.vue'
+import LogDetail from '@/pages/LogDetail.vue'
+import AgencyProfile from '@/pages/AgencyProfile.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -56,6 +57,10 @@ const router = createRouter({
     { 
       path: '/log/:id', 
       component: LogDetail 
+    },
+    { 
+      path: '/log/:id/edit', 
+      component: EditLog 
     },
     { 
       path: '/clients', 

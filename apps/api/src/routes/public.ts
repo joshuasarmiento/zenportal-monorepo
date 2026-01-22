@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { db } from '../db';
 import { clients, workLogs, users } from '../db/schema';
 import { eq, desc } from 'drizzle-orm';
+import { sendClientViewedEmail } from '../lib/email';
 
 const app = new Hono();
 
@@ -19,7 +20,8 @@ app.get('/report/:token', async (c) => {
           email: true, 
           tier: true, 
           avatarUrl: true,
-          accentColor: true 
+          accentColor: true,
+          notifyClientView: true
         }
       }
     }
@@ -29,10 +31,18 @@ app.get('/report/:token', async (c) => {
     return c.json({ error: 'Report not found or expired' }, 404);
   }
 
+  // --- Trigger Notification Logic ---
+  // Check if owner enabled notifications and has an email
+  if (clientData.owner && clientData.owner.notifyClientView && clientData.owner.email) {
+    // Fire and forget (don't await to keep response fast)
+    sendClientViewedEmail(clientData.owner.email, clientData.companyName)
+      .catch(err => console.error('Failed to send view alert', err));
+  }
+
   const logs = await db.query.workLogs.findMany({
     where: eq(workLogs.clientId, clientData.id),
     orderBy: [desc(workLogs.date)],
-    limit: 10,
+    limit: 10, // Work Logs Limit to 10
   });
 
   return c.json({

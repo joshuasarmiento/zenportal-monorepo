@@ -94,7 +94,7 @@ const viewLog = (id: string) => router.push(`/log/${id}`)
                     <CardHeader class="border-b border-border">
                         <CardTitle>Recent Proof of Work</CardTitle>
                     </CardHeader>
-                    <CardContent class="p-0 flex-1 flex flex-col">
+                    <CardContent class="px-4 flex-1 flex flex-col">
                         <div v-if="loading" class="flex-1 flex flex-col items-center justify-center py-20">
                             <div
                                 class="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mb-4">

@@ -1,0 +1,155 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useApi } from '../lib/api'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import AppSidebar from '@/components/AppSidebar.vue'
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { Separator } from "@/components/ui/separator"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { X, Loader2, Save } from 'lucide-vue-next'
+
+const router = useRouter()
+const route = useRoute()
+const { fetchApi } = useApi()
+const loading = ref(true)
+const saving = ref(false)
+const logId = route.params.id as string
+
+const form = ref({
+  clientName: '', // Read only for display
+  date: '',
+  summary: '',
+  hoursWorked: 0,
+  videoUrl: '',
+  attachmentUrl: '',
+  isBlocked: false,
+  blockerDetails: ''
+})
+
+onMounted(async () => {
+  try {
+    const data = await fetchApi(`/logs/${logId}`)
+    form.value = {
+      clientName: data.client?.companyName || 'Unknown Client',
+      date: data.date,
+      summary: data.summary,
+      hoursWorked: data.hoursWorked,
+      videoUrl: data.videoUrl || '',
+      attachmentUrl: data.attachmentUrl || '',
+      isBlocked: !!data.isBlocked,
+      blockerDetails: data.blockerDetails || ''
+    }
+  } catch (err) {
+    alert('Log not found')
+    router.push('/dashboard')
+  } finally {
+    loading.value = false
+  }
+})
+
+const submit = async () => {
+  saving.value = true
+  try {
+    await fetchApi(`/logs/${logId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(form.value)
+    })
+    router.push(`/log/${logId}`) // Go back to detail view
+  } catch (err) {
+    alert('Failed to update log.')
+  } finally {
+    saving.value = false
+  }
+}
+</script>
+
+<template>
+  <SidebarProvider>
+    <AppSidebar />
+    <SidebarInset>
+      <header class="flex h-16 shrink-0 items-center gap-2 border-b border-border bg-background px-4 sticky top-0 z-10">
+        <div class="flex items-center gap-2">
+          <SidebarTrigger class="-ml-1" />
+          <Separator orientation="vertical" class="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem class="hidden md:block"><BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbSeparator class="hidden md:block" />
+              <BreadcrumbItem><BreadcrumbPage>Edit Log</BreadcrumbPage></BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+      </header>
+
+      <div class="flex flex-1 flex-col p-4 md:p-8 bg-muted/40 overflow-y-auto">
+        <div class="max-w-2xl mx-auto w-full">
+          <Card>
+            <CardHeader class="flex flex-row items-center justify-between border-b border-border pb-4">
+              <CardTitle>Edit Log Entry</CardTitle>
+              <Button variant="ghost" size="icon" @click="router.back()"><X class="h-4 w-4" /></Button>
+            </CardHeader>
+
+            <div v-if="loading" class="p-10 flex justify-center"><Loader2 class="h-8 w-8 animate-spin text-muted-foreground" /></div>
+
+            <CardContent v-else class="pt-6">
+              <form @submit.prevent="submit" class="space-y-6">
+                
+                <div class="space-y-2">
+                  <Label>Client</Label>
+                  <Input v-model="form.clientName" disabled class="bg-muted text-muted-foreground" />
+                </div>
+
+                <div class="space-y-2">
+                  <Label>Accomplishments</Label>
+                  <Textarea v-model="form.summary" rows="5" />
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <Label>Video Link (Loom)</Label>
+                    <Input v-model="form.videoUrl" />
+                  </div>
+                  <div class="space-y-2">
+                    <Label>Attachment Link</Label>
+                    <Input v-model="form.attachmentUrl" />
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                    <Label>Hours Worked</Label>
+                    <Input v-model="form.hoursWorked" type="number" step="0.5" />
+                </div>
+
+                <div class="rounded-lg p-4 border transition-colors"
+                     :class="form.isBlocked ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-900' : 'bg-background border-border'">
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" v-model="form.isBlocked" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+                    <span class="font-bold text-sm" :class="form.isBlocked ? 'text-red-700 dark:text-red-400' : 'text-foreground'">
+                        I am Blocked / Stuck
+                    </span>
+                  </label>
+                  <div v-if="form.isBlocked" class="mt-3">
+                    <Label class="text-xs text-red-600 dark:text-red-400 mb-1 block">Reason</Label>
+                    <Input v-model="form.blockerDetails" class="bg-background" placeholder="What do you need from the client?" />
+                  </div>
+                </div>
+
+                <div class="flex justify-end pt-4">
+                  <Button :disabled="saving">
+                    <Loader2 v-if="saving" class="mr-2 h-4 w-4 animate-spin" />
+                    <span v-else class="flex items-center gap-2"><Save class="h-4 w-4" /> Save Changes</span>
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </SidebarInset>
+  </SidebarProvider>
+</template>

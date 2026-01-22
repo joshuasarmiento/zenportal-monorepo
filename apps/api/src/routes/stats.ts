@@ -8,6 +8,55 @@ const app = new Hono<{ Variables: { userId: string } }>();
 
 app.use('*', requireAuth);
 
+// GET /stats/export - Download CSV
+app.get('/export', async (c) => {
+  const userId = c.get('userId');
+
+  // 1. Fetch raw data needed for export
+  const logs = await db
+    .select({
+      date: workLogs.date,
+      clientName: clients.companyName,
+      summary: workLogs.summary,
+      hours: workLogs.hoursWorked,
+      rate: clients.hourlyRate,
+      isBlocked: workLogs.isBlocked
+    })
+    .from(workLogs)
+    .innerJoin(clients, eq(workLogs.clientId, clients.id))
+    .where(eq(workLogs.userId, userId))
+    .orderBy(desc(workLogs.date));
+
+  // 2. Define CSV Headers
+  const csvRows = [
+    ['Date', 'Client', 'Summary', 'Hours', 'Rate/Hr', 'Total', 'Status'].join(',')
+  ];
+
+  // 3. Format Data Rows
+  logs.forEach(log => {
+    const rate = log.rate || 0;
+    const hours = log.hours || 0;
+    const total = (rate * hours).toFixed(2);
+    
+    // Escape quotes in summary to prevent CSV breaking
+    const safeSummary = `"${log.summary.replace(/"/g, '""').replace(/\n/g, ' ')}"`;
+    const safeClient = `"${log.clientName}"`;
+    const status = log.isBlocked ? 'Blocked' : 'Done';
+
+    csvRows.push(
+      [log.date, safeClient, safeSummary, hours, rate, total, status].join(',')
+    );
+  });
+
+  // 4. Return as CSV File
+  const csvContent = csvRows.join('\n');
+  
+  return c.body(csvContent, 200, {
+    'Content-Type': 'text/csv; charset=utf-8',
+    'Content-Disposition': `attachment; filename="earnings_export_${new Date().toISOString().split('T')[0]}.csv"`,
+  });
+});
+
 app.get('/', async (c) => {
   const userId = c.get('userId');
   const now = new Date();

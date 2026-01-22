@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useApi } from '../../lib/api'
-import { useUserStore } from '../../stores/userStore'
+import { useApi } from '@/lib/api'
+import { useUserStore } from '@/stores/userStore'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'

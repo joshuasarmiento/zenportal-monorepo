@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useApi } from '../lib/api'
+import { useAuth } from '@clerk/vue' // Import Clerk Auth
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
 import { Bar } from 'vue-chartjs'
 import AppSidebar from '@/components/AppSidebar.vue'
@@ -14,7 +15,10 @@ import { Download, DollarSign, CreditCard, Loader2 } from 'lucide-vue-next'
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const { fetchApi } = useApi()
+const { getToken } = useAuth() // Get Auth Token
 const loading = ref(true)
+const exporting = ref(false) // State for export button
+
 const stats = ref({ totalEarnings: 0, pending: 0, goalPercent: 0, goalTarget: 2000 })
 const revenueHistory = ref<any[]>([])
 const topClients = ref<any[]>([])
@@ -50,6 +54,39 @@ onMounted(async () => {
 })
 
 const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+
+// --- EXPORT LOGIC ---
+const exportCSV = async () => {
+  exporting.value = true
+  try {
+    const token = await getToken.value()
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/stats/export`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    if (!response.ok) throw new Error('Export failed')
+
+    // Create Blob and download
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `zenportal-earnings-report-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(a)
+    a.click()
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(a)
+
+  } catch (err) {
+    alert('Failed to export CSV. Please try again.')
+    console.error(err)
+  } finally {
+    exporting.value = false
+  }
+}
 </script>
 
 <template>
@@ -72,9 +109,13 @@ const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').su
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <div class="ml-auto"><Button variant="outline" size="sm" class="gap-2">
-            <Download class="h-4 w-4" /> Export CSV
-          </Button></div>
+        <div class="ml-auto">
+          <Button variant="outline" size="sm" class="gap-2" @click="exportCSV" :disabled="exporting">
+            <Loader2 v-if="exporting" class="h-4 w-4 animate-spin" />
+            <Download v-else class="h-4 w-4" /> 
+            Export CSV
+          </Button>
+        </div>
       </header>
 
       <div class="flex flex-1 flex-col p-4 md:p-8 bg-muted/40 overflow-y-auto">
