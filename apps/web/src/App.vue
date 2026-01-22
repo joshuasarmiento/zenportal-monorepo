@@ -9,13 +9,15 @@ const isPublicPage = computed(() => route.meta.public)
 </script>
 
 <template>
-  <div v-if="isPublicPage" class="min-h-screen bg-gray-50">
+  <div v-if="isPublicPage" class="min-h-screen bg-background text-foreground font-sans">
     <router-view />
   </div>
 
   <template v-else>
     <SignedIn>
-      <router-view />
+      <div class="min-h-screen bg-background text-foreground font-sans">
+        <router-view />
+      </div>
     </SignedIn>
 
     <SignedOut>

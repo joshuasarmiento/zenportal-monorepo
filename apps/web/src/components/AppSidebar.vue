@@ -62,8 +62,8 @@ const links = [
               <Zap class="size-4" />
             </div>
             <div class="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-              <span class="truncate font-bold text-blue-600">ZenPortal<span class="text-muted-foreground">.io</span></span>
-              <span class="truncate text-xs">Agency Admin</span>
+              <span class="truncate font-bold text-blue-600 dark:text-blue-400">ZenPortal<span class="text-muted-foreground">.io</span></span>
+              <span class="truncate text-xs text-muted-foreground">Agency Admin</span>
             </div>
           </SidebarMenuButton>
         </SidebarMenuItem>
@@ -97,7 +97,7 @@ const links = [
               >
                 <Avatar class="h-8 w-8 rounded-lg">
                   <AvatarImage :src="userStore.user?.avatarUrl" :alt="userStore.user?.fullName" />
-                  <AvatarFallback class="rounded-lg bg-indigo-100 text-indigo-600 font-bold">
+                  <AvatarFallback class="rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-200 font-bold">
                     {{ userStore.user?.fullName?.[0] || 'U' }}
                   </AvatarFallback>
                 </Avatar>
@@ -121,7 +121,7 @@ const links = [
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem class="cursor-pointer text-red-600 focus:text-red-600">
+              <DropdownMenuItem class="cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600">
                 <LogOut class="mr-2 h-4 w-4" />
                 Log out
               </DropdownMenuItem>
