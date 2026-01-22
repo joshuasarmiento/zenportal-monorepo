@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { db } from '../db';
-import { clients, workLogs } from '../db/schema';
+import { clients, workLogs, users } from '../db/schema';
 import { eq, desc } from 'drizzle-orm';
 
 const app = new Hono();
@@ -12,7 +12,12 @@ app.get('/report/:token', async (c) => {
   // 1. Find the client by the magic token
   const clientData = await db.query.clients.findFirst({
     where: eq(clients.accessToken, token),
-    with: { owner: true }, // Get the VA's details (for branding)
+    with: { 
+      owner: {
+        // Explicitly fetch the tier
+        columns: { fullName: true, email: true, tier: true, avatarUrl: true }
+      }
+    }
   });
 
   if (!clientData) {
@@ -30,6 +35,24 @@ app.get('/report/:token', async (c) => {
     client: clientData,
     logs: logs,
   });
+});
+
+app.get('/agency/:slug', async (c) => {
+  const slug = c.req.param('slug');
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.portalSlug, slug),
+    columns: {
+      fullName: true,
+      avatarUrl: true,
+      accentColor: true,
+      email: true,
+      // Do NOT expose ID, Stripe data, etc.
+    }
+  });
+
+  if (!user) return c.json({ error: 'Agency not found' }, 404);
+  return c.json(user);
 });
 
 export { app as publicRouter };

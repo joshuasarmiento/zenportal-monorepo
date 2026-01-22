@@ -7,7 +7,6 @@ import { Webhook } from 'svix';
 
 const app = new Hono();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-12-15.clover' });
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 // --- CLERK CONFIG ---
 const clerkWebhookSecret = process.env.CLERK_WEBHOOK_SECRET!; // We will add this to .env later
@@ -63,55 +62,48 @@ app.post('/clerk', async (c) => {
 });
 
 app.post('/stripe', async (c) => {
-  const signature = c.req.header('stripe-signature');
+  const sig = c.req.header('stripe-signature');
   const body = await c.req.text();
-
   let event: Stripe.Event;
 
   try {
-    // 1. Verify the request actually came from Stripe
-    event = stripe.webhooks.constructEvent(body, signature!, endpointSecret);
+    event = stripe.webhooks.constructEvent(body, sig!, process.env.STRIPE_WEBHOOK_SECRET!);
   } catch (err: any) {
-    console.error(`⚠️ Webhook signature verification failed.`, err.message);
-    return c.text(`Webhook Error: ${err.message}`, 400);
+    console.error(`Webhook Error: ${err.message}`);
+    return c.json({ error: `Webhook Error: ${err.message}` }, 400);
   }
 
-  // 2. Handle the event
+  // Handle the event
   switch (event.type) {
+    // A. User Successfully Paid (Upgrade to Pro)
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
-      
-      // We stored the userId in the metadata when creating the checkout session
-      const userId = session.metadata?.userId; 
       const subscriptionId = session.subscription as string;
       const customerId = session.customer as string;
 
-      if (userId) {
-        // 3. Update User to PRO in Turso
-        await db.update(users)
-          .set({ 
-            tier: 'pro',
-            stripeCustomerId: customerId,
-            stripeSubscriptionId: subscriptionId
-          })
-          .where(eq(users.id, userId));
-          
-        console.log(`✅ User ${userId} upgraded to PRO.`);
-      }
+      // Find user by Stripe Customer ID and Upgrade
+      await db.update(users)
+        .set({ 
+          tier: 'pro',
+          stripeSubscriptionId: subscriptionId
+        })
+        .where(eq(users.stripeCustomerId, customerId));
+        
+      console.log(`✅ User upgraded to PRO (Customer: ${customerId})`);
       break;
     }
-    
+
+    // B. User Canceled / Payment Failed (Downgrade to Free)
     case 'customer.subscription.deleted': {
-        // Handle churn (downgrade to free)
-        const subscription = event.data.object as Stripe.Subscription;
-        const customerId = subscription.customer as string;
-        
-        await db.update(users)
-            .set({ tier: 'free' })
-            .where(eq(users.stripeCustomerId, customerId));
-        
-        console.log(`⚠️ Customer ${customerId} subscription ended.`);
-        break;
+      const subscription = event.data.object as Stripe.Subscription;
+      const customerId = subscription.customer as string;
+
+      await db.update(users)
+        .set({ tier: 'free', stripeSubscriptionId: null })
+        .where(eq(users.stripeCustomerId, customerId));
+
+      console.log(`❌ User downgraded to FREE (Customer: ${customerId})`);
+      break;
     }
   }
 

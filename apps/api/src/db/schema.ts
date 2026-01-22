@@ -1,16 +1,23 @@
 import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
 import { relations, sql } from 'drizzle-orm';
 
-// --- USERS TABLE ---
+// --- USERS TABLE (Updated) ---
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(), // Matches Clerk User ID
   email: text('email').notNull().unique(),
   fullName: text('full_name'),
   avatarUrl: text('avatar_url'),
   
-  // Branding
-  handle: text('handle').unique(), // e.g. portal.app/juan
-  brandColor: text('brand_color').default('#4F46E5'),
+  // Branding & Settings
+  // We renamed 'handle' -> 'portalSlug' to match your frontend code
+  portalSlug: text('portal_slug').unique(), 
+  // We renamed 'brandColor' -> 'accentColor' to match your frontend code
+  accentColor: text('accent_color').default('indigo'),
+  
+  // Notifications (NEW COLUMNS)
+  notifyClientView: integer('notify_client_view', { mode: 'boolean' }).default(true),
+  notifyWeeklyRecap: integer('notify_weekly_recap', { mode: 'boolean' }).default(true),
+  notifyMarketing: integer('notify_marketing', { mode: 'boolean' }).default(false),
   
   // SaaS / Billing
   tier: text('tier', { enum: ['free', 'pro'] }).default('free'),
@@ -21,7 +28,7 @@ export const users = sqliteTable('users', {
     .default(sql`(strftime('%s', 'now'))`),
 });
 
-// --- CLIENTS TABLE ---
+// --- CLIENTS TABLE (Unchanged) ---
 export const clients = sqliteTable('clients', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
@@ -46,7 +53,7 @@ export const clients = sqliteTable('clients', {
   };
 });
 
-// --- WORK LOGS TABLE ---
+// --- WORK LOGS TABLE (Unchanged) ---
 export const workLogs = sqliteTable('work_logs', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
@@ -73,7 +80,7 @@ export const workLogs = sqliteTable('work_logs', {
   };
 });
 
-// --- RELATIONS ---
+// --- RELATIONS (Unchanged) ---
 export const usersRelations = relations(users, ({ many }) => ({
   clients: many(clients),
   logs: many(workLogs),

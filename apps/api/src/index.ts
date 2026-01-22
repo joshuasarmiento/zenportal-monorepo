@@ -10,6 +10,7 @@ import { publicRouter } from './routes/public';
 import { webhooksRouter } from './routes/webhooks';
 import { statsRouter } from './routes/stats';
 import { authRouter } from './routes/auth';
+import { billingRouter } from './routes/billing';
 
 const app = new Hono();
 
@@ -30,6 +31,8 @@ app.route('/api/webhooks', webhooksRouter);
 app.route('/api/auth', authRouter);
 
 app.route('/api/stats', statsRouter);
+
+app.route('/api/billing', billingRouter);
 
 app.get('/', (c) => c.text('ZenPortal API is running! 🚀'));
 

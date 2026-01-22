@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { db } from '../db';
-import { clients } from '../db/schema';
+import { clients, users } from '../db/schema';
 import { requireAuth } from '../lib/auth';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, count} from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 
 const app = new Hono<{ Variables: { userId: string } }>();
@@ -36,8 +36,31 @@ app.get('/:id', async (c) => {
 app.post('/', async (c) => {
   const userId = c.get('userId');
   const body = await c.req.json();
-  const accessToken = uuidv4(); 
 
+  // 1. Get User Tier
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: { tier: true }
+  });
+
+  // 2. Count Existing Clients
+  const clientCount = await db
+    .select({ count: count() })
+    .from(clients)
+    .where(eq(clients.userId, userId));
+
+  const currentCount = clientCount[0].count;
+  const isPro = user?.tier === 'pro';
+
+  // 3. Enforce Limit
+  if (!isPro && currentCount >= 2) {
+    return c.json({ 
+      error: 'Free Limit Reached', 
+      message: 'Upgrade to Pro to add more than 2 clients.' 
+    }, 403);
+  }
+
+  const accessToken = uuidv4(); 
   const newClient = await db.insert(clients).values({
     id: uuidv4(),
     userId: userId,

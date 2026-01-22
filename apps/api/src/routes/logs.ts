@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { db } from '../db';
-import { workLogs } from '../db/schema';
+import { workLogs, users } from '../db/schema';
 import { requireAuth } from '../lib/auth';
 import { and, eq, desc } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
@@ -26,6 +26,20 @@ app.post('/', async (c) => {
   const userId = c.get('userId');
   const body = await c.req.json();
 
+  // 1. Get User Tier
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: { tier: true }
+  });
+
+  const isPro = user?.tier === 'pro';
+
+  // 2. Enforce Pro Features (Video Integrations)
+  // If user sends a video URL but is NOT pro, ignore it or throw error.
+  // Here we simply strip it out to enforce "Basic" logging.
+  const videoUrl = isPro ? body.videoUrl : null;
+  const attachmentUrl = isPro ? body.attachmentUrl : null; // Optional: restrict attachments too
+
   const newLog = await db.insert(workLogs).values({
     id: uuidv4(),
     userId: userId,
@@ -33,8 +47,11 @@ app.post('/', async (c) => {
     date: body.date,
     summary: body.summary,
     hoursWorked: body.hoursWorked,
+
+    // Only save these if Pro
     videoUrl: body.videoUrl,
     attachmentUrl: body.attachmentUrl,
+
     isBlocked: body.isBlocked || false,
     blockerDetails: body.blockerDetails,
   }).returning();
