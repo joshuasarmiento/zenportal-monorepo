@@ -49,8 +49,8 @@ app.post('/', async (c) => {
     hoursWorked: body.hoursWorked,
 
     // Only save these if Pro
-    videoUrl: body.videoUrl,
-    attachmentUrl: body.attachmentUrl,
+    videoUrl: videoUrl,
+    attachmentUrl: attachmentUrl,
 
     isBlocked: body.isBlocked || false,
     blockerDetails: body.blockerDetails,

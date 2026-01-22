@@ -2,14 +2,23 @@ import { Hono } from 'hono';
 import { db } from '../db';
 import { clients, users } from '../db/schema';
 import { requireAuth } from '../lib/auth';
-import { eq, and, desc, count} from 'drizzle-orm';
+import { eq, and, desc, count } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
+import { z } from 'zod';
+import { zValidator } from '@hono/zod-validator';
 
 const app = new Hono<{ Variables: { userId: string } }>();
 
 app.use('*', requireAuth);
 
-// GET /clients - List all
+const clientSchema = z.object({
+  companyName: z.string().min(1),
+  contactName: z.string().optional(),
+  contactEmail: z.string().email().optional().or(z.literal('')),
+  hourlyRate: z.number().min(0),
+});
+
+// GET /clients
 app.get('/', async (c) => {
   const userId = c.get('userId');
   const myClients = await db.query.clients.findMany({
@@ -19,7 +28,7 @@ app.get('/', async (c) => {
   return c.json(myClients);
 });
 
-// GET /clients/:id - Get Single Client (For Editing)
+// GET /clients/:id
 app.get('/:id', async (c) => {
   const userId = c.get('userId');
   const clientId = c.req.param('id');
@@ -32,35 +41,35 @@ app.get('/:id', async (c) => {
   return c.json(client);
 });
 
-// POST /clients - Add new
-app.post('/', async (c) => {
+// POST /clients
+app.post('/', zValidator('json', clientSchema), async (c) => {
   const userId = c.get('userId');
-  const body = await c.req.json();
+  const body = c.req.valid('json');
 
-  // 1. Get User Tier
   const user = await db.query.users.findFirst({
     where: eq(users.id, userId),
     columns: { tier: true }
   });
 
-  // 2. Count Existing Clients
+  // Count only ACTIVE clients for the limit
   const clientCount = await db
     .select({ count: count() })
     .from(clients)
-    .where(eq(clients.userId, userId));
+    .where(and(
+      eq(clients.userId, userId), 
+      eq(clients.status, 'active')
+    ));
 
   const currentCount = clientCount[0].count;
   const isPro = user?.tier === 'pro';
 
-  // 3. Enforce Limit
   if (!isPro && currentCount >= 2) {
     return c.json({ 
       error: 'Free Limit Reached', 
-      message: 'Upgrade to Pro to add more than 2 clients.' 
+      message: 'Archive old clients or Upgrade to Pro to add more.' 
     }, 403);
   }
 
-  const accessToken = uuidv4(); 
   const newClient = await db.insert(clients).values({
     id: uuidv4(),
     userId: userId,
@@ -69,13 +78,13 @@ app.post('/', async (c) => {
     contactEmail: body.contactEmail, 
     hourlyRate: body.hourlyRate,
     status: 'active',               
-    accessToken: accessToken,
+    accessToken: uuidv4(),
   }).returning();
 
   return c.json(newClient[0]);
 });
 
-// PUT /clients/:id - Update Client
+// PUT /clients/:id
 app.put('/:id', async (c) => {
   const userId = c.get('userId');
   const clientId = c.req.param('id');
@@ -87,7 +96,7 @@ app.put('/:id', async (c) => {
       contactName: body.contactName,
       contactEmail: body.contactEmail,
       hourlyRate: body.hourlyRate,
-      status: body.status // e.g. 'active' or 'archived'
+      status: body.status
     })
     .where(and(eq(clients.id, clientId), eq(clients.userId, userId)))
     .returning();

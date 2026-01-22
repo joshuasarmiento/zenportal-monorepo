@@ -8,7 +8,7 @@ const embedUrl = computed(() => props.url.replace('/share/', '/embed/'))
 </script>
 
 <template>
-  <div v-if="url" class="rounded-xl overflow-hidden bg-gray-900 shadow-sm border border-gray-200">
+  <div v-if="url" class="overflow-hidden bg-gray-900 shadow-sm border border-gray-200">
     
     <div v-if="isLoom" class="aspect-video w-full">
       <iframe 

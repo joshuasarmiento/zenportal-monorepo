@@ -2,7 +2,11 @@
 import { ref, onMounted, computed } from 'vue'
 import { useApi } from '../../lib/api'
 import { useUserStore } from '../../stores/userStore'
-import Button from '../ui/Button.vue'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
+import { Lock, Copy, Check, Loader2 } from 'lucide-vue-next'
 
 const { fetchApi } = useApi()
 const userStore = useUserStore()
@@ -14,13 +18,12 @@ const form = ref({
   accentColor: 'indigo'
 })
 
-// Define available colors
 const colors = [
-  { name: 'indigo', hex: 'bg-indigo-600' },
-  { name: 'blue', hex: 'bg-blue-600' },
-  { name: 'emerald', hex: 'bg-emerald-600' },
-  { name: 'rose', hex: 'bg-rose-600' },
-  { name: 'gray', hex: 'bg-gray-900' }
+  { name: 'indigo', hex: 'bg-indigo-600', ring: 'ring-indigo-600' },
+  { name: 'blue', hex: 'bg-blue-600', ring: 'ring-blue-600' },
+  { name: 'emerald', hex: 'bg-emerald-600', ring: 'ring-emerald-600' },
+  { name: 'rose', hex: 'bg-rose-600', ring: 'ring-rose-600' },
+  { name: 'gray', hex: 'bg-gray-900', ring: 'ring-gray-900' }
 ]
 
 const isPro = computed(() => userStore.user?.tier === 'pro')
@@ -51,10 +54,7 @@ const save = async () => {
 
 const copyLink = () => {
   if (!form.value.portalSlug) return
-
-  // Construct the URL (adjust the domain if needed)
-  const url = `/p/${form.value.portalSlug}`
-
+  const url = `${window.location.origin}/p/${form.value.portalSlug}`
   navigator.clipboard.writeText(url).then(() => {
     copied.value = true
     setTimeout(() => copied.value = false, 2000)
@@ -63,64 +63,76 @@ const copyLink = () => {
 </script>
 
 <template>
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 relative overflow-hidden">
-
+  <Card class="relative overflow-hidden">
+    
     <div v-if="!isPro"
       class="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center text-center p-6">
       <div class="bg-white p-6 rounded-xl shadow-xl border border-blue-100 max-w-sm">
         <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-          <i class="ph ph-lock-key text-2xl"></i>
+          <Lock class="h-6 w-6" />
         </div>
         <h3 class="text-lg font-bold text-gray-900 mb-2">Unlock Branding</h3>
         <p class="text-sm text-gray-500 mb-6">Use your own logo and colors with Agency Pro.</p>
-        <button class="bg-blue-600 text-white w-full py-2.5 rounded-lg font-bold hover:bg-blue-700 transition">
+        <Button class="w-full bg-blue-600 hover:bg-blue-700">
           Upgrade for $12/mo
-        </button>
+        </Button>
       </div>
     </div>
 
-    <div class="mb-6 pb-6 border-b border-gray-100">
-      <h3 class="text-lg font-bold text-gray-900">Portal Appearance</h3>
-      <p class="text-sm text-gray-500">Customize how clients see your work logs.</p>
-    </div>
+    <CardHeader class="border-b border-border pb-6">
+      <CardTitle>Portal Appearance</CardTitle>
+      <CardDescription>Customize how clients see your work logs.</CardDescription>
+    </CardHeader>
 
-    <div class="space-y-6">
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Portal Link</label>
-        <div class="flex">
-          <span
-            class="bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg px-3 py-2 text-gray-500 text-sm flex items-center">
-            portal.app/
-          </span>
-          <input v-model="form.portalSlug" type="text" placeholder="your-agency" :disabled="!isPro"
-            class="flex-1 border border-gray-300 rounded-r-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold text-gray-800 disabled:bg-gray-50">
+    <CardContent class="space-y-6 pt-6">
+      <div class="space-y-2">
+        <Label>Portal Link</Label>
+        <div class="flex items-center gap-2">
+          <div class="flex flex-1 rounded-md shadow-sm">
+             <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-sm">
+              portal.app/
+            </span>
+            <Input 
+              v-model="form.portalSlug" 
+              placeholder="your-agency"
+              :disabled="!isPro"
+              class="rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0 relative"
+            />
+          </div>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            @click="copyLink" 
+            :disabled="!isPro || !form.portalSlug"
+            :title="copied ? 'Copied!' : 'Copy Link'"
+          >
+            <Check v-if="copied" class="h-4 w-4 text-green-600" />
+            <Copy v-else class="h-4 w-4" />
+          </Button>
         </div>
-        <button @click="copyLink" :disabled="!isPro || !form.portalSlug"
-          class="p-2.5 rounded-lg border border-gray-300 text-gray-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
-          :title="copied ? 'Copied!' : 'Copy Link'">
-          <i v-if="copied" class="ph ph-check text-green-600 text-lg"></i>
-          <i v-else class="ph ph-copy text-lg"></i>
-        </button>
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Accent Color</label>
+      <div class="space-y-3">
+        <Label>Accent Color</Label>
         <div class="flex gap-3">
-          <button v-for="color in colors" :key="color.name" @click="form.accentColor = color.name" :disabled="!isPro"
-            class="w-8 h-8 rounded-full cursor-pointer hover:opacity-80 transition focus:outline-none disabled:cursor-not-allowed"
+          <button v-for="color in colors" :key="color.name" 
+            @click="form.accentColor = color.name" 
+            :disabled="!isPro"
+            class="w-8 h-8 rounded-full cursor-pointer hover:opacity-80 transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed"
             :class="[
               color.hex,
-              form.accentColor === color.name ? 'ring-2 ring-offset-2 ring-gray-400' : ''
-            ]"></button>
+              form.accentColor === color.name ? `ring-2 ring-offset-2 ${color.ring}` : ''
+            ]"
+          ></button>
         </div>
       </div>
-    </div>
+    </CardContent>
 
-    <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end">
-      <Button variant="primary" @click="save" :disabled="saving || !isPro">
+    <CardFooter class="border-t border-border pt-6 flex justify-end">
+      <Button @click="save" :disabled="saving || !isPro">
+        <Loader2 v-if="saving" class="mr-2 h-4 w-4 animate-spin" />
         {{ saving ? 'Saving...' : 'Save Changes' }}
       </Button>
-    </div>
-  </div>
+    </CardFooter>
+  </Card>
 </template>

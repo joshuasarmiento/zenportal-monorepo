@@ -6,18 +6,21 @@ import Stripe from 'stripe';
 import { Webhook } from 'svix';
 
 const app = new Hono();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-12-15.clover' });
 
-// --- CLERK CONFIG ---
-const clerkWebhookSecret = process.env.CLERK_WEBHOOK_SECRET!; // We will add this to .env later
+// Validate Environment Variables
+if (!process.env.STRIPE_SECRET_KEY) throw new Error('Missing STRIPE_SECRET_KEY');
+if (!process.env.CLERK_WEBHOOK_SECRET) throw new Error('Missing CLERK_WEBHOOK_SECRET');
+if (!process.env.STRIPE_WEBHOOK_SECRET) throw new Error('Missing STRIPE_WEBHOOK_SECRET');
 
-// 2. CLERK WEBHOOK (The Fix)
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-12-15.clover' as any });
+
+// CLERK WEBHOOK
 app.post('/clerk', async (c) => {
   const payload = await c.req.json();
   const headers = c.req.header();
+  const secret = process.env.CLERK_WEBHOOK_SECRET!;
 
-  // Verify the webhook signature (Security)
-  const wh = new Webhook(clerkWebhookSecret);
+  const wh = new Webhook(secret);
   let evt: any;
 
   try {
@@ -30,25 +33,29 @@ app.post('/clerk', async (c) => {
     return c.json({ error: "Invalid Signature" }, 400);
   }
 
-  // Handle the Event
   const eventType = evt.type;
 
   if (eventType === 'user.created') {
-    const { id, email_addresses, first_name, last_name, image_url } = evt.data;
+    const { id, email_addresses, first_name, last_name, image_url, primary_email_address_id } = evt.data;
     
-    // Get primary email
-    const email = email_addresses.find((e: any) => e.id === evt.data.primary_email_address_id)?.email_address;
+    // Safer email extraction
+    const primaryEmailObj = email_addresses.find((e: any) => e.id === primary_email_address_id);
+    const email = primaryEmailObj ? primaryEmailObj.email_address : null;
+    
+    if (!email) {
+      console.error(`❌ User ${id} created without a primary email.`);
+      return c.json({ error: "No email found" }, 400);
+    }
+
     const fullName = `${first_name || ''} ${last_name || ''}`.trim();
 
-    // Sync to Turso
     await db.insert(users).values({
-      id: id, // IMPORTANT: We use Clerk's ID as our Primary Key
+      id: id,
       email: email,
       fullName: fullName || 'New User',
       avatarUrl: image_url,
-      tier: 'free', // Default to free
+      tier: 'free',
     });
-
     console.log(`✅ User ${id} synced to Turso!`);
   }
 
@@ -61,6 +68,7 @@ app.post('/clerk', async (c) => {
   return c.json({ success: true });
 });
 
+// STRIPE WEBHOOK
 app.post('/stripe', async (c) => {
   const sig = c.req.header('stripe-signature');
   const body = await c.req.text();
@@ -73,27 +81,18 @@ app.post('/stripe', async (c) => {
     return c.json({ error: `Webhook Error: ${err.message}` }, 400);
   }
 
-  // Handle the event
   switch (event.type) {
-    // A. User Successfully Paid (Upgrade to Pro)
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
       const subscriptionId = session.subscription as string;
       const customerId = session.customer as string;
 
-      // Find user by Stripe Customer ID and Upgrade
       await db.update(users)
-        .set({ 
-          tier: 'pro',
-          stripeSubscriptionId: subscriptionId
-        })
+        .set({ tier: 'pro', stripeSubscriptionId: subscriptionId })
         .where(eq(users.stripeCustomerId, customerId));
-        
-      console.log(`✅ User upgraded to PRO (Customer: ${customerId})`);
       break;
     }
 
-    // B. User Canceled / Payment Failed (Downgrade to Free)
     case 'customer.subscription.deleted': {
       const subscription = event.data.object as Stripe.Subscription;
       const customerId = subscription.customer as string;
@@ -101,8 +100,6 @@ app.post('/stripe', async (c) => {
       await db.update(users)
         .set({ tier: 'free', stripeSubscriptionId: null })
         .where(eq(users.stripeCustomerId, customerId));
-
-      console.log(`❌ User downgraded to FREE (Customer: ${customerId})`);
       break;
     }
   }

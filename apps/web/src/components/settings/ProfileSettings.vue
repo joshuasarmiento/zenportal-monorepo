@@ -3,17 +3,20 @@ import { ref, onMounted } from 'vue'
 import { useApi } from '../../lib/api'
 import { useUserStore } from '../../stores/userStore'
 import { SignOutButton } from '@clerk/vue'
-import Button from '../ui/Button.vue'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
+import { Loader2, LogOut } from 'lucide-vue-next'
 
 const { fetchApi } = useApi()
 const userStore = useUserStore()
-// const { signOut } = useClerk()
-
 const saving = ref(false)
 
 const form = ref({
     fullName: '',
-    email: '', // Read-only
+    email: '',
     avatarUrl: ''
 })
 
@@ -49,53 +52,55 @@ const save = async () => {
 </script>
 
 <template>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div class="mb-6 pb-6 border-b border-gray-100">
-            <h3 class="text-lg font-bold text-gray-900">Personal Information</h3>
-            <p class="text-sm text-gray-500">Update your photo and personal details.</p>
-        </div>
+    <Card>
+        <CardHeader class="border-b border-border pb-6">
+            <CardTitle>Personal Information</CardTitle>
+            <CardDescription>Update your photo and personal details.</CardDescription>
+        </CardHeader>
 
-        <div class="space-y-6 max-w-lg">
+        <CardContent class="space-y-6 pt-6 max-w-lg">
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Profile Photo</label>
+            <div class="space-y-2">
+                <Label>Profile Photo</Label>
                 <div class="flex items-center gap-4">
-                    <img v-if="form.avatarUrl" :src="form.avatarUrl"
-                        class="w-16 h-16 rounded-full object-cover border border-gray-200">
-                    <div v-else
-                        class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-xl">
-                        {{ userStore.initials }}
-                    </div>
+                    <Avatar class="h-16 w-16 border">
+                        <AvatarImage :src="form.avatarUrl" />
+                        <AvatarFallback class="bg-indigo-100 text-indigo-600 text-xl font-bold">
+                            {{ userStore.initials }}
+                        </AvatarFallback>
+                    </Avatar>
 
-                    <div class="flex-1">
-                        <input v-model="form.avatarUrl" type="text" placeholder="https://..."
-                            class="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
-                        <p class="text-xs text-gray-500 mt-1">Paste an image URL (e.g. from LinkedIn or GitHub).</p>
+                    <div class="flex-1 space-y-1">
+                        <Input v-model="form.avatarUrl" placeholder="https://..." />
+                        <p class="text-xs text-muted-foreground">Paste an image URL (e.g. from LinkedIn or GitHub).</p>
                     </div>
                 </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input v-model="form.fullName" type="text"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-800">
+            <div class="space-y-2">
+                <Label>Full Name</Label>
+                <Input v-model="form.fullName" />
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                <input v-model="form.email" type="email" disabled
-                    class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-500 cursor-not-allowed">
+            <div class="space-y-2">
+                <Label>Email Address</Label>
+                <Input v-model="form.email" disabled class="bg-muted text-muted-foreground" />
             </div>
 
-            <div class="pt-6 flex items-center justify-between">
-                <SignOutButton
-                    class="text-red-600 text-sm font-medium hover:text-red-800 flex items-center gap-2 transition" />
+        </CardContent>
 
-                <Button variant="primary" @click="save" :disabled="saving">
-                    {{ saving ? 'Saving...' : 'Save Changes' }}
+        <CardFooter class="border-t border-border pt-6 flex items-center justify-between">
+            <SignOutButton>
+                <Button variant="ghost" class="text-red-600 hover:text-red-700 hover:bg-red-50">
+                    <LogOut class="mr-2 h-4 w-4" />
+                    Sign Out
                 </Button>
-            </div>
+            </SignOutButton>
 
-        </div>
-    </div>
+            <Button @click="save" :disabled="saving">
+                <Loader2 v-if="saving" class="mr-2 h-4 w-4 animate-spin" />
+                {{ saving ? 'Saving...' : 'Save Changes' }}
+            </Button>
+        </CardFooter>
+    </Card>
 </template>

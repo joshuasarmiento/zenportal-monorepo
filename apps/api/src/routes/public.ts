@@ -9,13 +9,18 @@ const app = new Hono();
 app.get('/report/:token', async (c) => {
   const token = c.req.param('token');
 
-  // 1. Find the client by the magic token
   const clientData = await db.query.clients.findFirst({
     where: eq(clients.accessToken, token),
     with: { 
       owner: {
-        // Explicitly fetch the tier
-        columns: { fullName: true, email: true, tier: true, avatarUrl: true }
+        // STRICT Privacy: Only return what is needed for the report display
+        columns: { 
+          fullName: true, 
+          email: true, 
+          tier: true, 
+          avatarUrl: true,
+          accentColor: true 
+        }
       }
     }
   });
@@ -24,7 +29,6 @@ app.get('/report/:token', async (c) => {
     return c.json({ error: 'Report not found or expired' }, 404);
   }
 
-  // 2. Fetch logs for this specific client only
   const logs = await db.query.workLogs.findMany({
     where: eq(workLogs.clientId, clientData.id),
     orderBy: [desc(workLogs.date)],
@@ -37,6 +41,7 @@ app.get('/report/:token', async (c) => {
   });
 });
 
+// GET /public/agency/:slug
 app.get('/agency/:slug', async (c) => {
   const slug = c.req.param('slug');
 
@@ -47,7 +52,7 @@ app.get('/agency/:slug', async (c) => {
       avatarUrl: true,
       accentColor: true,
       email: true,
-      // Do NOT expose ID, Stripe data, etc.
+      // Explicitly excluding billing IDs and internal flags
     }
   });
 

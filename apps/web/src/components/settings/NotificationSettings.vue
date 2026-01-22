@@ -2,7 +2,11 @@
 import { ref, onMounted } from 'vue'
 import { useApi } from '../../lib/api'
 import { useUserStore } from '../../stores/userStore'
-import Button from '../ui/Button.vue'
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
+import { Loader2 } from 'lucide-vue-next'
 
 const { fetchApi } = useApi()
 const userStore = useUserStore()
@@ -43,53 +47,45 @@ const save = async () => {
 </script>
 
 <template>
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-    <div class="mb-6 pb-6 border-b border-gray-100">
-      <h3 class="text-lg font-bold text-gray-900">Email Alerts</h3>
-      <p class="text-sm text-gray-500">Control when ZenPortal sends you emails.</p>
-    </div>
+  <Card>
+    <CardHeader class="border-b border-border pb-6">
+      <CardTitle>Email Alerts</CardTitle>
+      <CardDescription>Control when ZenPortal sends you emails.</CardDescription>
+    </CardHeader>
 
-    <div class="space-y-6">
+    <CardContent class="space-y-6 pt-6">
       
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-bold text-gray-800">Client Views Report</p>
-          <p class="text-xs text-gray-500">Get notified when a client opens your magic link.</p>
+      <div class="flex items-center justify-between space-x-2">
+        <div class="space-y-0.5">
+          <Label class="text-base font-semibold">Client Views Report</Label>
+          <p class="text-sm text-muted-foreground">Get notified when a client opens your magic link.</p>
         </div>
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" v-model="settings.notifyClientView" class="sr-only peer">
-          <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-        </label>
+        <Switch v-model:checked="settings.notifyClientView" />
       </div>
 
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-bold text-gray-800">Weekly Earnings Recap</p>
-          <p class="text-xs text-gray-500">Receive a Sunday summary of hours logged.</p>
+      <div class="flex items-center justify-between space-x-2">
+         <div class="space-y-0.5">
+          <Label class="text-base font-semibold">Weekly Earnings Recap</Label>
+          <p class="text-sm text-muted-foreground">Receive a Sunday summary of hours logged.</p>
         </div>
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" v-model="settings.notifyWeeklyRecap" class="sr-only peer">
-          <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-        </label>
+        <Switch v-model:checked="settings.notifyWeeklyRecap" />
       </div>
 
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-sm font-bold text-gray-800">Marketing & Tips</p>
-          <p class="text-xs text-gray-500">News about new features and freelance tips.</p>
+      <div class="flex items-center justify-between space-x-2">
+         <div class="space-y-0.5">
+          <Label class="text-base font-semibold">Marketing & Tips</Label>
+          <p class="text-sm text-muted-foreground">News about new features and freelance tips.</p>
         </div>
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" v-model="settings.notifyMarketing" class="sr-only peer">
-          <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-        </label>
+        <Switch v-model:checked="settings.notifyMarketing" />
       </div>
 
-    </div>
+    </CardContent>
     
-    <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end">
+    <CardFooter class="border-t border-border pt-6 flex justify-end">
       <Button variant="secondary" @click="save" :disabled="saving">
+        <Loader2 v-if="saving" class="mr-2 h-4 w-4 animate-spin" />
         {{ saving ? 'Updating...' : 'Update Preferences' }}
       </Button>
-    </div>
-  </div>
+    </CardFooter>
+  </Card>
 </template>
