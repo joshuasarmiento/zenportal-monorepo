@@ -10,23 +10,45 @@ const data = ref<any>(null)
 const error = ref('')
 const loading = ref(true)
 
-// Helper to format date like "Tuesday, Oct 24"
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr)
-  return new Intl.DateTimeFormat('en-US', { 
-    weekday: 'long', 
-    month: 'short', 
-    day: 'numeric' 
-  }).format(date)
+// --- 1. Define Color Maps (Matches your Settings Page) ---
+const bgColors: Record<string, string> = {
+  indigo: 'bg-indigo-600',
+  blue: 'bg-blue-600',
+  emerald: 'bg-emerald-600',
+  rose: 'bg-rose-600',
+  gray: 'bg-gray-900'
 }
 
-// Helper to split summary text into bullet points
+const textColors: Record<string, string> = {
+  indigo: 'text-indigo-600',
+  blue: 'text-blue-600',
+  emerald: 'text-emerald-600',
+  rose: 'text-rose-600',
+  gray: 'text-gray-900'
+}
+
+// --- 2. Computed Styles based on Owner Settings ---
+const accentBg = computed(() => {
+  const color = data.value?.client?.owner?.accentColor || 'indigo'
+  return bgColors[color] || 'bg-indigo-600'
+})
+
+const accentText = computed(() => {
+  const color = data.value?.client?.owner?.accentColor || 'indigo'
+  return textColors[color] || 'text-indigo-600'
+})
+
+// Helper functions
+const formatDate = (dateStr: string) => {
+  const date = new Date(dateStr)
+  return new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'short', day: 'numeric' }).format(date)
+}
+
 const formatSummary = (text: string) => {
   if (!text) return []
   return text.split('\n').filter(line => line.trim().length > 0)
 }
 
-// Computed: Sort logs by Date (Newest First)
 const sortedLogs = computed(() => {
   if (!data.value?.logs) return []
   return [...data.value.logs].sort((a: any, b: any) => {
@@ -36,9 +58,7 @@ const sortedLogs = computed(() => {
 
 onMounted(async () => {
   try {
-    // USE STANDARD FETCH for public pages (No Clerk Auth needed)
     const res = await fetch(`${import.meta.env.VITE_API_URL}/public/report/${token}`)
-    
     if (!res.ok) throw new Error('Report not found')
     data.value = await res.json()
   } catch (err) {
@@ -51,7 +71,7 @@ onMounted(async () => {
 
 <template>
   <div v-if="loading" class="h-screen flex items-center justify-center bg-[#FAFAFA]">
-    <div class="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full"></div>
+    <div class="animate-spin w-8 h-8 border-4 border-gray-200 border-t-gray-800 rounded-full"></div>
   </div>
 
   <div v-else-if="error" class="h-screen flex items-center justify-center text-center p-4 bg-[#FAFAFA]">
@@ -67,15 +87,31 @@ onMounted(async () => {
     <div class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div class="max-w-3xl mx-auto px-6 py-4 flex justify-between items-center">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-             {{ data.client.owner.fullName?.[0] || 'V' }}
+          
+          <img 
+            v-if="data.client.owner.avatarUrl" 
+            :src="data.client.owner.avatarUrl" 
+            class="w-10 h-10 rounded-lg object-cover border border-gray-100"
+          >
+          <div 
+            v-else 
+            class="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm"
+            :class="accentBg"
+          >
+             {{ data.client.owner.fullName?.[0] || 'A' }}
           </div>
+          
           <div>
             <h1 class="font-bold text-gray-900 text-sm leading-tight">{{ data.client.owner.fullName }}'s Updates</h1>
             <p class="text-xs text-gray-500">For: {{ data.client.companyName }}</p>
           </div>
         </div>
-        <a :href="`mailto:${data.client.owner.email}`" class="text-sm font-medium text-gray-500 hover:text-indigo-600 transition flex items-center gap-2">
+        
+        <a 
+          :href="`mailto:${data.client.owner.email}`" 
+          class="text-sm font-medium hover:opacity-80 transition flex items-center gap-2"
+          :class="accentText"
+        >
           <i class="ph ph-envelope-simple text-lg"></i> <span class="hidden sm:inline">Reply</span>
         </a>
       </div>
@@ -110,7 +146,7 @@ onMounted(async () => {
             <span v-if="!log.isBlocked" class="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">On Track</span>
         </div>
 
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden transition hover:shadow-md">
             
             <div v-if="log.videoUrl" class="bg-gray-900 border-b border-gray-100">
                <LoomPlayer :url="log.videoUrl" />
@@ -121,7 +157,7 @@ onMounted(async () => {
                 
                 <ul class="space-y-4">
                     <li v-for="(line, i) in formatSummary(log.summary)" :key="i" class="flex gap-3">
-                        <i class="ph ph-check-circle text-green-500 text-xl flex-shrink-0 mt-0.5"></i>
+                        <i class="ph ph-check-circle text-xl flex-shrink-0 mt-0.5" :class="accentText"></i>
                         <span class="text-gray-600 leading-relaxed">{{ line }}</span>
                     </li>
                 </ul>
@@ -135,7 +171,12 @@ onMounted(async () => {
                     <span v-if="log.attachmentUrl" class="flex items-center gap-2">
                       <i class="ph ph-paperclip text-lg"></i>
                       Attachment: 
-                      <a :href="log.attachmentUrl" target="_blank" class="text-indigo-600 font-medium hover:underline flex items-center gap-1">
+                      <a 
+                        :href="log.attachmentUrl" 
+                        target="_blank" 
+                        class="font-medium hover:underline flex items-center gap-1"
+                        :class="accentText"
+                      >
                         View File <i class="ph ph-arrow-square-out"></i>
                       </a>
                     </span>
@@ -147,7 +188,13 @@ onMounted(async () => {
     </main>
 
     <footer class="text-center py-8 text-gray-400 text-sm">
-        <p>Report generated via <a href="/" class="text-gray-500 hover:text-indigo-600 font-medium">ZenPortal</a></p>
+      <p v-if="!data.client.owner.tier || data.client.owner.tier === 'free'">
+          Report generated via <a href="/" class="font-medium hover:underline" :class="accentText">ZenPortal</a>
+      </p>
+      
+      <p v-else class="text-gray-300 text-xs">
+          &copy; {{ new Date().getFullYear() }} {{ data.client.owner.fullName }}
+      </p>
     </footer>
 
   </div>

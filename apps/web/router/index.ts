@@ -17,6 +17,7 @@ import ClientReport from '../src/pages/ClientReport.vue'
 import NotFound from '../src/pages/404.vue'
 import Pricing from '../src/pages/Pricing.vue'
 import LogDetail from '../src/pages/LogDetail.vue'
+import AgencyProfile from '../src/pages/AgencyProfile.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -40,6 +41,10 @@ const router = createRouter({
     { 
       path: '/c/:token', 
       component: ClientReport, 
+      meta: { public: true } 
+    },
+    { path: '/p/:slug', 
+      component: AgencyProfile,
       meta: { public: true } 
     },
 
@@ -76,6 +81,7 @@ const router = createRouter({
       path: '/log/new', 
       component: NewLog 
     },
+    
 
     // --- 404 Catch-all ---
     { 

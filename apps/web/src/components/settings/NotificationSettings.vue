@@ -1,18 +1,44 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useApi } from '../../lib/api'
+import { useUserStore } from '../../stores/userStore'
 import Button from '../ui/Button.vue'
 
+const { fetchApi } = useApi()
+const userStore = useUserStore()
+const saving = ref(false)
+
 const settings = ref({
-  clientViewReport: true,
-  weeklyRecap: true,
-  marketing: false
+  notifyClientView: true,
+  notifyWeeklyRecap: true,
+  notifyMarketing: false
 })
 
-const loading = ref(false)
+onMounted(async () => {
+  await userStore.fetchUser()
+  if (userStore.user) {
+    settings.value = {
+      notifyClientView: userStore.user.notifyClientView ?? true,
+      notifyWeeklyRecap: userStore.user.notifyWeeklyRecap ?? true,
+      notifyMarketing: userStore.user.notifyMarketing ?? false
+    }
+  }
+})
 
 const save = async () => {
-  loading.value = true
-  setTimeout(() => loading.value = false, 800)
+  saving.value = true
+  try {
+    const updatedUser = await fetchApi('/auth/me', {
+      method: 'PATCH',
+      body: JSON.stringify(settings.value)
+    })
+    userStore.user = { ...userStore.user, ...updatedUser }
+    alert('Preferences updated.')
+  } catch (err) {
+    alert('Error saving preferences.')
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 
@@ -31,7 +57,7 @@ const save = async () => {
           <p class="text-xs text-gray-500">Get notified when a client opens your magic link.</p>
         </div>
         <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" v-model="settings.clientViewReport" class="sr-only peer">
+          <input type="checkbox" v-model="settings.notifyClientView" class="sr-only peer">
           <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
         </label>
       </div>
@@ -42,7 +68,7 @@ const save = async () => {
           <p class="text-xs text-gray-500">Receive a Sunday summary of hours logged.</p>
         </div>
         <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" v-model="settings.weeklyRecap" class="sr-only peer">
+          <input type="checkbox" v-model="settings.notifyWeeklyRecap" class="sr-only peer">
           <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
         </label>
       </div>
@@ -53,7 +79,7 @@ const save = async () => {
           <p class="text-xs text-gray-500">News about new features and freelance tips.</p>
         </div>
         <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" v-model="settings.marketing" class="sr-only peer">
+          <input type="checkbox" v-model="settings.notifyMarketing" class="sr-only peer">
           <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
         </label>
       </div>
@@ -61,8 +87,8 @@ const save = async () => {
     </div>
     
     <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end">
-      <Button variant="secondary" @click="save" :disabled="loading">
-        {{ loading ? 'Updating...' : 'Update Preferences' }}
+      <Button variant="secondary" @click="save" :disabled="saving">
+        {{ saving ? 'Updating...' : 'Update Preferences' }}
       </Button>
     </div>
   </div>

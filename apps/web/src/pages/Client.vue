@@ -88,13 +88,13 @@ const goToEdit = (id: string) => router.push(`/clients/${id}/edit`)
           >
         </div>
         
-        <select v-model="statusFilter" class="bg-white border border-gray-200 rounded-lg px-4 py-3 outline-none cursor-pointer text-gray-700 shadow-sm min-w-[150px]">
+        <select v-model="statusFilter" class="bg-white border border-gray-200 rounded-lg px-4 py-3 outline-none cursor-pointer text-gray-700 shadow-sm min-w-35.7">
           <option>All Statuses</option>
           <option value="active">Active</option>
           <option value="archived">Archived</option>
         </select>
 
-        <select v-model="sortBy" class="bg-white border border-gray-200 rounded-lg px-4 py-3 outline-none cursor-pointer text-gray-700 shadow-sm min-w-[150px]">
+        <select v-model="sortBy" class="bg-white border border-gray-200 rounded-lg px-4 py-3 outline-none cursor-pointer text-gray-700 shadow-sm min-w-35.7">
           <option value="newest">Newest First</option>
           <option value="name">Name (A-Z)</option>
         </select>
@@ -146,7 +146,7 @@ const goToEdit = (id: string) => router.push(`/clients/${id}/edit`)
           </div>
         </div>
 
-        <button @click="goToAdd" class="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center text-gray-400 hover:border-blue-500 hover:text-blue-500 hover:bg-blue-50 transition cursor-pointer min-h-[250px] group">
+        <button @click="goToAdd" class="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center text-gray-400 hover:border-blue-500 hover:text-blue-500 hover:bg-blue-50 transition cursor-pointer min-h-62.5 group">
           <div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-200 transition">
             <i class="ph ph-plus text-2xl"></i>
           </div>
