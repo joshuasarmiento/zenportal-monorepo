@@ -25,12 +25,13 @@ import {
   Laptop   
 } from 'lucide-vue-next'
 import { useApi } from '@/lib/api'
-import { SignOutButton } from '@clerk/vue'
+import { SignOutButton, useUser } from '@clerk/vue'
 
 const mode = useColorMode()
 const { fetchApi } = useApi()
 const route = useRoute()
 const userStore = useUserStore()
+const { user: clerkUser } = useUser()
 const loading = ref(false)
 
 const isPro = computed(() => userStore.user?.tier === 'pro')
@@ -59,8 +60,28 @@ const handlePortal = async () => {
   }
 }
 
-onMounted(() => {
-  userStore.fetchUser()
+onMounted(async () => {
+  // 1. Try to fetch user from DB
+  await userStore.fetchUser()
+
+  // 2. If user is logged in (Clerk) but not in DB (userStore), SYNC them.
+  if (!userStore.user && clerkUser.value) {
+    try {
+      console.log('Syncing new user to database...')
+      await fetchApi('/auth/sync', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: clerkUser.value.primaryEmailAddress?.emailAddress,
+          fullName: clerkUser.value.fullName,
+          avatarUrl: clerkUser.value.imageUrl
+        })
+      })
+      // 3. Fetch again after sync
+      await userStore.fetchUser()
+    } catch (err) {
+      console.error('Failed to sync user:', err)
+    }
+  }
 })
 
 const links = [

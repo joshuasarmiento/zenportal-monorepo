@@ -1,12 +1,12 @@
 import { Hono } from 'hono';
 import { db } from '../db';
-import { workLogs, users, clients } from '../db/schema'; // Added 'clients'
+import { workLogs, users, clients } from '../db/schema';
 import { requireAuth } from '../lib/auth';
-import { and, eq, desc } from 'drizzle-orm';
+import { and, eq, desc, sql, count } from 'drizzle-orm'; // Added sql, count
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
-import { sendLogEmail } from '../lib/email'; // Added email import
+import { sendLogEmail } from '../lib/email';
 
 const app = new Hono<{ Variables: { userId: string } }>();
 
@@ -55,7 +55,29 @@ app.post('/', zValidator('json', logSchema), async (c) => {
 
   const isPro = user?.tier === 'pro';
 
-  // 2. Enforce Pro Features
+  // 2. Enforce Monthly Limit for Free Tier
+  if (!isPro) {
+    const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+
+    // Count logs created by this user in the current month
+    // Note: Adjust the SQL syntax if you are using Postgres vs SQLite (this is generally compatible)
+    const [usage] = await db
+      .select({ count: count() })
+      .from(workLogs)
+      .where(and(
+        eq(workLogs.userId, userId),
+        sql`${workLogs.date} LIKE ${currentMonth + '%'}`
+      ));
+
+    if (usage.count >= 500) {
+      return c.json({ 
+        error: 'Monthly limit reached (50 logs). Upgrade to Pro for unlimited logs.',
+        code: 'LIMIT_REACHED'
+      }, 403);
+    }
+  }
+
+  // 3. Enforce Pro Features (Video/Attachment)
   const videoUrl = isPro ? body.videoUrl : null;
   const attachmentUrl = isPro ? body.attachmentUrl : null;
 
@@ -72,14 +94,12 @@ app.post('/', zValidator('json', logSchema), async (c) => {
     blockerDetails: body.blockerDetails || '',
   }).returning();
 
-  // 3. Trigger Email Notification
-  // Fetch Client details to get the email address and access token
+  // 4. Trigger Email Notification
   const client = await db.query.clients.findFirst({
     where: eq(clients.id, body.clientId),
     columns: { contactEmail: true, companyName: true, accessToken: true }
   });
 
-  // Only send if client has an email and we found the user's name
   if (client?.contactEmail && user?.fullName) {
     const reportLink = `${process.env.FRONTEND_URL}/c/${client.accessToken}`;
     
@@ -95,7 +115,7 @@ app.post('/', zValidator('json', logSchema), async (c) => {
   return c.json(newLog[0]);
 });
 
-// GET /logs/:id
+// GET /logs/:id (Unchanged)
 app.get('/:id', async (c) => {
   const userId = c.get('userId');
   const logId = c.req.param('id');
@@ -109,22 +129,18 @@ app.get('/:id', async (c) => {
   return c.json(log);
 });
 
-// PATCH /logs/:id - Update an existing log
+// PATCH /logs/:id (Unchanged)
 app.patch('/:id', async (c) => {
   const userId = c.get('userId');
   const logId = c.req.param('id');
   const body = await c.req.json();
 
-  // 1. Verify ownership before updating
   const existingLog = await db.query.workLogs.findFirst({
     where: and(eq(workLogs.id, logId), eq(workLogs.userId, userId)),
   });
 
-  if (!existingLog) {
-    return c.json({ error: 'Log not found or unauthorized' }, 404);
-  }
+  if (!existingLog) return c.json({ error: 'Log not found or unauthorized' }, 404);
 
-  // 2. Update allowed fields
   const updatedLog = await db.update(workLogs)
     .set({
       summary: body.summary,

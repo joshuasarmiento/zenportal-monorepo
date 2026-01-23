@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi } from '../lib/api'
+import { useUserStore } from '@/stores/userStore' // Import User Store
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,12 +13,17 @@ import AppSidebar from '@/components/AppSidebar.vue'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from "@/components/ui/separator"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
-import { X, Loader2, AlertOctagon } from 'lucide-vue-next'
+import { X, Loader2, Lock } from 'lucide-vue-next'
+// Note: Assuming you have a toast library like vue-sonner, otherwise revert to alert
+import { toast } from 'vue-sonner'
 
 const router = useRouter()
 const { fetchApi } = useApi()
+const userStore = useUserStore()
+
 const clients = ref<any[]>([])
 const loading = ref(false)
+const saving = ref(false)
 
 const form = ref({
   clientId: '',
@@ -30,19 +36,48 @@ const form = ref({
   blockerDetails: ''
 })
 
+const isPro = computed(() => userStore.user?.tier === 'pro')
+
 onMounted(async () => {
+  if (!userStore.user) await userStore.fetchUser()
+
   try {
     clients.value = await fetchApi('/clients')
     if (clients.value.length > 0) form.value.clientId = clients.value[0].id
-  } catch (e) { console.error(e) }
+  } catch (e) {
+    console.error(e)
+  }
 })
 
 const submit = async () => {
-  loading.value = true
+  saving.value = true
   try {
     await fetchApi('/logs', { method: 'POST', body: JSON.stringify(form.value) })
+    toast.success('Log saved successfully')
     router.push('/dashboard')
-  } catch (err) { alert('Failed to save log.') } finally { loading.value = false }
+  } catch (err: any) {
+    // Handle backend limit error specifically
+    if (err.message?.includes('LIMIT_REACHED') || err.status === 403) {
+      toast.error("Monthly limit reached! Upgrade to Pro to continue.")
+      // Optional: Redirect to billing or open upgrade modal
+    } else {
+      toast.error('Failed to save log.')
+    }
+  } finally {
+    saving.value = false
+  }
+}
+
+const handleUpgrade = async () => {
+  loading.value = true
+  try {
+    const res = await fetchApi('/billing/checkout', { method: 'POST' })
+    if (res.url) window.location.href = res.url
+  } catch (err) {
+    alert('Failed to start checkout')
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -56,11 +91,24 @@ const submit = async () => {
           <Separator orientation="vertical" class="mr-2 h-4" />
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem class="hidden md:block"><BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem class="hidden md:block">
+                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator class="hidden md:block" />
-              <BreadcrumbItem><BreadcrumbPage>Log Work</BreadcrumbPage></BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbPage>Log Work</BreadcrumbPage>
+              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+        </div>
+
+        <div class="ml-auto" v-if="!isPro">
+          <Button @click="handleUpgrade" :disabled="loading" variant="outline" size="sm"
+            class="text-xs h-8 border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-800 gap-1">
+            <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
+            <Lock v-else class="h-3 w-3" />
+            {{ loading ? 'Redirecting...' : 'Upgrade to Pro' }}
+          </Button>
         </div>
       </header>
 
@@ -69,7 +117,9 @@ const submit = async () => {
           <Card>
             <CardHeader class="flex flex-row items-center justify-between border-b border-border pb-4">
               <CardTitle>Log New Work</CardTitle>
-              <Button variant="ghost" size="icon" @click="router.back()"><X class="h-4 w-4" /></Button>
+              <Button variant="ghost" size="icon" @click="router.back()">
+                <X class="h-4 w-4" />
+              </Button>
             </CardHeader>
 
             <CardContent class="pt-6">
@@ -77,16 +127,20 @@ const submit = async () => {
                 <div class="space-y-2">
                   <Label>Select Client</Label>
                   <Select v-model="form.clientId">
-                    <SelectTrigger><SelectValue placeholder="Select a client" /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a client" />
+                    </SelectTrigger>
                     <SelectContent>
-                      <SelectItem v-for="client in clients" :key="client.id" :value="client.id">{{ client.companyName }}</SelectItem>
+                      <SelectItem v-for="client in clients" :key="client.id" :value="client.id">{{ client.companyName }}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div class="space-y-2">
                   <Label>Accomplishments (One per line)</Label>
-                  <Textarea v-model="form.summary" rows="5" placeholder="- Fixed the homepage bug&#10;- Sent 50 cold emails" />
+                  <Textarea v-model="form.summary" rows="5"
+                    placeholder="- Fixed the homepage bug&#10;- Sent 50 cold emails" />
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -101,22 +155,27 @@ const submit = async () => {
                 </div>
 
                 <div class="space-y-2">
-                    <Label>Hours Worked</Label>
-                    <Input v-model="form.hoursWorked" type="number" step="0.5" />
+                  <Label>Hours Worked</Label>
+                  <Input v-model="form.hoursWorked" type="number" step="0.5" />
                 </div>
 
                 <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border border-red-200 dark:border-red-900">
                   <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" v-model="form.isBlocked" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
-                    <span class="font-bold text-red-700 dark:text-red-400 text-sm">I am Blocked / Stuck</span>
+                    <input type="checkbox" v-model="form.isBlocked"
+                      class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+                      <span class="font-bold text-red-700 dark:text-red-400 text-sm">I am Blocked / Stuck</span>
                   </label>
                   <div v-if="form.isBlocked" class="mt-3">
-                    <Input v-model="form.blockerDetails" class="bg-background border-red-200 dark:border-red-800" placeholder="What do you need from the client?" />
+                    <Input v-model="form.blockerDetails" class="bg-background border-red-200 dark:border-red-800"
+                      placeholder="What do you need from the client?" />
                   </div>
                 </div>
 
                 <div class="flex justify-end pt-4">
-                  <Button :disabled="loading">{{ loading ? 'Saving...' : 'Save Log' }}</Button>
+                  <Button :disabled="saving">
+                    <Loader2 v-if="saving" class="mr-2 h-4 w-4 animate-spin" />
+                    {{ saving ? 'Saving...' : 'Save Log' }}
+                  </Button>
                 </div>
               </form>
             </CardContent>

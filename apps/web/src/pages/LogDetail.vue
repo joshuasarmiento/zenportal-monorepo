@@ -33,6 +33,11 @@ onMounted(async () => {
                     <SidebarTrigger class="-ml-1" />
                     <Separator orientation="vertical" class="mr-2 h-4" />
                     <Breadcrumb>
+                        <BreadcrumbList>
+                        <BreadcrumbItem class="hidden md:block"><BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink></BreadcrumbItem>
+                        <BreadcrumbSeparator class="hidden md:block" />
+                        <BreadcrumbItem><BreadcrumbPage>Log Detail</BreadcrumbPage></BreadcrumbItem>
+                        </BreadcrumbList>
                     </Breadcrumb>
                 </div>
 

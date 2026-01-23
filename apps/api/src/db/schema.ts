@@ -75,6 +75,7 @@ export const workLogs = sqliteTable('work_logs', {
     .default(sql`(strftime('%s', 'now'))`),
 }, (table) => {
   return {
+    userIdIdx: index('log_user_idx').on(table.userId),
     clientIdIdx: index('log_client_idx').on(table.clientId),
     dateIdx: index('log_date_idx').on(table.date),
   };

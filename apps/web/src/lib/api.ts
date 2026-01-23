@@ -5,8 +5,7 @@ import { useAuth } from '@clerk/vue'
 export function useApi() {
   const { getToken } = useAuth() // This now runs inside the component setup!
 
-  const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
-    // We get the token dynamically when the request is made
+  const fetchApi = async <T = any>(endpoint: string, options: RequestInit = {}): Promise<T> => { 
     const token = await getToken.value()
 
     const headers = {

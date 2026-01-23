@@ -22,6 +22,13 @@ const updateUserSchema = z.object({
   notifyMarketing: z.boolean().optional(),
 });
 
+// Sync Schema
+const syncUserSchema = z.object({
+  email: z.email(),
+  fullName: z.string().optional(),
+  avatarUrl: z.string().optional(),
+})
+
 app.get('/me', async (c) => {
   const userId = c.get('userId');
   const user = await db.query.users.findFirst({
@@ -29,6 +36,32 @@ app.get('/me', async (c) => {
   });
   if (!user) return c.json({ error: 'User not found' }, 404);
   return c.json(user);
+});
+
+// POST /sync - Create user if not exists (Call this from Frontend on login)
+app.post('/sync', zValidator('json', syncUserSchema), async (c) => {
+  const userId = c.get('userId');
+  const body = c.req.valid('json');
+
+  // Check if user already exists
+  const existingUser = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+
+  if (existingUser) {
+    return c.json(existingUser);
+  }
+
+  // Create new user
+  const newUser = await db.insert(users).values({
+    id: userId,
+    email: body.email,
+    fullName: body.fullName || '',
+    avatarUrl: body.avatarUrl || '',
+    createdAt: new Date(),
+  }).returning();
+
+  return c.json(newUser[0]);
 });
 
 // 2. Use the Validator

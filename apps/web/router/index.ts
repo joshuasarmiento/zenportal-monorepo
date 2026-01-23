@@ -15,6 +15,7 @@ import UserGuide from '@/pages/UserGuide.vue'
 
 // 2. Auth & Public Pages
 import Login from '@/pages/Login.vue'
+import Signup from '@/pages/Singup.vue'
 import LandingPage from '@/pages/LandingPage.vue'
 import ClientReport from '@/pages/ClientReport.vue'
 import NotFound from '@/pages/404.vue'
@@ -36,6 +37,10 @@ const router = createRouter({
       component: Login, 
       meta: { public: true } 
     },
+    { 
+      path: '/sign-up', 
+      component: Signup, 
+      meta: { public: true } },
     { 
       path: '/pricing', 
       component: Pricing ,

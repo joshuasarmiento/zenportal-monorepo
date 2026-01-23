@@ -63,7 +63,7 @@ app.post('/', zValidator('json', clientSchema), async (c) => {
   const currentCount = clientCount[0].count;
   const isPro = user?.tier === 'pro';
 
-  if (!isPro && currentCount >= 2) {
+  if (!isPro && currentCount >= 1) {
     return c.json({ 
       error: 'Free Limit Reached', 
       message: 'Archive old clients or Upgrade to Pro to add more.' 

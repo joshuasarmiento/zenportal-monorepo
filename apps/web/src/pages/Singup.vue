@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SignIn } from '@clerk/vue'
+import { SignUp } from '@clerk/vue'
 import { useUser } from '@clerk/vue'
 import { useRouter } from 'vue-router'
 import { onMounted, watch } from 'vue'
@@ -33,9 +33,9 @@ watch([isLoaded, isSignedIn], checkRedirect)
             <div class="flex-1 flex items-center justify-center">
                 <blockquote class="space-y-2 max-w-lg">
                     <p class="text-lg font-medium leading-relaxed">
-                        &ldquo;Since switching to ZenPortal, I've stopped spending hours on weekly reports. My clients love the transparency, and I love the extra time.&rdquo;
+                        &ldquo;I used to chase clients for payments and feedback. Now they chase me to see their next update on the portal. It's a game changer.&rdquo;
                     </p>
-                    <footer class="text-sm text-zinc-400">Sofia Davis, Senior Virtual Assistant</footer>
+                    <footer class="text-sm text-zinc-400">Marcus Chen, Freelance Developer</footer>
                 </blockquote>
             </div>
         </div>
@@ -48,16 +48,16 @@ watch([isLoaded, isSignedIn], checkRedirect)
 
             <div class="mx-auto grid w-[350px] gap-6">
                 <div class="grid gap-2 text-center">
-                    <h1 class="text-3xl font-bold text-foreground">Welcome Back</h1>
+                    <h1 class="text-3xl font-bold text-foreground">Create an Account</h1>
                     <p class="text-balance text-muted-foreground">
-                        Enter your credentials to access your portal.
+                        No credit card required • Free plan available
                     </p>
                 </div>
                 
                 <div class="flex justify-center">
-                    <SignIn 
+                    <SignUp 
                         redirectUrl="/dashboard" 
-                        signUpUrl="/sign-up"
+                        signInUrl="/sign-in"
                         :appearance="{
                             elements: {
                                 rootBox: 'w-full',

@@ -5,7 +5,7 @@ import { useUserStore } from '@/stores/userStore'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Check, Crown, CreditCard, Loader2 } from 'lucide-vue-next'
+import { Check, Crown, Loader2 } from 'lucide-vue-next'
 
 const { fetchApi } = useApi()
 const userStore = useUserStore()
@@ -56,16 +56,16 @@ const handlePortal = async () => {
 
     <CardContent class="pt-6">
       
-      <div v-if="isPro" class="bg-slate-950 text-white rounded-xl p-6 relative overflow-hidden">
+      <div v-if="isPro" class="bg-slate-950 text-white rounded-xl p-6 relative overflow-hidden dark:border dark:border-slate-800">
         <div class="relative z-10">
           <div class="flex justify-between items-center mb-4">
-            <span class="text-blue-400 font-bold text-sm tracking-wider uppercase">Agency Pro</span>
+            <span class="text-indigo-400 font-bold text-sm tracking-wider uppercase">Agency Pro</span>
             <span class="text-2xl font-bold">$12<span class="text-sm text-slate-400 font-normal">/mo</span></span>
           </div>
           <ul class="text-sm text-slate-300 space-y-2 mb-6">
-            <li class="flex items-center gap-2"><Check class="h-4 w-4 text-blue-400" /> Unlimited Clients</li>
-            <li class="flex items-center gap-2"><Check class="h-4 w-4 text-blue-400" /> Video Integrations</li>
-            <li class="flex items-center gap-2"><Check class="h-4 w-4 text-blue-400" /> Priority Support</li>
+            <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Unlimited Clients</li>
+            <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Video Integrations</li>
+            <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Priority Support</li>
           </ul>
           <Button variant="secondary" @click="handlePortal" :disabled="loading">
              <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
@@ -77,13 +77,15 @@ const handlePortal = async () => {
         </div>
       </div>
 
-      <div v-else class="bg-blue-50/50 border border-blue-200 rounded-xl p-6 text-center">
-        <div class="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600">
+      <div v-else class="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800 rounded-xl p-6 text-center">
+        <div class="bg-indigo-100 dark:bg-indigo-900/50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400">
            <Crown class="h-6 w-6" />
         </div>
-        <h4 class="text-blue-900 font-bold text-lg mb-2">Upgrade to Pro</h4>
-        <p class="text-blue-700/80 text-sm mb-6 max-w-sm mx-auto">Get unlimited clients, video uploads, and custom branding to scale your agency.</p>
-        <Button size="lg" @click="handleUpgrade" :disabled="loading" class="bg-blue-600 hover:bg-blue-700">
+        <h4 class="text-indigo-900 dark:text-indigo-100 font-bold text-lg mb-2">Upgrade to Pro</h4>
+        <p class="text-indigo-700/80 dark:text-indigo-300/80 text-sm mb-6 max-w-sm mx-auto">
+          Get unlimited clients, video uploads, and custom branding to scale your agency.
+        </p>
+        <Button size="lg" @click="handleUpgrade" :disabled="loading" class="bg-indigo-600 hover:bg-indigo-700 dark:text-white">
           <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
           {{ loading ? 'Redirecting...' : 'Upgrade Now ($12/mo)' }}
         </Button>

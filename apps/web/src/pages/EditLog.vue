@@ -78,9 +78,17 @@ const submit = async () => {
           <Separator orientation="vertical" class="mr-2 h-4" />
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem class="hidden md:block"><BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem class="hidden md:block">
+                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
               <BreadcrumbSeparator class="hidden md:block" />
-              <BreadcrumbItem><BreadcrumbPage>Edit Log</BreadcrumbPage></BreadcrumbItem>
+              <BreadcrumbItem class="hidden md:block">
+                <BreadcrumbLink :href="`/log/${logId}`">Log Detail</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator class="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Edit Log</BreadcrumbPage>
+              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useApi } from '../lib/api'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/userStore' // Import User Store
 import AppSidebar from '@/components/AppSidebar.vue'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from "@/components/ui/separator"
@@ -10,19 +11,30 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { PlusCircle, Clock, Briefcase, AlertCircle, Video, Paperclip, Check, ChevronRight, FileQuestion } from 'lucide-vue-next'
+import { Progress } from '@/components/ui/progress' // Ensure you have this component
+import { PlusCircle, Clock, Briefcase, AlertCircle, Video, Paperclip, Check, ChevronRight, FileQuestion, Lock } from 'lucide-vue-next'
 
 const router = useRouter()
 const { fetchApi } = useApi()
+const userStore = useUserStore()
+
 const logs = ref<any[]>([])
-const stats = ref({ hoursThisMonth: 0, activeClients: 0, pendingBlockers: 0 })
+// Added 'logCount' to stats ref
+const stats = ref({ hoursThisMonth: 0, activeClients: 0, pendingBlockers: 0, logCount: 0 }) 
 const loading = ref(true)
 
+const isPro = computed(() => userStore.user?.tier === 'pro')
+const logLimit = 500
+const logUsagePercent = computed(() => Math.min(100, (stats.value.logCount / logLimit) * 100))
+
 onMounted(async () => {
+    if (!userStore.user) await userStore.fetchUser()
     try {
         const [logsRes, statsRes] = await Promise.all([fetchApi('/logs'), fetchApi('/stats')])
         logs.value = logsRes
-        stats.value = statsRes
+        // Assuming statsRes now returns logCount based on your previous backend updates
+        // If not, it defaults to 0
+        stats.value = { ...stats.value, ...statsRes } 
     } catch (err) { console.error(err) } finally { loading.value = false }
 })
 
@@ -51,9 +63,20 @@ const viewLog = (id: string) => router.push(`/log/${id}`)
                         </BreadcrumbList>
                     </Breadcrumb>
                 </div>
-                <div class="ml-auto">
-                    <Button @click="navigateToLog" class="gap-2">
-                        <PlusCircle class="h-4 w-4" /> Log Work
+                
+                <div class="ml-auto flex items-center gap-4">
+                    <div v-if="!loading && !isPro" class="hidden md:flex flex-col items-end gap-1 w-32">
+                        <div class="flex justify-between w-full text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                            <span>Monthly Limit</span>
+                            <span :class="{'text-orange-600': stats.logCount >= logLimit}">{{ stats.logCount }}/{{ logLimit }}</span>
+                        </div>
+                        <Progress :model-value="logUsagePercent" class="h-1.5" :class="{'bg-red-100 dark:bg-red-900/30': stats.logCount >= logLimit}" />
+                    </div>
+
+                    <Button @click="navigateToLog" class="gap-2" :disabled="!isPro && stats.logCount >= logLimit">
+                        <Lock v-if="!isPro && stats.logCount >= logLimit" class="h-4 w-4" />
+                        <PlusCircle v-else class="h-4 w-4" /> 
+                        Log Work
                     </Button>
                 </div>
             </header>

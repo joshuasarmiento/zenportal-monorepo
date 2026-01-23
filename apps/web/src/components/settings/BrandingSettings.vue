@@ -66,14 +66,14 @@ const copyLink = () => {
   <Card class="relative overflow-hidden">
     
     <div v-if="!isPro"
-      class="absolute inset-0 bg-white/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center text-center p-6">
-      <div class="bg-white p-6 rounded-xl shadow-xl border border-blue-100 max-w-sm">
-        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+      class="absolute inset-0 bg-white/60 dark:bg-background/80 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center text-center p-6">
+      <div class="bg-white dark:bg-card p-6 rounded-xl shadow-xl border border-blue-100 dark:border-border max-w-sm">
+        <div class="bg-blue-100 dark:bg-primary/10 text-blue-600 dark:text-primary rounded-full flex items-center justify-center mx-auto mb-4 w-12 h-12">
           <Lock class="h-6 w-6" />
         </div>
-        <h3 class="text-lg font-bold text-gray-900 mb-2">Unlock Branding</h3>
-        <p class="text-sm text-gray-500 mb-6">Use your own logo and colors with Agency Pro.</p>
-        <Button class="w-full bg-blue-600 hover:bg-blue-700">
+        <h3 class="text-lg font-bold text-foreground mb-2">Unlock Branding</h3>
+        <p class="text-sm text-muted-foreground mb-6">Use your own logo and colors with Agency Pro.</p>
+        <Button class="w-full">
           Upgrade for $12/mo
         </Button>
       </div>
@@ -106,7 +106,7 @@ const copyLink = () => {
             :disabled="!isPro || !form.portalSlug"
             :title="copied ? 'Copied!' : 'Copy Link'"
           >
-            <Check v-if="copied" class="h-4 w-4 text-green-600" />
+            <Check v-if="copied" class="h-4 w-4 text-green-600 dark:text-green-400" />
             <Copy v-else class="h-4 w-4" />
           </Button>
         </div>
@@ -118,7 +118,7 @@ const copyLink = () => {
           <button v-for="color in colors" :key="color.name" 
             @click="form.accentColor = color.name" 
             :disabled="!isPro"
-            class="w-8 h-8 rounded-full cursor-pointer hover:opacity-80 transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed"
+            class="w-8 h-8 rounded-full cursor-pointer hover:opacity-80 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed"
             :class="[
               color.hex,
               form.accentColor === color.name ? `ring-2 ring-offset-2 ${color.ring}` : ''
