@@ -11,6 +11,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 import { Separator } from "@/components/ui/separator"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { X, CheckCircle, Loader2 } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 
 const router = useRouter()
 const { fetchApi } = useApi()
@@ -27,9 +28,14 @@ const submit = async () => {
   loading.value = true
   try {
     await fetchApi('/clients', { method: 'POST', body: JSON.stringify(form.value) })
+    toast.success('Client created successfully')
     router.push('/clients')
-  } catch (err) {
-    alert('Failed to create client.')
+  } catch (err: any) {
+    if (err.message?.includes('Limit')) {
+      toast.error(err.message || 'Limit reached')
+    } else {
+      toast.error('Failed to create client')
+    }
   } finally {
     loading.value = false
   }

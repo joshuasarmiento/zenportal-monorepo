@@ -11,17 +11,15 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Download, DollarSign, AlertTriangle, Loader2, Lock } from 'lucide-vue-next'
-// Note: If you don't have vue-sonner installed, replace `toast` calls with `alert()` or `console.log`
 import { toast } from 'vue-sonner' 
-
-// Import Shadcn Chart Components
-import { VisXYContainer, VisGroupedBar, VisAxis } from '@unovis/vue'
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import VueApexCharts from 'vue3-apexcharts'
+import type { ApexOptions } from 'apexcharts'
 
 // --- Types ---
 interface RevenueItem {
   period: string
   amount: number
+  rawDate: string // Added rawDate
 }
 
 interface ClientItem {
@@ -44,10 +42,9 @@ const { fetchApi } = useApi()
 const { getToken } = useAuth()
 const userStore = useUserStore()
 
-// State
 const loading = ref(true)
 const exporting = ref(false)
-const selectedRange = ref('6m') // Default to 6 months for better initial data probability
+const selectedRange = ref('6m')
 
 const stats = ref<StatsData>({ 
   totalEarnings: 0, 
@@ -59,15 +56,6 @@ const stats = ref<StatsData>({
   topClients: [] 
 })
 
-// Configuration for Shadcn/Unovis Chart
-const chartConfig = {
-  amount: { 
-    label: 'Revenue', 
-    // FIX: Use specific HEX color. CSS vars like 'hsl(var(--primary))' can fail in some JS chart libs
-    color: '#3b82f6' 
-  }
-}
-
 const isPro = computed(() => userStore.user?.tier === 'pro')
 
 const ranges = computed(() => [
@@ -78,7 +66,71 @@ const ranges = computed(() => [
   { label: 'Last 6 Months', value: '6m', pro: false },
 ])
 
-// --- Actions ---
+// FIX 2: Use backend order directly. Do not re-sort on frontend.
+// The backend uses SQL ORDER BY date, which is strictly chronological.
+const chartSeries = computed(() => [{
+  name: 'Revenue',
+  data: stats.value.revenueHistory.map(item => item.amount)
+}])
+
+const chartOptions = computed<ApexOptions>(() => {
+  const isDark = document.documentElement.classList.contains('dark')
+
+  return {
+    chart: {
+      type: 'bar',
+      toolbar: { show: false }, 
+      fontFamily: 'inherit',
+      background: 'transparent'
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 4, 
+        columnWidth: '45%',
+        distributed: false, 
+      }
+    },
+    dataLabels: {
+      enabled: false 
+    },
+    xaxis: {
+      // FIX 2: Use the labels exactly as they come from backend
+      categories: stats.value.revenueHistory.map(item => item.period),
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      labels: {
+        style: {
+          colors: isDark ? '#94a3b8' : '#64748b', 
+          fontSize: '12px'
+        }
+      }
+    },
+    yaxis: {
+      labels: {
+        style: {
+          colors: isDark ? '#94a3b8' : '#64748b',
+          fontSize: '12px'
+        },
+        formatter: (value: number) => `$${value.toLocaleString()}`
+      }
+    },
+    grid: {
+      borderColor: isDark ? '#1e293b' : '#e2e8f0', 
+      strokeDashArray: 4, 
+      xaxis: { lines: { show: false } }
+    },
+    fill: {
+      opacity: 1,
+      colors: ['#3b82f6'] 
+    },
+    tooltip: {
+      theme: isDark ? 'dark' : 'light',
+      y: {
+        formatter: (value: number) => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+      }
+    }
+  }
+})
 
 const loadStats = async () => {
   loading.value = true
@@ -128,7 +180,6 @@ const getInitials = (name: string) => {
   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
 }
 
-// Lifecycle
 onMounted(async () => {
   if (!userStore.user) await userStore.fetchUser()
   loadStats()
@@ -154,7 +205,6 @@ watch(selectedRange, () => loadStats())
           </Breadcrumb>
         </div>
         <div class="ml-auto flex items-center gap-2">
-          
           <Select v-model="selectedRange">
             <SelectTrigger class="w-[180px]">
               <SelectValue placeholder="Select Range" />
@@ -185,13 +235,12 @@ watch(selectedRange, () => loadStats())
       </header>
 
       <div class="flex flex-1 flex-col p-4 md:p-8 bg-muted/40 overflow-y-auto">
-        
         <div class="max-w-6xl w-full mx-auto space-y-6">
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card class="relative overflow-hidden">
               <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle class="text-sm font-medium text-muted-foreground">Total Earnings (Month)</CardTitle>
+                <CardTitle class="text-sm font-medium text-muted-foreground">Total Earnings ({{ ranges.find(r => r.value === selectedRange)?.label || 'Period' }})</CardTitle>
                 <DollarSign class="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent class="relative z-10">
@@ -248,57 +297,26 @@ watch(selectedRange, () => loadStats())
                 <CardTitle>Revenue History</CardTitle>
               </CardHeader>
               <CardContent class="flex-1">
-                <div v-if="loading" class="w-full h-[300px] flex items-end gap-2 px-4">
-                  <div v-for="i in 6" :key="i" class="bg-muted animate-pulse rounded-t w-full" :style="{ height: `${Math.random() * 80 + 20}%` }"></div>
+                <div v-if="loading" class="w-full h-[300px] flex items-center justify-center">
+                  <Loader2 class="h-8 w-8 animate-spin text-primary" />
                 </div>
                 
-                <div v-else-if="stats.revenueHistory && stats.revenueHistory.length > 0" class="w-full h-[300px]">
-                  <ChartContainer :config="chartConfig" class="h-full w-full">
-                    <VisXYContainer :data="stats.revenueHistory" :margin="{ left: 10, right: 10, top: 10, bottom: 0 }">
-                      
-                      <VisGroupedBar 
-                        :x="(d: RevenueItem) => d.period" 
-                        :y="(d: RevenueItem) => d.amount" 
-                        :color="chartConfig.amount.color" 
-                        :rounded-corners="4"
-                      />
-                      
-                      <VisAxis 
-                        type="x" 
-                        :x="(d: RevenueItem) => d.period" 
-                        :tick-line="false" 
-                        :grid-line="false" 
-                        :domain-line="false" 
-                        class="text-muted-foreground text-xs"
-                      />
-                      <VisAxis 
-                        type="y" 
-                        :tick-line="false" 
-                        :grid-line="false" 
-                        :domain-line="false" 
-                        :tick-format="(d: number) => `$${d}`"
-                        :num-ticks="5"
-                        class="text-muted-foreground text-xs"
-                      />
-
-                      <ChartTooltip 
-                        :cursor="{ stroke: 'var(--border)', strokeWidth: 1 }"
-                        :content="{
-                          component: ChartTooltipContent,
-                          props: {
-                            formatter: (value: any) => `$${Number(value).toLocaleString()}`
-                          }
-                        }"
-                      />
-                    </VisXYContainer>
-                  </ChartContainer>
+                <div v-else-if="stats.revenueHistory.length > 0" class="w-full h-[300px]">
+                  <VueApexCharts
+                    type="bar"
+                    height="300"
+                    width="100%"
+                    :options="chartOptions"
+                    :series="chartSeries"
+                  />
                 </div>
                 
                 <div v-else class="h-full flex flex-col items-center justify-center text-muted-foreground min-h-[300px]">
                   <div class="p-4 bg-muted/50 rounded-full mb-2">
                     <DollarSign class="h-6 w-6 opacity-50" />
                   </div>
-                  <p>No revenue data found for this period.</p>
+                  <p class="text-lg font-medium">No revenue data yet</p>
+                  <p class="text-sm mt-1">Complete some tasks to see your earnings trend.</p>
                 </div>
               </CardContent>
             </Card>
@@ -309,10 +327,10 @@ watch(selectedRange, () => loadStats())
               </CardHeader>
               <CardContent class="flex-1">
                 <div v-if="loading" class="space-y-6">
-                   <div v-for="i in 3" :key="i" class="space-y-2">
-                     <div class="flex justify-between"><div class="h-4 w-24 bg-muted animate-pulse rounded"></div><div class="h-4 w-12 bg-muted animate-pulse rounded"></div></div>
-                     <div class="h-2 w-full bg-muted animate-pulse rounded"></div>
-                   </div>
+                  <div v-for="i in 3" :key="i" class="space-y-2">
+                    <div class="flex justify-between"><div class="h-4 w-24 bg-muted animate-pulse rounded"></div><div class="h-4 w-12 bg-muted animate-pulse rounded"></div></div>
+                    <div class="h-2 w-full bg-muted animate-pulse rounded"></div>
+                  </div>
                 </div>
 
                 <div v-else-if="stats.topClients.length > 0" class="space-y-6">
@@ -325,7 +343,7 @@ watch(selectedRange, () => loadStats())
                         </div>
                         <span class="text-sm font-medium text-foreground truncate max-w-[120px]" :title="client.name">{{ client.name }}</span>
                       </div>
-                      <span class="text-sm font-bold text-foreground">${{ client.amount.toLocaleString() }}</span>
+                      <span class="text-sm font-bold text-foreground">${{ client.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</span>
                     </div>
                     <div class="w-full bg-secondary h-2 rounded-full overflow-hidden">
                       <div class="h-full rounded-full transition-all duration-500" 

@@ -12,6 +12,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 import { Separator } from "@/components/ui/separator"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { X, Loader2, Save } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 
 const router = useRouter()
 const route = useRoute()
@@ -21,7 +22,7 @@ const saving = ref(false)
 const logId = route.params.id as string
 
 const form = ref({
-  clientName: '', // Read only for display
+  clientName: '',
   date: '',
   summary: '',
   hoursWorked: 0,
@@ -45,7 +46,7 @@ onMounted(async () => {
       blockerDetails: data.blockerDetails || ''
     }
   } catch (err) {
-    alert('Log not found')
+    toast.error('Log not found')
     router.push('/dashboard')
   } finally {
     loading.value = false
@@ -59,9 +60,10 @@ const submit = async () => {
       method: 'PATCH',
       body: JSON.stringify(form.value)
     })
-    router.push(`/log/${logId}`) // Go back to detail view
+    toast.success('Log updated successfully')
+    router.push(`/log/${logId}`)
   } catch (err) {
-    alert('Failed to update log.')
+    toast.error('Failed to update log')
   } finally {
     saving.value = false
   }

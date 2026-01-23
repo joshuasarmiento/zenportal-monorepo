@@ -69,9 +69,9 @@ app.post('/', zValidator('json', logSchema), async (c) => {
         sql`${workLogs.date} LIKE ${currentMonth + '%'}`
       ));
 
-    if (usage.count >= 500) {
+    if (usage.count >= 100) {
       return c.json({ 
-        error: 'Monthly limit reached (50 logs). Upgrade to Pro for unlimited logs.',
+        error: 'Monthly limit reached (100 logs). Upgrade to Pro for unlimited logs.',
         code: 'LIMIT_REACHED'
       }, 403);
     }

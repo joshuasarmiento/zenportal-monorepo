@@ -14,7 +14,6 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 import { Separator } from "@/components/ui/separator"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { X, Loader2, Lock } from 'lucide-vue-next'
-// Note: Assuming you have a toast library like vue-sonner, otherwise revert to alert
 import { toast } from 'vue-sonner'
 
 const router = useRouter()

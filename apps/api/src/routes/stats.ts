@@ -8,9 +8,6 @@ const app = new Hono<{ Variables: { userId: string } }>();
 
 app.use('*', requireAuth);
 
-/**
- * Helper: Calculate Start Date safely
- */
 const getStartDate = (range: string): Date => {
   const now = new Date();
   const d = new Date(now);
@@ -23,7 +20,6 @@ const getStartDate = (range: string): Date => {
     case '6m': 
     default: d.setMonth(d.getMonth() - 6); break;
   }
-  // Reset time to start of that day for consistent querying
   d.setHours(0, 0, 0, 0);
   return d;
 };
@@ -78,30 +74,37 @@ app.get('/', async (c) => {
     const now = new Date();
     const startDate = getStartDate(range);
     const startDateStr = startDate.toISOString().split('T')[0]; // YYYY-MM-DD
-    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+    
+    // FIX 1: Use startDateStr for the cards too, not just the chart
+    const filterDate = startDateStr; 
     
     const isDailyGroup = ['24h', '7d', '30d'].includes(range);
-    // SQLite format: %Y-%m-%d for daily, %Y-%m for monthly
     const groupByFormat = isDailyGroup ? '%Y-%m-%d' : '%Y-%m';
 
-    // 2. Dashboard Aggregates
+    // 2. Dashboard Aggregates (Updated to use filterDate)
     const [dashboardStats] = await db
       .select({
-        hoursThisMonth: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.date} >= ${currentMonthStart} THEN ${workLogs.hoursWorked} ELSE 0 END), 0)`,
-        monthlyEarnings: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.date} >= ${currentMonthStart} THEN ${workLogs.hoursWorked} * ${clients.hourlyRate} ELSE 0 END), 0)`,
-        // Calculated revenue stuck in blocked tasks
+        // FIX 1: Changed condition to use filterDate
+        hoursPeriod: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.date} >= ${filterDate} THEN ${workLogs.hoursWorked} ELSE 0 END), 0)`,
+        
+        // FIX 1: Changed condition to use filterDate
+        earningsPeriod: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.date} >= ${filterDate} THEN ${workLogs.hoursWorked} * ${clients.hourlyRate} ELSE 0 END), 0)`,
+        
+        // Blocked is usually "current status", so we check all time or period? 
+        // Let's keep blocked as "current unresolved" (All Time) because a blocker from last month is still a blocker today.
         blockedRevenue: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.isBlocked} = 1 THEN ${workLogs.hoursWorked} * ${clients.hourlyRate} ELSE 0 END), 0)`,
         pendingBlockersCount: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.isBlocked} = 1 THEN 1 ELSE 0 END), 0)`,
+        
         activeClients: sql<number>`COUNT(DISTINCT CASE WHEN ${clients.status} = 'active' THEN ${clients.id} END)`
       })
       .from(workLogs)
       .innerJoin(clients, eq(workLogs.clientId, clients.id))
       .where(eq(workLogs.userId, userId));
 
-    // 3. Revenue History (Chart Data)
+    // 3. Revenue History
     const revenueHistory = await db
       .select({
-        period: sql<string>`strftime(${groupByFormat}, ${workLogs.date})`,
+        rawDate: sql<string>`strftime(${groupByFormat}, ${workLogs.date})`, // Keep raw for sorting
         amount: sql<number>`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`
       })
       .from(workLogs)
@@ -111,7 +114,7 @@ app.get('/', async (c) => {
         gte(workLogs.date, startDateStr)
       ))
       .groupBy(sql`strftime(${groupByFormat}, ${workLogs.date})`)
-      .orderBy(sql`strftime(${groupByFormat}, ${workLogs.date})`);
+      .orderBy(sql`strftime(${groupByFormat}, ${workLogs.date})`); // Backend sorts correctly (YYYY-MM)
 
     // 4. Top Clients
     const topClients = await db
@@ -129,30 +132,30 @@ app.get('/', async (c) => {
       .orderBy(desc(sql`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`))
       .limit(5);
 
-    // 5. Transform Data for Frontend
+    // 5. Formatting
     const formattedHistory = revenueHistory.map(r => {
-      let label = r.period;
-      // Safety check for null periods
-      if (!r.period) return { period: 'Unknown', amount: 0 };
+      let label = r.rawDate;
+      if (!r.rawDate) return { period: 'Unknown', amount: 0, rawDate: '' };
 
       try {
         if (!isDailyGroup) {
-          // Format YYYY-MM -> "Jan"
-          const [y, m] = r.period.split('-');
+          // YYYY-MM -> "Jan"
+          const [y, m] = r.rawDate.split('-');
           const date = new Date(parseInt(y), parseInt(m) - 1, 1);
           label = date.toLocaleString('default', { month: 'short' });
         } else {
-          // Format YYYY-MM-DD -> "Jan 12"
-          const date = new Date(r.period);
+          // YYYY-MM-DD -> "Jan 12"
+          const date = new Date(r.rawDate);
           label = date.toLocaleString('default', { month: 'short', day: 'numeric' });
         }
       } catch (e) {
-        label = r.period; // Fallback to raw string
+        label = r.rawDate;
       }
       
       return {
         period: label,
-        amount: Number(r.amount || 0)
+        amount: Number(r.amount || 0),
+        rawDate: r.rawDate // Send this to frontend so we don't have to guess order
       };
     });
 
@@ -167,16 +170,16 @@ app.get('/', async (c) => {
     }));
 
     const GOAL_TARGET = 2000;
-    const monthlyEarnings = Number(dashboardStats?.monthlyEarnings || 0);
+    const currentEarnings = Number(dashboardStats?.earningsPeriod || 0);
 
     return c.json({
-      totalEarnings: monthlyEarnings,
-      hoursThisMonth: Number(dashboardStats?.hoursThisMonth || 0),
+      totalEarnings: currentEarnings,
+      hoursThisMonth: Number(dashboardStats?.hoursPeriod || 0), // Now reflects selected range
       activeClients: Number(dashboardStats?.activeClients || 0),
       blockedRevenue: Number(dashboardStats?.blockedRevenue || 0),
       pendingBlockersCount: Number(dashboardStats?.pendingBlockersCount || 0),
       goalTarget: GOAL_TARGET,
-      goalPercent: Math.min(100, Math.round((monthlyEarnings / GOAL_TARGET) * 100)),
+      goalPercent: Math.min(100, Math.round((currentEarnings / GOAL_TARGET) * 100)),
       revenueHistory: formattedHistory,
       topClients: formattedTopClients
     });

@@ -12,6 +12,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 import { Separator } from "@/components/ui/separator"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { X, Loader2 } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 
 const router = useRouter()
 const route = useRoute()
@@ -27,7 +28,7 @@ onMounted(async () => {
     const data = await fetchApi(`/clients/${clientId}`)
     form.value = { ...data, status: data.status || 'active' }
   } catch (err) {
-    alert('Could not load client')
+    toast.error('Could not load client details')
     router.push('/clients')
   } finally {
     loading.value = false
@@ -38,8 +39,13 @@ const submit = async () => {
   saving.value = true
   try {
     await fetchApi(`/clients/${clientId}`, { method: 'PUT', body: JSON.stringify(form.value) })
+    toast.success('Client updated successfully')
     router.push('/clients')
-  } catch (err) { alert('Failed to update client.') } finally { saving.value = false }
+  } catch (err) { 
+    toast.error('Failed to update client') 
+  } finally { 
+    saving.value = false 
+  }
 }
 </script>
 
