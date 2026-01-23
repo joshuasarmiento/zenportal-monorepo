@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Check, Crown, Loader2 } from 'lucide-vue-next'
+import { toast } from 'vue-sonner' 
 
 const { fetchApi } = useApi()
 const userStore = useUserStore()
@@ -24,6 +25,7 @@ const handleUpgrade = async () => {
     if (res.url) window.location.href = res.url
   } catch (err) {
     alert('Failed to start checkout')
+    
   } finally {
     loading.value = false
   }
@@ -35,7 +37,7 @@ const handlePortal = async () => {
     const res = await fetchApi('/billing/portal', { method: 'POST' })
     if (res.url) window.location.href = res.url
   } catch (err) {
-    alert('Failed to open portal')
+    toast.error('Failed to open portal')
   } finally {
     loading.value = false
   }
@@ -54,7 +56,7 @@ const handlePortal = async () => {
       </Badge>
     </CardHeader>
 
-    <CardContent class="pt-6">
+    <CardContent class="">
       
       <div v-if="isPro" class="bg-slate-950 text-white rounded-xl p-6 relative overflow-hidden dark:border dark:border-slate-800">
         <div class="relative z-10">

@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Loader2, LogOut } from 'lucide-vue-next'
+import { toast } from 'vue-sonner' 
 
 const { fetchApi } = useApi()
 const userStore = useUserStore()
@@ -42,9 +43,9 @@ const save = async () => {
             })
         })
         userStore.user = { ...userStore.user, ...updatedUser }
-        alert('Profile updated successfully!')
+        toast.success('Profile updated successfully!')
     } catch (err) {
-        alert('Failed to update profile.')
+        toast.error('Failed to update profile.')
     } finally {
         saving.value = false
     }

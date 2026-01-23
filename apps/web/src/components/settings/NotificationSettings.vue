@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Loader2, Eye, Calendar, Megaphone, BellRing } from 'lucide-vue-next'
+import { toast } from 'vue-sonner' 
 
 const { fetchApi } = useApi()
 const userStore = useUserStore()
@@ -42,9 +43,9 @@ const save = async () => {
     })
     // Update local store immediately
     userStore.user = { ...userStore.user, ...updatedUser }
-    alert('Preferences updated.')
+    toast.success('Preferences updated.')
   } catch (err) {
-    alert('Error saving preferences.')
+    toast.error('Error saving preferences.')
   } finally {
     saving.value = false
   }
@@ -64,7 +65,7 @@ const save = async () => {
     <CardContent class="space-y-6 pt-6">
       
       <div class="flex items-start justify-between space-x-4">
-        <div class="flex gap-3">
+        <div class="flex gap-3 items-center">
           <div class="mt-1 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg text-blue-600 dark:text-blue-400">
             <Eye class="h-5 w-5" />
           </div>
@@ -79,7 +80,7 @@ const save = async () => {
       </div>
 
       <div class="flex items-start justify-between space-x-4">
-        <div class="flex gap-3">
+        <div class="flex gap-3 items-center">
           <div class="mt-1 bg-green-50 dark:bg-green-900/20 p-2 rounded-lg text-green-600 dark:text-green-400">
             <Calendar class="h-5 w-5" />
           </div>
@@ -94,7 +95,7 @@ const save = async () => {
       </div>
 
       <div class="flex items-start justify-between space-x-4">
-        <div class="flex gap-3">
+        <div class="flex gap-3 items-center">
           <div class="mt-1 bg-orange-50 dark:bg-orange-900/20 p-2 rounded-lg text-orange-600 dark:text-orange-400">
             <Megaphone class="h-5 w-5" />
           </div>

@@ -8,6 +8,13 @@ export const users = sqliteTable('users', {
   fullName: text('full_name'),
   avatarUrl: text('avatar_url'),
   
+  // NEW PROFILE FIELDS
+  headline: text('headline'), // e.g. "Senior Full Stack Developer"
+  bio: text('bio'), // Longer description
+  websiteUrl: text('website_url'),
+  linkedinUrl: text('linkedin_url'),
+  twitterUrl: text('twitter_url'),
+  
   // Branding & Settings
   // We renamed 'handle' -> 'portalSlug' to match your frontend code
   portalSlug: text('portal_slug').unique(), 

@@ -62,7 +62,15 @@ app.get('/agency/:slug', async (c) => {
       avatarUrl: true,
       accentColor: true,
       email: true,
-      // Explicitly excluding billing IDs and internal flags
+      
+      headline: true,
+      bio: true,
+      websiteUrl: true,
+      linkedinUrl: true,
+      twitterUrl: true,
+
+      tier: true,
+      createdAt: true, 
     }
   });
 
