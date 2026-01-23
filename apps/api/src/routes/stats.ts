@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { db } from '../db';
 import { workLogs, clients } from '../db/schema';
 import { requireAuth } from '../lib/auth';
-import { eq, and, sql, desc, gte } from 'drizzle-orm';
+import { eq, and, sql, desc, asc, gte } from 'drizzle-orm';
 
 const app = new Hono<{ Variables: { userId: string } }>();
 
@@ -20,6 +20,7 @@ const getStartDate = (range: string): Date => {
     case '6m': 
     default: d.setMonth(d.getMonth() - 6); break;
   }
+  // Reset to start of that day
   d.setHours(0, 0, 0, 0);
   return d;
 };
@@ -28,6 +29,18 @@ const getStartDate = (range: string): Date => {
 app.get('/export', async (c) => {
   try {
     const userId = c.get('userId');
+    const range = c.req.query('range') || 'all'; 
+    
+    // 1. Create an array of conditions
+    const filters = [eq(workLogs.userId, userId)];
+
+    // 2. Push the date filter if needed
+    if (range !== 'all') {
+      const startDate = getStartDate(range);
+      const startDateStr = startDate.toISOString().split('T')[0];
+      filters.push(gte(workLogs.date, startDateStr));
+    }
+
     const logs = await db
       .select({
         date: workLogs.date,
@@ -39,19 +52,17 @@ app.get('/export', async (c) => {
       })
       .from(workLogs)
       .innerJoin(clients, eq(workLogs.clientId, clients.id))
-      .where(eq(workLogs.userId, userId))
+      .where(and(...filters))
       .orderBy(desc(workLogs.date));
 
     const csvRows = [['Date', 'Client', 'Summary', 'Hours', 'Rate/Hr', 'Total', 'Status'].join(',')];
-    
     logs.forEach(log => {
       const rate = log.rate || 0;
       const hours = log.hours || 0;
       const total = (rate * hours).toFixed(2);
       const safeSummary = `"${(log.summary || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`;
       const safeClient = `"${(log.clientName || 'Unknown').replace(/"/g, '""')}"`;
-      const status = log.isBlocked ? 'Blocked' : 'Done';
-      csvRows.push([log.date, safeClient, safeSummary, hours, rate, total, status].join(','));
+      csvRows.push([log.date, safeClient, safeSummary, hours, rate, total, log.isBlocked ? 'Blocked' : 'Done'].join(','));
     });
 
     return c.body(csvRows.join('\n'), 200, {
@@ -59,8 +70,7 @@ app.get('/export', async (c) => {
       'Content-Disposition': `attachment; filename="earnings_export_${new Date().toISOString().split('T')[0]}.csv"`,
     });
   } catch (error) {
-    console.error('Export Error:', error);
-    return c.json({ error: 'Failed to generate export' }, 500);
+    return c.json({ error: 'Export failed' }, 500);
   }
 });
 
@@ -70,41 +80,36 @@ app.get('/', async (c) => {
     const userId = c.get('userId');
     const range = c.req.query('range') || '6m';
     
-    // 1. Calculate Date Context
-    const now = new Date();
+    // 1. Determine Date Filter
     const startDate = getStartDate(range);
-    const startDateStr = startDate.toISOString().split('T')[0]; // YYYY-MM-DD
-    
-    // FIX 1: Use startDateStr for the cards too, not just the chart
-    const filterDate = startDateStr; 
-    
+    const startDateStr = startDate.toISOString().split('T')[0]; 
+
     const isDailyGroup = ['24h', '7d', '30d'].includes(range);
     const groupByFormat = isDailyGroup ? '%Y-%m-%d' : '%Y-%m';
 
-    // 2. Dashboard Aggregates (Updated to use filterDate)
+    // 2. Dashboard Aggregates
+    // FIX: Moved the date filter into the .where() clause.
+    // This ensures Drizzle handles the date comparison logic consistently with the graph.
     const [dashboardStats] = await db
       .select({
-        // FIX 1: Changed condition to use filterDate
-        hoursPeriod: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.date} >= ${filterDate} THEN ${workLogs.hoursWorked} ELSE 0 END), 0)`,
-        
-        // FIX 1: Changed condition to use filterDate
-        earningsPeriod: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.date} >= ${filterDate} THEN ${workLogs.hoursWorked} * ${clients.hourlyRate} ELSE 0 END), 0)`,
-        
-        // Blocked is usually "current status", so we check all time or period? 
-        // Let's keep blocked as "current unresolved" (All Time) because a blocker from last month is still a blocker today.
+        hoursPeriod: sql<number>`COALESCE(SUM(${workLogs.hoursWorked}), 0)`,
+        earningsPeriod: sql<number>`COALESCE(SUM(${workLogs.hoursWorked} * ${clients.hourlyRate}), 0)`,
         blockedRevenue: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.isBlocked} = 1 THEN ${workLogs.hoursWorked} * ${clients.hourlyRate} ELSE 0 END), 0)`,
         pendingBlockersCount: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.isBlocked} = 1 THEN 1 ELSE 0 END), 0)`,
-        
+        // Note: This activeClients count is now also filtered by the date range (clients who had work in this period). 
         activeClients: sql<number>`COUNT(DISTINCT CASE WHEN ${clients.status} = 'active' THEN ${clients.id} END)`
       })
       .from(workLogs)
       .innerJoin(clients, eq(workLogs.clientId, clients.id))
-      .where(eq(workLogs.userId, userId));
+      .where(and(
+        eq(workLogs.userId, userId),
+        gte(workLogs.date, startDateStr) // <--- Applied Global Filter here
+      ));
 
-    // 3. Revenue History
+    // 3. Revenue History (Chart)
     const revenueHistory = await db
       .select({
-        rawDate: sql<string>`strftime(${groupByFormat}, ${workLogs.date})`, // Keep raw for sorting
+        rawDate: sql<string>`strftime(${groupByFormat}, ${workLogs.date})`,
         amount: sql<number>`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`
       })
       .from(workLogs)
@@ -114,7 +119,7 @@ app.get('/', async (c) => {
         gte(workLogs.date, startDateStr)
       ))
       .groupBy(sql`strftime(${groupByFormat}, ${workLogs.date})`)
-      .orderBy(sql`strftime(${groupByFormat}, ${workLogs.date})`); // Backend sorts correctly (YYYY-MM)
+      .orderBy(asc(sql`strftime(${groupByFormat}, ${workLogs.date})`));
 
     // 4. Top Clients
     const topClients = await db
@@ -139,24 +144,17 @@ app.get('/', async (c) => {
 
       try {
         if (!isDailyGroup) {
-          // YYYY-MM -> "Jan"
           const [y, m] = r.rawDate.split('-');
           const date = new Date(parseInt(y), parseInt(m) - 1, 1);
           label = date.toLocaleString('default', { month: 'short' });
         } else {
-          // YYYY-MM-DD -> "Jan 12"
           const date = new Date(r.rawDate);
           label = date.toLocaleString('default', { month: 'short', day: 'numeric' });
         }
       } catch (e) {
         label = r.rawDate;
       }
-      
-      return {
-        period: label,
-        amount: Number(r.amount || 0),
-        rawDate: r.rawDate // Send this to frontend so we don't have to guess order
-      };
+      return { period: label, amount: Number(r.amount || 0), rawDate: r.rawDate };
     });
 
     const totalRangeEarnings = topClients.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
@@ -164,9 +162,7 @@ app.get('/', async (c) => {
     const formattedTopClients = topClients.map(c => ({
       name: c.name,
       amount: Number(c.amount || 0),
-      percent: totalRangeEarnings > 0 
-        ? Math.round((Number(c.amount || 0) / totalRangeEarnings) * 100) 
-        : 0
+      percent: totalRangeEarnings > 0 ? Math.round((Number(c.amount || 0) / totalRangeEarnings) * 100) : 0
     }));
 
     const GOAL_TARGET = 2000;
@@ -174,7 +170,7 @@ app.get('/', async (c) => {
 
     return c.json({
       totalEarnings: currentEarnings,
-      hoursThisMonth: Number(dashboardStats?.hoursPeriod || 0), // Now reflects selected range
+      hoursThisMonth: Number(dashboardStats?.hoursPeriod || 0),
       activeClients: Number(dashboardStats?.activeClients || 0),
       blockedRevenue: Number(dashboardStats?.blockedRevenue || 0),
       pendingBlockersCount: Number(dashboardStats?.pendingBlockersCount || 0),

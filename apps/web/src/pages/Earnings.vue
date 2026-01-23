@@ -19,7 +19,7 @@ import type { ApexOptions } from 'apexcharts'
 interface RevenueItem {
   period: string
   amount: number
-  rawDate: string // Added rawDate
+  rawDate: string
 }
 
 interface ClientItem {
@@ -66,8 +66,6 @@ const ranges = computed(() => [
   { label: 'Last 6 Months', value: '6m', pro: false },
 ])
 
-// FIX 2: Use backend order directly. Do not re-sort on frontend.
-// The backend uses SQL ORDER BY date, which is strictly chronological.
 const chartSeries = computed(() => [{
   name: 'Revenue',
   data: stats.value.revenueHistory.map(item => item.amount)
@@ -94,7 +92,6 @@ const chartOptions = computed<ApexOptions>(() => {
       enabled: false 
     },
     xaxis: {
-      // FIX 2: Use the labels exactly as they come from backend
       categories: stats.value.revenueHistory.map(item => item.period),
       axisBorder: { show: false },
       axisTicks: { show: false },
@@ -205,27 +202,6 @@ watch(selectedRange, () => loadStats())
           </Breadcrumb>
         </div>
         <div class="ml-auto flex items-center gap-2">
-          <Select v-model="selectedRange">
-            <SelectTrigger class="w-[180px]">
-              <SelectValue placeholder="Select Range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem 
-                v-for="range in ranges" 
-                :key="range.value" 
-                :value="range.value"
-                :disabled="range.pro && !isPro"
-              >
-                <div class="flex items-center justify-between w-full gap-2">
-                  <span>{{ range.label }}</span>
-                  <div v-if="range.pro && !isPro" class="flex items-center gap-1 text-muted-foreground bg-muted px-1.5 py-0.5 rounded text-[10px] uppercase font-bold">
-                    <Lock class="h-3 w-3" /> Pro
-                  </div>
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
           <Button variant="outline" size="sm" class="gap-2" @click="exportCSV" :disabled="exporting || loading">
             <Loader2 v-if="exporting" class="h-4 w-4 animate-spin" />
             <Download v-else class="h-4 w-4" /> 
@@ -240,7 +216,7 @@ watch(selectedRange, () => loadStats())
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card class="relative overflow-hidden">
               <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-                <CardTitle class="text-sm font-medium text-muted-foreground">Total Earnings ({{ ranges.find(r => r.value === selectedRange)?.label || 'Period' }})</CardTitle>
+                <CardTitle class="text-sm font-medium text-muted-foreground">Total Earnings</CardTitle>
                 <DollarSign class="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent class="relative z-10">
@@ -293,8 +269,28 @@ watch(selectedRange, () => loadStats())
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             <Card class="lg:col-span-2 flex flex-col min-h-[400px]">
-              <CardHeader>
+              <CardHeader class="flex flex-row items-center justify-between">
                 <CardTitle>Revenue History</CardTitle>
+                <Select v-model="selectedRange">
+                  <SelectTrigger class="w-[180px]">
+                    <SelectValue placeholder="Select Range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem 
+                      v-for="range in ranges" 
+                      :key="range.value" 
+                      :value="range.value"
+                      :disabled="range.pro && !isPro"
+                    >
+                      <div class="flex items-center justify-between w-full gap-2">
+                        <span>{{ range.label }}</span>
+                        <div v-if="range.pro && !isPro" class="flex items-center gap-1 text-muted-foreground bg-muted px-1.5 py-0.5 rounded text-[10px] uppercase font-bold">
+                          <Lock class="h-3 w-3" /> Pro
+                        </div>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </CardHeader>
               <CardContent class="flex-1">
                 <div v-if="loading" class="w-full h-[300px] flex items-center justify-center">

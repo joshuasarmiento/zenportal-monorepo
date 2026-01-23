@@ -97,7 +97,7 @@ const goToUpgrade = async () => {
                 </div>
             </header>
 
-            <div class="flex flex-1 flex-col gap-4 p-4 pt-4 bg-muted/40">
+            <div class="flex flex-1 flex-col gap-4 p-4 md:p-8 pt-4 bg-muted/40">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Card>
                         <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
