@@ -16,7 +16,7 @@ export const sendLogEmail = async ({ to, clientName, vaName, summary, link }: Se
   if (!process.env.RESEND_API_KEY) return;
 
   await resend.emails.send({
-    from: 'ZenPortal <updates@yourdomain.com>',
+    from: 'ZenPortal <androekolokoy@gmail.com>',
     to: [to],
     subject: `New Update from ${vaName} - ${new Date().toLocaleDateString()}`,
     html: `
@@ -39,7 +39,7 @@ export const sendClientViewedEmail = async (userEmail: string, clientName: strin
   if (!process.env.RESEND_API_KEY) return;
 
   await resend.emails.send({
-    from: 'ZenPortal <alerts@yourdomain.com>',
+    from: 'ZenPortal <androekolokoy@gmail.com>',
     to: [userEmail],
     subject: `👀 ${clientName} just viewed your report`,
     html: `
@@ -57,7 +57,7 @@ export const sendWeeklyRecapEmail = async (userEmail: string, userName: string, 
   if (!process.env.RESEND_API_KEY) return;
 
   await resend.emails.send({
-    from: 'ZenPortal <alerts@yourdomain.com>',
+    from: 'ZenPortal <androekolokoy@gmail.com>',
     to: [userEmail],
     subject: `Weekly Recap: $${totalEarnings} Earned 💰`,
     html: `

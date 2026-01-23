@@ -42,7 +42,7 @@ const viewLog = (id: string) => router.push(`/log/${id}`)
                     <Breadcrumb>
                         <BreadcrumbList>
                             <BreadcrumbItem class="hidden md:block">
-                                <BreadcrumbLink href="#">Overview</BreadcrumbLink>
+                                <BreadcrumbLink href="#">Platform</BreadcrumbLink>
                             </BreadcrumbItem>
                             <BreadcrumbSeparator class="hidden md:block" />
                             <BreadcrumbItem>

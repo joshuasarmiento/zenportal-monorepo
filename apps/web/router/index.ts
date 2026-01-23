@@ -10,6 +10,8 @@ import NewLog from '@/pages/NewLog.vue'
 import AddClient from '@/pages/AddClient.vue'
 import EditClient from '@/pages/EditClient.vue'
 import EditLog from '@/pages/EditLog.vue'
+import Documentation from '@/pages/Documentation.vue'
+import UserGuide from '@/pages/UserGuide.vue'
 
 // 2. Auth & Public Pages
 import Login from '@/pages/Login.vue'
@@ -30,7 +32,7 @@ const router = createRouter({
       meta: { public: true } 
     },
     { 
-      path: '/login', 
+      path: '/sign-in', 
       component: Login, 
       meta: { public: true } 
     },
@@ -46,6 +48,11 @@ const router = createRouter({
     },
     { path: '/p/:slug', 
       component: AgencyProfile,
+      meta: { public: true } 
+    },
+    { 
+      path: '/docs', 
+      component: Documentation, 
       meta: { public: true } 
     },
 
@@ -86,7 +93,11 @@ const router = createRouter({
       path: '/log/new', 
       component: NewLog 
     },
-    
+    {
+      path: '/help',
+      component: UserGuide,
+      meta: { public: false } // Only for logged-in users
+    },
 
     // --- 404 Catch-all ---
     { 

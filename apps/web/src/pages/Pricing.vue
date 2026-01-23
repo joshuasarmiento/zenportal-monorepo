@@ -1,105 +1,117 @@
 <script setup lang="ts">
-import { useUser } from '@clerk/vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useApi } from '../lib/api' // Ensure this path is correct
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
+import { Check, Zap, X } from 'lucide-vue-next'
+import ModeToggle from '@/components/ModeToggle.vue'
 
-const { isSignedIn, user } = useUser()
 const router = useRouter()
-const { fetchApi } = useApi()
+const isYearly = ref(false)
 
-const handleUpgrade = async () => {
-  // 1. If not logged in, send to Signup
-  if (!isSignedIn.value) {
-    router.push('/login')
-    return
+const plans = [
+  {
+    name: 'Starter',
+    price: '0',
+    desc: 'Perfect for your first client.',
+    features: [
+      '1 Active Client',
+      'Basic Work Logging',
+      'Standard Public Profile',
+      '30 Days History'
+    ],
+    missing: ['Video Uploads', 'Custom Branding', 'Priority Support'],
+    cta: 'Start for Free',
+    variant: 'outline',
+    popular: false
+  },
+  {
+    name: 'Agency Pro',
+    price: '12',
+    desc: 'Scale your freelance business.',
+    features: [
+      'Unlimited Clients',
+      'Loom Video Integration',
+      'Custom Branding & Colors',
+      'Unlimited History',
+      'Export to PDF/CSV',
+      'Priority Support'
+    ],
+    missing: [],
+    cta: 'Go Pro',
+    variant: 'default',
+    popular: true
   }
-
-  // 2. If logged in, Create Stripe Session (Backend)
-  try {
-    const res = await fetchApi('/billing/checkout', { // You'll need this endpoint later
-      method: 'POST'
-    })
-    // Redirect to Stripe Checkout URL
-    if (res.url) window.location.href = res.url
-  } catch (err) {
-    console.error('Checkout failed', err)
-    alert('Could not start checkout. Please try again.')
-  }
-}
+]
 </script>
 
 <template>
-  <div class="bg-slate-900 text-white flex flex-col min-h-screen font-inter">
-    
-    <nav class="max-w-5xl mx-auto w-full p-6 flex justify-between items-center">
-      <div class="font-bold text-xl tracking-tight text-blue-400">ZenPortal</div>
-      
-      <router-link :to="isSignedIn ? '/dashboard' : '/'" class="text-slate-400 hover:text-white text-sm font-medium">
-        {{ isSignedIn ? 'Back to Dashboard' : 'Back to Home' }}
+  <div class="min-h-screen bg-background font-sans text-foreground">
+    <nav class="flex justify-between items-center max-w-6xl mx-auto px-6 h-16">
+      <router-link to="/" class="flex items-center gap-2 font-bold text-xl tracking-tight text-blue-600 dark:text-blue-400">
+        <Zap class="h-6 w-6" /> ZenPortal
       </router-link>
+      <div class="flex items-center gap-4">
+        <ModeToggle />
+        <router-link to="/sign-in" class="text-sm font-medium hover:text-primary">Login</router-link>
+      </div>
     </nav>
 
-    <main class="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        
-      <div class="mb-10 max-w-2xl">
-        <span class="text-blue-400 font-bold tracking-widest uppercase text-xs mb-2 block">Premium Membership</span>
-        <h1 class="text-4xl md:text-5xl font-extrabold mb-4">Invest in your career.</h1>
-        <p class="text-slate-400 text-lg">You earn $1,000+ per month. Don't risk losing it over a messy email report.</p>
+    <main class="max-w-5xl mx-auto px-6 py-20">
+      <div class="text-center mb-16">
+        <h1 class="text-4xl font-extrabold mb-4">Simple, Transparent Pricing</h1>
+        <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+          Start for free, upgrade when you land more clients. No hidden fees.
+        </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full text-left">
-          
-        <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 opacity-70 hover:opacity-100 transition">
-          <h3 class="text-xl font-bold text-white mb-2">Starter</h3>
-          <div class="text-3xl font-bold mb-6">$0 <span class="text-sm font-normal text-slate-400">/ forever</span></div>
-          <ul class="space-y-4 mb-8 text-slate-300 text-sm">
-            <li class="flex items-center gap-3"><i class="ph ph-check text-blue-400 text-lg"></i> 1 Client Limit</li>
-            <li class="flex items-center gap-3"><i class="ph ph-check text-blue-400 text-lg"></i> Basic Work Logging</li>
-            <li class="flex items-center gap-3"><i class="ph ph-x text-slate-600 text-lg"></i> <span class="text-slate-500 line-through">Custom Branding</span></li>
-            <li class="flex items-center gap-3"><i class="ph ph-x text-slate-600 text-lg"></i> <span class="text-slate-500 line-through">Video Uploads</span></li>
-          </ul>
-          
-          <button v-if="!isSignedIn" @click="router.push('/login')" class="w-full py-3 rounded-lg border border-slate-600 text-white font-medium hover:bg-slate-700 transition">
-            Start for Free
-          </button>
-          <button v-else class="w-full py-3 rounded-lg border border-slate-600 text-white font-medium cursor-default opacity-50">
-            Current Plan
-          </button>
-        </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <Card 
+          v-for="plan in plans" 
+          :key="plan.name" 
+          class="flex flex-col relative transition-all duration-200"
+          :class="{ 'border-blue-500 shadow-xl scale-105 z-10': plan.popular }"
+        >
+          <div v-if="plan.popular" class="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+            Most Popular
+          </div>
 
-        <div class="bg-gradient-to-b from-blue-600 to-blue-800 rounded-2xl p-8 relative shadow-2xl transform md:-translate-y-4">
-          <div class="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg uppercase">Best Value</div>
-          
-          <h3 class="text-xl font-bold text-white mb-2">Agency Pro</h3>
-          <div class="text-4xl font-extrabold mb-6">$12 <span class="text-sm font-normal text-blue-200">/ month</span></div>
-          <p class="text-blue-100 text-xs mb-6">Less than the cost of one lunch.</p>
+          <CardHeader>
+            <CardTitle class="text-2xl">{{ plan.name }}</CardTitle>
+            <CardDescription>{{ plan.desc }}</CardDescription>
+            <div class="mt-4 flex items-baseline gap-1">
+              <span class="text-4xl font-extrabold">${{ plan.price }}</span>
+              <span class="text-muted-foreground">/month</span>
+            </div>
+          </CardHeader>
 
-          <ul class="space-y-4 mb-8 text-white text-sm font-medium">
-            <li class="flex items-center gap-3">
-              <div class="bg-blue-500 p-1 rounded-full"><i class="ph ph-check text-white text-xs"></i></div> 
-              Unlimited Clients
-            </li>
-            <li class="flex items-center gap-3">
-              <div class="bg-blue-500 p-1 rounded-full"><i class="ph ph-check text-white text-xs"></i></div> 
-              Remove "ZenPortal" Branding
-            </li>
-            <li class="flex items-center gap-3">
-              <div class="bg-blue-500 p-1 rounded-full"><i class="ph ph-check text-white text-xs"></i></div> 
-              Video/Loom Integrations
-            </li>
-            <li class="flex items-center gap-3">
-              <div class="bg-blue-500 p-1 rounded-full"><i class="ph ph-check text-white text-xs"></i></div> 
-              Priority Support
-            </li>
-          </ul>
-          
-          <button @click="handleUpgrade" class="w-full py-4 rounded-xl bg-white text-blue-900 font-bold hover:bg-blue-50 transition shadow-lg flex items-center justify-center gap-2">
-            <i class="ph ph-lightning-fill text-yellow-500"></i> 
-            {{ isSignedIn ? 'Upgrade Now' : 'Get Started' }}
-          </button>
-          <p class="text-center text-xs text-blue-200 mt-4">30-day money-back guarantee.</p>
-        </div>
+          <CardContent class="flex-1">
+            <ul class="space-y-3">
+              <li v-for="feature in plan.features" :key="feature" class="flex items-center gap-3 text-sm">
+                <div class="h-5 w-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+                  <Check class="h-3 w-3 text-green-600 dark:text-green-400" />
+                </div>
+                {{ feature }}
+              </li>
+              <li v-for="feature in plan.missing" :key="feature" class="flex items-center gap-3 text-sm text-muted-foreground/50">
+                <div class="h-5 w-5 rounded-full bg-muted flex items-center justify-center shrink-0">
+                  <X class="h-3 w-3" />
+                </div>
+                {{ feature }}
+              </li>
+            </ul>
+          </CardContent>
 
+          <CardFooter>
+            <Button 
+              :variant="plan.variant as any" 
+              class="w-full h-12 text-lg"
+              @click="router.push('/sign-up')"
+            >
+              {{ plan.cta }}
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
     </main>
   </div>

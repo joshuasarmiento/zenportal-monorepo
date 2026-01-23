@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Loader2, LogOut } from 'lucide-vue-next'
-import ModeToggle from '@/components/ModeToggle.vue' // <--- 1. Import Component
 
 const { fetchApi } = useApi()
 const userStore = useUserStore()
@@ -86,14 +85,6 @@ const save = async () => {
             <div class="space-y-2">
                 <Label>Email Address</Label>
                 <Input v-model="form.email" disabled class="bg-muted text-muted-foreground" />
-            </div>
-
-            <div class="space-y-2">
-                <Label>Theme Preference</Label>
-                <div class="flex items-center gap-3">
-                    <ModeToggle />
-                    <span class="text-sm text-muted-foreground">Switch between light and dark mode.</span>
-                </div>
             </div>
 
         </CardContent>

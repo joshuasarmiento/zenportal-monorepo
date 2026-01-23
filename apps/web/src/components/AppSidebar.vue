@@ -1,44 +1,33 @@
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
+import { onMounted,ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
-  SidebarGroup,
-  SidebarGroupLabel,
-} from '@/components/ui/sidebar'
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarGroup, SidebarGroupLabel } from '@/components/ui/sidebar'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub,
+  DropdownMenuSubTrigger,    
+  DropdownMenuSubContent, 
+  DropdownMenuPortal        
 } from '@/components/ui/dropdown-menu'
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback
-} from '@/components/ui/avatar'
-import {
-  LayoutDashboard,
-  Users,
-  BarChart3,
-  Settings,
-  Zap,
-  ChevronsUpDown,
-  Sparkles,
-  LogOut
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { useColorMode } from '@vueuse/core'
+import { 
+  LayoutDashboard, 
+  Users, 
+  BarChart3, 
+  Settings, 
+  Zap, 
+  ChevronsUpDown, 
+  Sparkles, 
+  LogOut,
+  BookOpen,
+  Moon,    
+  Sun,  
+  Laptop   
 } from 'lucide-vue-next'
 import { useApi } from '@/lib/api'
 import { SignOutButton } from '@clerk/vue'
 
+const mode = useColorMode()
 const { fetchApi } = useApi()
 const route = useRoute()
 const userStore = useUserStore()
@@ -78,6 +67,10 @@ const links = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { name: 'Clients', path: '/clients', icon: Users },
   { name: 'Earnings', path: '/earnings', icon: BarChart3 },
+]
+
+const UserGuide = [
+  { name: 'User Guide', path: '/help', icon: BookOpen },
   { name: 'Settings', path: '/settings', icon: Settings },
 ]
 </script>
@@ -111,6 +104,19 @@ const links = [
               <router-link :to="link.path">
                 <component :is="link.icon" />
                 <span>{{ link.name }}</span>
+              </router-link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
+      <SidebarGroup>
+        <SidebarGroupLabel>Settings</SidebarGroupLabel>
+        <SidebarMenu>
+          <SidebarMenuItem v-for="guide in UserGuide" :key="guide.path">
+            <SidebarMenuButton as-child :isActive="route.path === guide.path" :tooltip="guide.name">
+              <router-link :to="guide.path">
+                <component :is="guide.icon" />
+                <span>{{ guide.name }}</span>
               </router-link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -159,6 +165,32 @@ const links = [
 
               <DropdownMenuSeparator />
 
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger class="cursor-pointer">
+                  <Sun class="mr-2 h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                  <Moon class="absolute mr-2 h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                  <span>Theme</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem @click="mode = 'light'" class="cursor-pointer">
+                      <Sun class="mr-2 h-4 w-4" />
+                      <span>Light</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem @click="mode = 'dark'" class="cursor-pointer">
+                      <Moon class="mr-2 h-4 w-4" />
+                      <span>Dark</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem @click="mode = 'auto'" class="cursor-pointer">
+                      <Laptop class="mr-2 h-4 w-4" />
+                      <span>System</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+
+              <DropdownMenuSeparator />
+
               <DropdownMenuItem as-child>
                 <SignOutButton
                   class="w-full items-center px-2 py-1.5 cursor-pointer text-red-600 focus:text-red-600 dark:text-red-400">
@@ -173,7 +205,6 @@ const links = [
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarFooter>
-
     <SidebarRail />
   </Sidebar>
 </template>
