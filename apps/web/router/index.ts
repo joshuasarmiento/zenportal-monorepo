@@ -24,6 +24,8 @@ import LogDetail from '@/pages/LogDetail.vue'
 import AgencyProfile from '@/pages/public/AgencyProfile.vue'
 import Features from '@/pages/public/Features.vue'
 import About from '@/pages/public/About.vue'
+import TermsCondition from '@/pages/public/Terms.vue'
+import PrivacyPolicy from '@/pages/public/PrivacyPolicy.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -70,6 +72,16 @@ const router = createRouter({
     { 
       path: '/about', 
       component: About, 
+      meta: { public: true } 
+    },
+    { 
+      path: '/terms', 
+      component: TermsCondition, 
+      meta: { public: true } 
+    },
+    { 
+      path: '/privacy-policy', 
+      component: PrivacyPolicy, 
       meta: { public: true } 
     },
 

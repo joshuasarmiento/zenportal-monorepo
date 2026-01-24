@@ -235,7 +235,7 @@ const router = useRouter()
 
           <section class="text-center py-8">
             <h3 class="text-xl font-bold mb-2 text-foreground">Still have questions?</h3>
-            <p class="text-muted-foreground mb-6">Contact support if you need help setting up your portal.</p>
+            <p class="text-muted-foreground mb-6">Priority support is available for Pro users.</p>
             <Button size="lg" as-child>
                <a href="mailto:support@zenportal.io">Contact Support</a>
             </Button>
