@@ -1,14 +1,16 @@
 import { Hono } from 'hono';
+import { stream } from 'hono/streaming';
 import { db } from '../db';
 import { workLogs, clients } from '../db/schema';
 import { requireAuth } from '../lib/auth';
-import { eq, and, sql, desc, asc, gte } from 'drizzle-orm';
+import { eq, and, sql, desc, asc, gte, lte } from 'drizzle-orm';
 
 const app = new Hono<{ Variables: { userId: string } }>();
 
 app.use('*', requireAuth);
 
-const getStartDate = (range: string): Date => {
+// Helper: Get Date Range strictly as strings (YYYY-MM-DD) for SQLite index usage
+const getDateRange = (range: string) => {
   const now = new Date();
   const d = new Date(now);
   
@@ -17,131 +19,163 @@ const getStartDate = (range: string): Date => {
     case '7d': d.setDate(now.getDate() - 7); break;
     case '30d': d.setDate(now.getDate() - 30); break;
     case '90d': d.setDate(now.getDate() - 90); break;
-    case '6m': 
+    case '6m': d.setMonth(d.getMonth() - 6); break;
+    case '1y': d.setFullYear(d.getFullYear() - 1); break;
     default: d.setMonth(d.getMonth() - 6); break;
   }
-  // Reset to start of that day
-  d.setHours(0, 0, 0, 0);
-  return d;
+  
+  return {
+    start: d.toISOString().split('T')[0], // "2026-01-01"
+    end: now.toISOString().split('T')[0]
+  };
 };
 
-// GET /stats/export
+/**
+ * GET /stats/export
+ * SCALABILITY FIX: Uses Streams & Chunking to prevent OOM (Out Of Memory) crashes.
+ */
 app.get('/export', async (c) => {
-  try {
-    const userId = c.get('userId');
-    const range = c.req.query('range') || 'all'; 
-    
-    // 1. Create an array of conditions
-    const filters = [eq(workLogs.userId, userId)];
+  const userId = c.get('userId');
+  const range = c.req.query('range') || 'all'; 
 
-    // 2. Push the date filter if needed
+  // Headers for CSV download
+  c.header('Content-Type', 'text/csv; charset=utf-8');
+  c.header('Content-Disposition', `attachment; filename="work_logs_${new Date().toISOString().split('T')[0]}.csv"`);
+
+  return stream(c, async (stream) => {
+    // 1. Write Header
+    await stream.write(`Date,Client,Summary,Hours,Rate,Total,Status\n`);
+
+    // 2. Build Query Filters
+    const filters = [eq(workLogs.userId, userId)];
     if (range !== 'all') {
-      const startDate = getStartDate(range);
-      const startDateStr = startDate.toISOString().split('T')[0];
-      filters.push(gte(workLogs.date, startDateStr));
+      const { start } = getDateRange(range);
+      filters.push(gte(workLogs.date, start));
     }
 
-    const logs = await db
-      .select({
-        date: workLogs.date,
-        clientName: clients.companyName,
-        summary: workLogs.summary,
-        hours: workLogs.hoursWorked,
-        rate: clients.hourlyRate,
-        isBlocked: workLogs.isBlocked
-      })
-      .from(workLogs)
-      .innerJoin(clients, eq(workLogs.clientId, clients.id))
-      .where(and(...filters))
-      .orderBy(desc(workLogs.date));
+    // 3. Batch Fetching (Chunking) to keep memory usage low
+    // Fetching 100k rows at once crashes Node. Fetching 1000 at a time does not.
+    const BATCH_SIZE = 1000;
+    let offset = 0;
+    let hasMore = true;
 
-    const csvRows = [['Date', 'Client', 'Summary', 'Hours', 'Rate/Hr', 'Total', 'Status'].join(',')];
-    logs.forEach(log => {
-      const rate = log.rate || 0;
-      const hours = log.hours || 0;
-      const total = (rate * hours).toFixed(2);
-      const safeSummary = `"${(log.summary || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`;
-      const safeClient = `"${(log.clientName || 'Unknown').replace(/"/g, '""')}"`;
-      csvRows.push([log.date, safeClient, safeSummary, hours, rate, total, log.isBlocked ? 'Blocked' : 'Done'].join(','));
-    });
+    while (hasMore) {
+      const logs = await db
+        .select({
+          date: workLogs.date,
+          clientName: clients.companyName,
+          summary: workLogs.summary,
+          hours: workLogs.hoursWorked,
+          rate: clients.hourlyRate,
+          isBlocked: workLogs.isBlocked
+        })
+        .from(workLogs)
+        .innerJoin(clients, eq(workLogs.clientId, clients.id))
+        .where(and(...filters))
+        .orderBy(desc(workLogs.date))
+        .limit(BATCH_SIZE)
+        .offset(offset);
 
-    return c.body(csvRows.join('\n'), 200, {
-      'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': `attachment; filename="earnings_export_${new Date().toISOString().split('T')[0]}.csv"`,
-    });
-  } catch (error) {
-    return c.json({ error: 'Export failed' }, 500);
-  }
+      if (logs.length === 0) {
+        hasMore = false;
+        break;
+      }
+
+      // Process and write chunk
+      const chunkString = logs.map(log => {
+        const rate = log.rate || 0;
+        const hours = log.hours || 0;
+        const total = (rate * hours).toFixed(2);
+        
+        // CSV Injection protection and formatting
+        const safeSummary = `"${(log.summary || '').replace(/"/g, '""').replace(/(\r\n|\n|\r)/g, ' ')}"`;
+        const safeClient = `"${(log.clientName || 'Unknown').replace(/"/g, '""')}"`;
+        const status = log.isBlocked ? 'Blocked' : 'Done';
+
+        return `${log.date},${safeClient},${safeSummary},${hours},${rate},${total},${status}`;
+      }).join('\n');
+
+      await stream.write(chunkString + '\n');
+
+      offset += BATCH_SIZE;
+      
+      // Artificial break to allow event loop to handle other requests (optional but good for massive exports)
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
+  });
 });
 
-// GET /stats
+/**
+ * GET /stats
+ * SCALABILITY FIX: Uses Promise.all for concurrency & optimized SQL logic
+ */
 app.get('/', async (c) => {
   try {
     const userId = c.get('userId');
     const range = c.req.query('range') || '6m';
     
-    // 1. Determine Date Filter
-    const startDate = getStartDate(range);
-    const startDateStr = startDate.toISOString().split('T')[0]; 
-
+    // 1. Prepare Date Logic
+    const { start: startDateStr } = getDateRange(range);
     const isDailyGroup = ['24h', '7d', '30d'].includes(range);
     const groupByFormat = isDailyGroup ? '%Y-%m-%d' : '%Y-%m';
 
-    // 2. Dashboard Aggregates
-    // FIX: Moved the date filter into the .where() clause.
-    // This ensures Drizzle handles the date comparison logic consistently with the graph.
-    const [dashboardStats] = await db
-      .select({
-        hoursPeriod: sql<number>`COALESCE(SUM(${workLogs.hoursWorked}), 0)`,
-        earningsPeriod: sql<number>`COALESCE(SUM(${workLogs.hoursWorked} * ${clients.hourlyRate}), 0)`,
-        blockedRevenue: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.isBlocked} = 1 THEN ${workLogs.hoursWorked} * ${clients.hourlyRate} ELSE 0 END), 0)`,
-        pendingBlockersCount: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.isBlocked} = 1 THEN 1 ELSE 0 END), 0)`,
-        // Note: This activeClients count is now also filtered by the date range (clients who had work in this period). 
-        activeClients: sql<number>`COUNT(DISTINCT CASE WHEN ${clients.status} = 'active' THEN ${clients.id} END)`
-      })
-      .from(workLogs)
-      .innerJoin(clients, eq(workLogs.clientId, clients.id))
-      .where(and(
-        eq(workLogs.userId, userId),
-        gte(workLogs.date, startDateStr) // <--- Applied Global Filter here
-      ));
+    // 2. Run Heavy Queries in PARALLEL (Drastically reduces latency)
+    const [statsResult, historyResult, topClientsResult] = await Promise.all([
+      
+      // Query A: Dashboard Aggregates
+      db.select({
+          hoursPeriod: sql<number>`COALESCE(SUM(${workLogs.hoursWorked}), 0)`,
+          earningsPeriod: sql<number>`COALESCE(SUM(${workLogs.hoursWorked} * ${clients.hourlyRate}), 0)`,
+          blockedRevenue: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.isBlocked} = 1 THEN ${workLogs.hoursWorked} * ${clients.hourlyRate} ELSE 0 END), 0)`,
+          pendingBlockersCount: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.isBlocked} = 1 THEN 1 ELSE 0 END), 0)`,
+          activeClients: sql<number>`COUNT(DISTINCT ${workLogs.clientId})` // Only count clients active IN THIS PERIOD
+        })
+        .from(workLogs)
+        .innerJoin(clients, eq(workLogs.clientId, clients.id))
+        .where(and(
+          eq(workLogs.userId, userId),
+          gte(workLogs.date, startDateStr)
+        )),
 
-    // 3. Revenue History (Chart)
-    const revenueHistory = await db
-      .select({
-        rawDate: sql<string>`strftime(${groupByFormat}, ${workLogs.date})`,
-        amount: sql<number>`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`
-      })
-      .from(workLogs)
-      .innerJoin(clients, eq(workLogs.clientId, clients.id))
-      .where(and(
-        eq(workLogs.userId, userId),
-        gte(workLogs.date, startDateStr)
-      ))
-      .groupBy(sql`strftime(${groupByFormat}, ${workLogs.date})`)
-      .orderBy(asc(sql`strftime(${groupByFormat}, ${workLogs.date})`));
+      // Query B: Revenue History (Chart)
+      db.select({
+          rawDate: sql<string>`strftime(${groupByFormat}, ${workLogs.date})`,
+          amount: sql<number>`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`
+        })
+        .from(workLogs)
+        .innerJoin(clients, eq(workLogs.clientId, clients.id))
+        .where(and(
+          eq(workLogs.userId, userId),
+          gte(workLogs.date, startDateStr)
+        ))
+        .groupBy(sql`strftime(${groupByFormat}, ${workLogs.date})`)
+        .orderBy(asc(sql`strftime(${groupByFormat}, ${workLogs.date})`)),
 
-    // 4. Top Clients
-    const topClients = await db
-      .select({
-        name: clients.companyName,
-        amount: sql<number>`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`
-      })
-      .from(workLogs)
-      .innerJoin(clients, eq(workLogs.clientId, clients.id))
-      .where(and(
-        eq(workLogs.userId, userId),
-        gte(workLogs.date, startDateStr)
-      ))
-      .groupBy(clients.id)
-      .orderBy(desc(sql`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`))
-      .limit(5);
+      // Query C: Top Clients
+      db.select({
+          name: clients.companyName,
+          amount: sql<number>`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`
+        })
+        .from(workLogs)
+        .innerJoin(clients, eq(workLogs.clientId, clients.id))
+        .where(and(
+          eq(workLogs.userId, userId),
+          gte(workLogs.date, startDateStr)
+        ))
+        .groupBy(clients.id)
+        .orderBy(desc(sql`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`))
+        .limit(5)
+    ]);
 
-    // 5. Formatting
-    const formattedHistory = revenueHistory.map(r => {
+    // 3. Process Results
+    const dashboardStats = statsResult[0];
+
+    // Format History Data
+    const formattedHistory = historyResult.map(r => {
       let label = r.rawDate;
       if (!r.rawDate) return { period: 'Unknown', amount: 0, rawDate: '' };
 
+      // Helper to make dates readable
       try {
         if (!isDailyGroup) {
           const [y, m] = r.rawDate.split('-');
@@ -157,14 +191,15 @@ app.get('/', async (c) => {
       return { period: label, amount: Number(r.amount || 0), rawDate: r.rawDate };
     });
 
-    const totalRangeEarnings = topClients.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
-
-    const formattedTopClients = topClients.map(c => ({
+    // Format Top Clients
+    const totalRangeEarnings = topClientsResult.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
+    const formattedTopClients = topClientsResult.map(c => ({
       name: c.name,
       amount: Number(c.amount || 0),
       percent: totalRangeEarnings > 0 ? Math.round((Number(c.amount || 0) / totalRangeEarnings) * 100) : 0
     }));
 
+    // Goals (Hardcoded for now, could be moved to User Settings DB)
     const GOAL_TARGET = 2000;
     const currentEarnings = Number(dashboardStats?.earningsPeriod || 0);
 

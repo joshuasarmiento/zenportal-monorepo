@@ -101,14 +101,18 @@ const submit = async () => {
           <Card>
             <CardHeader class="flex flex-row items-center justify-between border-b border-border pb-4">
               <CardTitle>Edit Log Entry</CardTitle>
-              <Button variant="ghost" size="icon" @click="router.back()"><X class="h-4 w-4" /></Button>
+              <Button variant="ghost" size="icon" @click="router.back()">
+                <X class="h-4 w-4" />
+              </Button>
             </CardHeader>
 
-            <div v-if="loading" class="p-10 flex justify-center"><Loader2 class="h-8 w-8 animate-spin text-muted-foreground" /></div>
+            <div v-if="loading" class="p-10 flex justify-center">
+              <Loader2 class="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
 
             <CardContent v-else class="pt-6">
               <form @submit.prevent="submit" class="space-y-6">
-                
+
                 <div class="space-y-2">
                   <Label>Client</Label>
                   <Input v-model="form.clientName" disabled class="bg-muted text-muted-foreground" />
@@ -121,7 +125,7 @@ const submit = async () => {
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div class="space-y-2">
-                    <Label>Video Link (Loom)</Label>
+                    <Label>Video Update (Loom / Google Drive)</Label>
                     <Input v-model="form.videoUrl" />
                   </div>
                   <div class="space-y-2">
@@ -131,28 +135,33 @@ const submit = async () => {
                 </div>
 
                 <div class="space-y-2">
-                    <Label>Hours Worked</Label>
-                    <Input v-model="form.hoursWorked" type="number" step="0.5" />
+                  <Label>Hours Worked</Label>
+                  <Input v-model="form.hoursWorked" type="number" step="0.5" />
                 </div>
 
                 <div class="rounded-lg p-4 border transition-colors"
-                     :class="form.isBlocked ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-900' : 'bg-background border-border'">
+                  :class="form.isBlocked ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-900' : 'bg-background border-border'">
                   <label class="flex items-center gap-3 cursor-pointer">
-                    <input type="checkbox" v-model="form.isBlocked" class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
-                    <span class="font-bold text-sm" :class="form.isBlocked ? 'text-red-700 dark:text-red-400' : 'text-foreground'">
+                    <input type="checkbox" v-model="form.isBlocked"
+                      class="w-4 h-4 text-red-600 rounded focus:ring-red-500">
+                      <span class="font-bold text-sm"
+                        :class="form.isBlocked ? 'text-red-700 dark:text-red-400' : 'text-foreground'">
                         I am Blocked / Stuck
-                    </span>
+                      </span>
                   </label>
                   <div v-if="form.isBlocked" class="mt-3">
                     <Label class="text-xs text-red-600 dark:text-red-400 mb-1 block">Reason</Label>
-                    <Input v-model="form.blockerDetails" class="bg-background" placeholder="What do you need from the client?" />
+                    <Input v-model="form.blockerDetails" class="bg-background"
+                      placeholder="What do you need from the client?" />
                   </div>
                 </div>
 
                 <div class="flex justify-end pt-4">
                   <Button :disabled="saving">
                     <Loader2 v-if="saving" class="mr-2 h-4 w-4 animate-spin" />
-                    <span v-else class="flex items-center gap-2"><Save class="h-4 w-4" /> Save Changes</span>
+                    <span v-else class="flex items-center gap-2">
+                      <Save class="h-4 w-4" /> Save Changes
+                    </span>
                   </Button>
                 </div>
               </form>

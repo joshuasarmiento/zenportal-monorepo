@@ -62,7 +62,7 @@ const emit = defineEmits(['view'])
               <TableCell>
                 <div class="flex flex-col gap-1 items-start">
                   <div v-if="log.videoUrl" class="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 text-xs font-semibold">
-                    <Video class="h-3.5 w-3.5" /> Loom
+                    <Video class="h-3.5 w-3.5" /> Video
                   </div>
                   <div v-if="log.attachmentUrl" class="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 text-xs font-semibold">
                     <Paperclip class="h-3.5 w-3.5" /> File

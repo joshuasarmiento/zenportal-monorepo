@@ -16,12 +16,14 @@ import UserGuide from '@/pages/UserGuide.vue'
 // 2. Auth & Public Pages
 import Login from '@/pages/Login.vue'
 import Signup from '@/pages/Singup.vue'
-import LandingPage from '@/pages/LandingPage.vue'
+import LandingPage from '@/pages/public/LandingPage.vue'
 import ClientReport from '@/pages/ClientReport.vue'
 import NotFound from '@/pages/404.vue'
-import Pricing from '@/pages/Pricing.vue'
+import Pricing from '@/pages/public/Pricing.vue'
 import LogDetail from '@/pages/LogDetail.vue'
-import AgencyProfile from '@/pages/AgencyProfile.vue'
+import AgencyProfile from '@/pages/public/AgencyProfile.vue'
+import Features from '@/pages/public/Features.vue'
+import About from '@/pages/public/About.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -58,6 +60,16 @@ const router = createRouter({
     { 
       path: '/docs', 
       component: Documentation, 
+      meta: { public: true } 
+    },
+    { 
+      path: '/features', 
+      component: Features, 
+      meta: { public: true } 
+    },
+    { 
+      path: '/about', 
+      component: About, 
       meta: { public: true } 
     },
 

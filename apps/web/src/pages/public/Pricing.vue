@@ -20,7 +20,7 @@ const plans = [
       'Standard Public Profile',
       '30 Days History'
     ],
-    missing: ['Video Uploads', 'Custom Branding', 'Priority Support'],
+    missing: ['Video Embedding (Loom/Drive)', 'Custom Branding', 'Priority Support'],
     cta: 'Start for Free',
     variant: 'outline',
     popular: false
@@ -31,7 +31,7 @@ const plans = [
     desc: 'Scale your freelance business.',
     features: [
       'Unlimited Clients',
-      'Loom Video Integration',
+      'Loom & Drive Embeds',
       'Custom Branding & Colors',
       'Unlimited History',
       'Export to PDF/CSV',

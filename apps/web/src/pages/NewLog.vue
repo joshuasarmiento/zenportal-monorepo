@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi } from '../lib/api'
-import { useUserStore } from '@/stores/userStore' // Import User Store
+import { useUserStore } from '@/stores/userStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,7 +13,7 @@ import AppSidebar from '@/components/AppSidebar.vue'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from "@/components/ui/separator"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
-import { X, Loader2, Lock } from 'lucide-vue-next'
+import { X, Loader2, Lock, Video } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
 const router = useRouter()
@@ -55,10 +55,8 @@ const submit = async () => {
     toast.success('Log saved successfully')
     router.push('/dashboard')
   } catch (err: any) {
-    // Handle backend limit error specifically
     if (err.message?.includes('LIMIT_REACHED') || err.status === 403) {
       toast.error("Monthly limit reached! Upgrade to Pro to continue.")
-      // Optional: Redirect to billing or open upgrade modal
     } else {
       toast.error('Failed to save log.')
     }
@@ -143,10 +141,35 @@ const handleUpgrade = async () => {
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div class="space-y-2">
-                    <Label>Video Link (Loom)</Label>
-                    <Input v-model="form.videoUrl" placeholder="https://loom.com/..." />
+                  
+                  <div class="space-y-2 relative">
+                    <div class="flex items-center justify-between">
+                        <Label :class="{'text-muted-foreground': !isPro}">Video Update (Loom / Drive)</Label>
+                        <span v-if="!isPro" class="text-[10px] font-bold bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded flex items-center gap-1">
+                            <Lock class="h-2.5 w-2.5" /> PRO
+                        </span>
+                    </div>
+                    
+                    <div class="relative">
+                        <Input 
+                            v-model="form.videoUrl" 
+                            :disabled="!isPro"
+                            :placeholder="isPro ? 'Paste Loom or Drive link here...' : 'Upgrade to attach videos'" 
+                            :class="{'pl-9': !isPro, 'opacity-60 cursor-not-allowed bg-muted': !isPro}"
+                        />
+                        <div v-if="!isPro" class="absolute left-3 top-2.5 text-muted-foreground">
+                             <Video class="h-4 w-4" />
+                        </div>
+                    </div>
+                    
+                    <p v-if="isPro" class="text-[10px] text-muted-foreground">
+                      Tip: Use <a href="https://screenity.io" target="_blank" class="underline hover:text-primary">Screenity</a> for free unlimited recording.
+                    </p>
+                    <p v-else class="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium cursor-pointer hover:underline" @click="handleUpgrade">
+                        <Lock class="h-2.5 w-2.5 inline mr-0.5" /> Unlock video embeds with Pro
+                    </p>
                   </div>
+
                   <div class="space-y-2">
                     <Label>Attachment Link</Label>
                     <Input v-model="form.attachmentUrl" placeholder="GDrive / Dropbox Link" />

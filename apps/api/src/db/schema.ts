@@ -20,10 +20,12 @@ export const users = sqliteTable('users', {
   portalSlug: text('portal_slug').unique(), 
   // We renamed 'brandColor' -> 'accentColor' to match your frontend code
   accentColor: text('accent_color').default('indigo'),
+
+  publicTemplate: text('public_template', { enum: ['modern', 'corporate', 'creative'] }).default('modern'),
   
   // Notifications (NEW COLUMNS)
-  notifyClientView: integer('notify_client_view', { mode: 'boolean' }).default(true),
-  notifyWeeklyRecap: integer('notify_weekly_recap', { mode: 'boolean' }).default(true),
+  notifyClientView: integer('notify_client_view', { mode: 'boolean' }).default(false),
+  notifyWeeklyRecap: integer('notify_weekly_recap', { mode: 'boolean' }).default(false),
   notifyMarketing: integer('notify_marketing', { mode: 'boolean' }).default(false),
   
   // SaaS / Billing
@@ -82,6 +84,7 @@ export const workLogs = sqliteTable('work_logs', {
     .default(sql`(strftime('%s', 'now'))`),
 }, (table) => {
   return {
+    userDateIdx: index('user_date_idx').on(table.userId, table.date),
     userIdIdx: index('log_user_idx').on(table.userId),
     clientIdIdx: index('log_client_idx').on(table.clientId),
     dateIdx: index('log_date_idx').on(table.date),

@@ -4,7 +4,19 @@ import { computed } from 'vue'
 const props = defineProps<{ url: string }>()
 
 const isLoom = computed(() => props.url.includes('loom.com/share'))
-const embedUrl = computed(() => props.url.replace('/share/', '/embed/'))
+const isGoogleDrive = computed(() => props.url.includes('drive.google.com') && props.url.includes('/file/d/'))
+
+const embedUrl = computed(() => {
+  if (isLoom.value) {
+    return props.url.replace('/share/', '/embed/')
+  }
+  if (isGoogleDrive.value) {
+    // Convert standard view link to preview link for embedding
+    // Ex: .../file/d/XYZ/view -> .../file/d/XYZ/preview
+    return props.url.replace(/\/view.*/, '/preview').replace(/\/edit.*/, '/preview')
+  }
+  return ''
+})
 </script>
 
 <template>
@@ -15,6 +27,15 @@ const embedUrl = computed(() => props.url.replace('/share/', '/embed/'))
         :src="embedUrl" 
         class="w-full h-full" 
         frameborder="0" 
+        allowfullscreen
+      ></iframe>
+    </div>
+
+    <div v-else-if="isGoogleDrive" class="aspect-video w-full">
+      <iframe 
+        :src="embedUrl" 
+        class="w-full h-full" 
+        style="border:0"
         allowfullscreen
       ></iframe>
     </div>

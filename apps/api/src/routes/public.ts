@@ -21,6 +21,7 @@ app.get('/report/:token', async (c) => {
           tier: true, 
           avatarUrl: true,
           accentColor: true,
+          publicTemplate: true,
           notifyClientView: true
         }
       }
@@ -68,6 +69,7 @@ app.get('/agency/:slug', async (c) => {
       websiteUrl: true,
       linkedinUrl: true,
       twitterUrl: true,
+      publicTemplate: true,
 
       tier: true,
       createdAt: true, 

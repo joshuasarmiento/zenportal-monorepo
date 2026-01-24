@@ -15,7 +15,8 @@ import {
   Settings, 
   ExternalLink,
   AlertTriangle,
-  DollarSign
+  DollarSign,
+  Video
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -147,11 +148,16 @@ const router = useRouter()
 
                     <div class="flex gap-4">
                        <div class="h-10 w-10 shrink-0 rounded-lg bg-pink-100 dark:bg-pink-900/50 flex items-center justify-center text-pink-600 dark:text-pink-400">
-                        <ExternalLink class="h-5 w-5" />
+                        <Video class="h-5 w-5" />
                       </div>
                       <div>
-                        <h3 class="font-bold text-foreground">2. Loom Videos (Recommended)</h3>
-                        <p class="text-sm text-muted-foreground">Record a 2-minute screen share explaining what you did. Paste the Loom link, and it will auto-embed in the client's dashboard.</p>
+                        <h3 class="font-bold text-foreground">2. Video Updates (Loom or Drive)</h3>
+                        <p class="text-sm text-muted-foreground mb-2">
+                          Record a quick screen share. We support <strong>Loom</strong>, but for free unlimited recording, we recommend <strong>Screenity</strong>.
+                        </p>
+                        <div class="text-xs bg-muted p-3 rounded-md border border-border">
+                          <strong>Pro Tip (Save Money):</strong> Use <a href="https://screenity.io" target="_blank" class="underline text-blue-500">Screenity</a> to record directly to Google Drive. Paste the Drive link in ZenPortal, and we will embed it just like a Loom video. No 5-minute limits!
+                        </div>
                       </div>
                     </div>
 
@@ -182,7 +188,7 @@ const router = useRouter()
                     <CardContent class="text-sm space-y-3">
                       <p>Fixed homepage layout bugs.</p>
                       <div class="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 p-2 rounded text-xs flex items-center gap-2 border border-indigo-100 dark:border-indigo-900">
-                        <ExternalLink class="h-3 w-3" /> Video Attached
+                        <Video class="h-3 w-3" /> Watch Video (Drive)
                       </div>
                     </CardContent>
                   </Card>

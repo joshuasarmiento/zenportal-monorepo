@@ -22,9 +22,10 @@ const updateUserSchema = z.object({
   notifyMarketing: z.boolean().optional(),
   headline: z.string().optional(),
   bio: z.string().optional(),
-  websiteUrl: z.string().optional(), // We allow simple string to support empty "" values easily
+  websiteUrl: z.string().optional(),
   linkedinUrl: z.string().optional(),
   twitterUrl: z.string().optional(),
+  publicTemplate: z.enum(['modern', 'corporate', 'creative']).optional(),
 });
 
 // Sync Schema
