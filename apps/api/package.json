@@ -1,8 +1,10 @@
 {
   "name": "api",
+  "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --format=esm --external:@libsql/client/sqlite3",
+    "build": "bun build src/index.ts --target=node --outdir=./dist --external=@libsql/client/sqlite3",
+    "preview": "node dist/index.js",
     "db:push": "npx drizzle-kit push",
     "ngrok": "npx ngrok http 3000"
   },
