@@ -4,13 +4,14 @@ import { createPinia } from 'pinia'
 import { clerkPlugin } from '@clerk/vue'
 import router from '../router'
 import App from './App.vue'
+import { env } from './env'
 
 const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
 app.use(clerkPlugin, {
-  publishableKey: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+  publishableKey: env.VITE_CLERK_PUBLISHABLE_KEY
 })
 
 app.mount('#app')

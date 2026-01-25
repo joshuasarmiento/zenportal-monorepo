@@ -8,14 +8,14 @@ import { MapPin, Zap, HeartHandshake, ArrowRight } from 'lucide-vue-next'
   <div class="min-h-screen bg-background font-sans text-foreground selection:bg-purple-500/30 pt-24">
     
     <div class="fixed inset-0 -z-10 bg-background">
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[800px] w-[800px] bg-blue-500/5 rounded-full blur-[120px]"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-200 w-200 bg-blue-500/5 rounded-full blur-[120px]"></div>
       <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
     </div>
 
     <section class="max-w-4xl mx-auto px-6 text-center mb-24">
       <h1 class="text-5xl md:text-6xl font-bold tracking-tight mb-8">
         Built by Filipinos, <br/>
-        for the <span class="text-transparent bg-clip-text bg-gradient-to-br from-blue-500 to-purple-600">Global Gig Economy.</span>
+        for the <span class="text-transparent bg-clip-text bg-linear-to-br from-blue-500 to-purple-600">Global Gig Economy.</span>
       </h1>
       <p class="text-xl text-muted-foreground leading-relaxed">
         We believe that Filipino talent is world-class. <br/>
@@ -38,7 +38,7 @@ import { MapPin, Zap, HeartHandshake, ArrowRight } from 'lucide-vue-next'
           </p>
         </div>
         <div class="relative">
-             <div class="absolute inset-0 bg-gradient-to-tr from-blue-600/20 to-purple-600/20 rounded-2xl -rotate-2"></div>
+             <div class="absolute inset-0 bg-linear-to-tr from-blue-600/20 to-purple-600/20 rounded-2xl -rotate-2"></div>
              <Card class="relative h-full bg-background/80 backdrop-blur border-border/60 p-8 flex flex-col justify-center gap-6">
                 <div class="flex items-start gap-4">
                     <div class="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg text-blue-600 dark:text-blue-400">

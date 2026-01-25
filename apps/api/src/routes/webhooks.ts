@@ -4,21 +4,17 @@ import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import Stripe from 'stripe';
 import { Webhook } from 'svix';
+import { config } from '../config';
 
 const app = new Hono();
 
-// Validate Environment Variables
-if (!process.env.STRIPE_SECRET_KEY) throw new Error('Missing STRIPE_SECRET_KEY');
-if (!process.env.CLERK_WEBHOOK_SECRET) throw new Error('Missing CLERK_WEBHOOK_SECRET');
-if (!process.env.STRIPE_WEBHOOK_SECRET) throw new Error('Missing STRIPE_WEBHOOK_SECRET');
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-12-15.clover' as any });
+const stripe = new Stripe(config.stripe.secretKey, { apiVersion: '2025-12-15.clover' as any });
 
 // CLERK WEBHOOK
 app.post('/clerk', async (c) => {
   const payload = await c.req.json();
   const headers = c.req.header();
-  const secret = process.env.CLERK_WEBHOOK_SECRET!;
+  const secret = config.clerk.webhookSecret;
 
   const wh = new Webhook(secret);
   let evt: any;
@@ -75,7 +71,7 @@ app.post('/stripe', async (c) => {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, sig!, process.env.STRIPE_WEBHOOK_SECRET!);
+    event = stripe.webhooks.constructEvent(body, sig!, config.stripe.webhookSecret);
   } catch (err: any) {
     console.error(`Webhook Error: ${err.message}`);
     return c.json({ error: `Webhook Error: ${err.message}` }, 400);

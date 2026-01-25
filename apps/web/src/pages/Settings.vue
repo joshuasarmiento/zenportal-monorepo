@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import AppSidebar from '@/components/AppSidebar.vue'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from "@/components/ui/separator"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb"
 import ProfileSettings from '../components/settings/ProfileSettings.vue'
 import BrandingSettings from '../components/settings/BrandingSettings.vue'
 import BillingSettings from '../components/settings/BillingSettings.vue'

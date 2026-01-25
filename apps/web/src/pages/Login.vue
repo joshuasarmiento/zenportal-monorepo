@@ -46,7 +46,7 @@ watch([isLoaded, isSignedIn], checkRedirect)
                 <ChevronLeft class="mr-2 h-4 w-4" /> Home
             </Button>
 
-            <div class="mx-auto grid w-[350px] gap-6">
+            <div class="mx-auto grid w-87.5 gap-6">
                 <div class="grid gap-2 text-center">
                     <h1 class="text-3xl font-bold text-foreground">Welcome Back</h1>
                     <p class="text-balance text-muted-foreground">

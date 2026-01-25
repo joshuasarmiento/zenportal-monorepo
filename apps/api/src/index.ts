@@ -6,6 +6,7 @@ import { handle } from 'hono/vercel';
 import { secureHeaders } from 'hono/secure-headers';
 import { csrf } from 'hono/csrf';
 
+import { config } from './config'; // Ensure config is loaded and validated at startup
 import { clientsRouter } from './routes/clients';
 import { logsRouter } from './routes/logs';
 import { publicRouter } from './routes/public';
@@ -17,13 +18,18 @@ import { v1ProgrammaticRouter } from './routes/v1_programmatic';
 
 const app = new Hono().basePath('/');
 
+app.onError((err, c) => {
+  console.error('API Global Error:', err);
+  return c.json({ error: 'Internal Server Error', message: err.message }, 500);
+});
+
 // --- Global Middleware ---
 // Applied to all incoming requests
 app.use('*', secureHeaders());
 app.use(
   '/*',
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: config.app.frontendUrl,
     credentials: true,
     allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     allowMethods: ['POST', 'GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

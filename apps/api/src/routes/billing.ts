@@ -4,9 +4,10 @@ import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { requireAuth } from '../lib/auth';
 import Stripe from 'stripe';
+import { config } from '../config';
 
 const app = new Hono<{ Variables: { userId: string } }>();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-12-15.clover' });
+const stripe = new Stripe(config.stripe.secretKey, { apiVersion: '2025-12-15.clover' });
 
 app.use('*', requireAuth);
 
@@ -54,12 +55,12 @@ app.post('/checkout', async (c) => {
     payment_method_types: ['card'],
     line_items: [
       {
-        price: process.env.STRIPE_PRICE_ID,
+        price: config.stripe.priceId,
         quantity: 1,
       },
     ],
-    success_url: `${process.env.FRONTEND_URL}/settings?success=true`,
-    cancel_url: `${process.env.FRONTEND_URL}/settings?canceled=true`,
+    success_url: `${config.app.frontendUrl}/settings?success=true`,
+    cancel_url: `${config.app.frontendUrl}/settings?canceled=true`,
   });
 
   return c.json({ url: session.url });
@@ -79,7 +80,7 @@ app.post('/portal', async (c) => {
 
   const session = await stripe.billingPortal.sessions.create({
     customer: user.stripeCustomerId,
-    return_url: `${process.env.FRONTEND_URL}/settings`,
+    return_url: `${config.app.frontendUrl}/settings`,
   });
 
   return c.json({ url: session.url });

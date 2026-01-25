@@ -1,5 +1,6 @@
 // src/lib/api.ts
 import { useAuth } from '@clerk/vue'
+import { env } from '@/env'
 
 // Change from a regular function to a Composable "useApi"
 export function useApi() {
@@ -14,7 +15,7 @@ export function useApi() {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     }
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
+    const res = await fetch(`${env.VITE_API_URL}${endpoint}`, {
       ...options,
       headers,
     })

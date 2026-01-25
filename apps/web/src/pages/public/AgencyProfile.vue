@@ -144,7 +144,7 @@ onMounted(async () => {
 
     <div v-else-if="agency" :class="[activeTheme.bg, activeTheme.font]" class="min-h-screen font-sans text-foreground flex flex-col relative overflow-hidden transition-colors duration-300">
         
-        <div v-if="agency.publicTemplate === 'modern' || !agency.publicTemplate" class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] opacity-40 pointer-events-none z-0">
+        <div v-if="agency.publicTemplate === 'modern' || !agency.publicTemplate" class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-150 opacity-40 pointer-events-none z-0">
              <div class="absolute inset-0 bg-gradient-radial from-white/10 to-transparent dark:from-white/5"></div>
              <div :class="`absolute top-[-20%] left-[-10%] w-[70%] h-[80%] rounded-full blur-[120px] mix-blend-screen opacity-60 ${themeColor?.bg}`"></div>
              <div :class="`absolute top-[-10%] right-[-10%] w-[60%] h-[70%] rounded-full blur-[100px] mix-blend-screen opacity-40 ${themeColor?.bg}`"></div>

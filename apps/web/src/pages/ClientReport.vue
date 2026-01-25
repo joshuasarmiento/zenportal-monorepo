@@ -9,15 +9,12 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { 
   Loader2, 
-  Frown, 
-  Mail, 
+  Frown,  
   AlertTriangle, 
   CheckCircle2, 
   Clock, 
   Paperclip, 
-  Download,
   CalendarDays,
-  Play,
   Share2
 } from 'lucide-vue-next'
 
@@ -191,7 +188,7 @@ onMounted(async () => {
             </p>
           </div>
 
-          <div class="bg-white px-5 py-4 rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] border border-zinc-100 min-w-[160px]">
+          <div class="bg-white px-5 py-4 rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] border border-zinc-100 min-w-40">
              <div class="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Total Hours Logged</div>
              <div class="text-2xl font-bold font-mono tracking-tight">{{ totalHours.toFixed(1) }}h</div>
           </div>
@@ -209,7 +206,7 @@ onMounted(async () => {
       </div>
 
       <div v-else class="relative space-y-12">
-        <div class="absolute left-[19px] top-4 bottom-10 w-[2px] bg-zinc-100 -z-10 hidden sm:block"></div>
+        <div class="absolute left-4.75 top-4 bottom-10 w-0.5 bg-zinc-100 -z-10 hidden sm:block"></div>
 
         <article v-for="(log, index) in sortedLogs" :key="log.id" class="group relative sm:pl-16">
             

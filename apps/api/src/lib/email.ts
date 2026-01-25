@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
-import 'dotenv/config';
+import { config } from '../config';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(config.resend.apiKey);
 
 const escapeHtml = (unsafe: string) => {
   return unsafe
@@ -22,7 +22,7 @@ interface SendLogEmailProps {
 }
 
 export const sendLogEmail = async ({ to, clientName, vaName, summary, link }: SendLogEmailProps) => {
-  if (!process.env.RESEND_API_KEY) return;
+  if (!config.resend.apiKey) return;
 
   const safeSummary = escapeHtml(summary);
 
@@ -47,7 +47,7 @@ export const sendLogEmail = async ({ to, clientName, vaName, summary, link }: Se
 
 // 2. New: Notify User when Client Views Report
 export const sendClientViewedEmail = async (userEmail: string, clientName: string) => {
-  if (!process.env.RESEND_API_KEY) return;
+  if (!config.resend.apiKey) return;
 
   await resend.emails.send({
     from: 'ZenPortal <androekolokoy@gmail.com>',
@@ -65,7 +65,7 @@ export const sendClientViewedEmail = async (userEmail: string, clientName: strin
 
 // 3. New: Weekly Recap Email
 export const sendWeeklyRecapEmail = async (userEmail: string, userName: string, totalHours: number, totalEarnings: number) => {
-  if (!process.env.RESEND_API_KEY) return;
+  if (!config.resend.apiKey) return;
 
   await resend.emails.send({
     from: 'ZenPortal <androekolokoy@gmail.com>',
@@ -79,7 +79,7 @@ export const sendWeeklyRecapEmail = async (userEmail: string, userName: string, 
             <li><strong>Hours Logged:</strong> ${totalHours} hrs</li>
             <li><strong>Est. Earnings:</strong> $${totalEarnings}</li>
         </ul>
-        <a href="${process.env.FRONTEND_URL}/dashboard" style="color: #4F46E5;">Go to Dashboard</a>
+        <a href="${config.app.frontendUrl}/dashboard" style="color: #4F46E5;">Go to Dashboard</a>
       </div>
     `
   });

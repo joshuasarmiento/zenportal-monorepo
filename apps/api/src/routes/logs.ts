@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { sendLogEmail } from '../lib/email';
+import { config } from '../config';
 
 const app = new Hono<{ Variables: { userId: string } }>();
 
@@ -103,7 +104,7 @@ app.post('/', zValidator('json', logSchema), async (c) => {
   });
 
   if (client?.contactEmail && user?.fullName) {
-    const reportLink = `${process.env.FRONTEND_URL}/c/${client.accessToken}`;
+    const reportLink = `${config.app.frontendUrl}/c/${client.accessToken}`;
 
     await sendLogEmail({
       to: client.contactEmail,

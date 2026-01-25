@@ -13,7 +13,7 @@ const emit = defineEmits(['view'])
 </script>
 
 <template>
-  <Card class="flex-1 flex flex-col min-h-[500px]">
+  <Card class="flex-1 flex flex-col min-h-125">
     <CardHeader class="border-b border-border">
       <CardTitle>Recent Proof of Work</CardTitle>
     </CardHeader>
@@ -57,7 +57,7 @@ const emit = defineEmits(['view'])
                 </Badge>
               </TableCell>
               
-              <TableCell class="truncate max-w-[200px] font-medium">{{ log.summary }}</TableCell>
+              <TableCell class="truncate max-w-50 font-medium">{{ log.summary }}</TableCell>
               
               <TableCell>
                 <div class="flex flex-col gap-1 items-start">

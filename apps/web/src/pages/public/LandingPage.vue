@@ -25,7 +25,6 @@ import {
   Banknote,
   Lock,
   Paperclip,
-  Heart,
   // Dashboard Preview Icons
   LayoutDashboard,
   Users,
@@ -112,16 +111,16 @@ const faqs = [
     <div class="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-zinc-950 transition-colors duration-300">
       <div class="absolute top-0 z-[-2] h-screen w-screen bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(59,130,246,0.15),rgba(255,255,255,0))] dark:opacity-0 transition-opacity duration-500"></div>
       <div class="absolute top-0 z-[-2] h-screen w-screen opacity-0 dark:opacity-100 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(37,99,235,0.15),rgba(255,255,255,0))] transition-opacity duration-500"></div>
-      <div class="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+      <div class="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
     </div>
     
     <nav :class="['fixed top-0 w-full z-50 transition-all duration-300', isScrolled ? 'border-b border-zinc-200 dark:border-white/10 bg-white/80 dark:bg-zinc-950/60 backdrop-blur-xl' : 'bg-transparent border-transparent']">
       <div class="flex justify-between items-center max-w-7xl mx-auto px-6 h-20">
         <div class="flex items-center gap-2 font-bold text-xl tracking-tighter">
-          <div class="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg p-1.5 text-white shadow-lg shadow-blue-500/20">
+          <div class="bg-linear-to-br from-blue-600 to-indigo-600 rounded-lg p-1.5 text-white shadow-lg shadow-blue-500/20">
             <Zap class="h-5 w-5 fill-white" />
           </div>
-          <span class="bg-clip-text text-transparent bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400">ZenPortal</span>
+          <span class="bg-clip-text text-transparent bg-linear-to-r from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400">ZenPortal</span>
         </div>
         <div class="flex items-center gap-4 md:gap-6">
           <ModeToggle />
@@ -147,8 +146,8 @@ const faqs = [
         </div>
         
         <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight text-zinc-900 dark:text-white mb-8 text-balance leading-[0.95]">
-          Hindi ka lang <span class="text-transparent bg-clip-text bg-gradient-to-r from-zinc-400 to-zinc-600 decoration-zinc-500 line-through decoration-4">Employee.</span><br />
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-600 to-emerald-600 dark:from-blue-400 dark:via-cyan-400 dark:to-emerald-400 glow-text">Business Partner</span> ka.
+          Hindi ka lang <span class="text-transparent bg-clip-text bg-linear-to-r from-zinc-400 to-zinc-600 decoration-zinc-500 line-through decoration-4">Employee.</span><br />
+          <span class="text-transparent bg-clip-text bg-linear-to-r from-blue-600 via-cyan-600 to-emerald-600 dark:from-blue-400 dark:via-cyan-400 dark:to-emerald-400 glow-text">Business Partner</span> ka.
         </h1>
         
         <p class="text-xl md:text-2xl text-zinc-600 dark:text-zinc-400 mb-10 max-w-3xl mx-auto leading-relaxed">
@@ -170,7 +169,7 @@ const faqs = [
         </div>
 
         <div class="relative w-full max-w-6xl mx-auto group perspective-1000">
-          <div class="absolute -inset-4 bg-gradient-to-t from-blue-600/20 via-purple-600/20 to-transparent rounded-[2rem] blur-2xl opacity-50 group-hover:opacity-75 transition duration-1000"></div>
+          <div class="absolute -inset-4 bg-linear-to-t from-blue-600/20 via-purple-600/20 to-transparent rounded-4xl blur-2xl opacity-50 group-hover:opacity-75 transition duration-1000"></div>
           
           <div class="relative rounded-2xl border border-zinc-200 dark:border-white/10 bg-white/50 dark:bg-zinc-950/80 backdrop-blur-md shadow-2xl overflow-hidden transform transition-transform duration-500 hover:rotate-x-2">
             
@@ -186,7 +185,7 @@ const faqs = [
               <div class="w-16"></div>
             </div>
 
-            <div class="flex h-[600px] md:h-[500px] overflow-hidden">
+            <div class="flex h-150 md:h-125 overflow-hidden">
               
               <div class="hidden md:flex w-64 flex-col border-r border-zinc-200 dark:border-white/5 bg-white dark:bg-zinc-900/50">
                 <div class="p-4">
@@ -386,7 +385,7 @@ const faqs = [
           </Card>
 
           <Card class="relative border-blue-500/30 bg-blue-50 dark:bg-blue-600/5 shadow-[0_0_40px_-10px_rgba(59,130,246,0.1)] overflow-hidden">
-             <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent"></div>
+             <div class="absolute inset-0 bg-linear-to-br from-blue-500/10 to-transparent"></div>
             <CardHeader class="relative z-10">
               <div class="flex items-center justify-between">
                 <span class="text-sm font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">The Strategic Partner</span>
@@ -460,7 +459,7 @@ const faqs = [
 
     <section class="py-32 px-6 relative overflow-hidden bg-zinc-900 dark:bg-black">
         <div class="absolute inset-0 bg-blue-600/20 dark:bg-blue-600/10"></div>
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-zinc-900/90 dark:to-zinc-950"></div>
+        <div class="absolute inset-0 bg-linear-to-b from-transparent to-zinc-900/90 dark:to-zinc-950"></div>
         
         <div class="max-w-4xl mx-auto text-center relative z-10">
             <h2 class="text-4xl md:text-6xl font-black tracking-tight mb-8 text-white">

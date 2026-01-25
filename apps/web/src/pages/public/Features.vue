@@ -7,8 +7,7 @@ import {
   ShieldCheck, 
   FileText, 
   Zap, 
-  LayoutTemplate, 
-  Globe, 
+  LayoutTemplate,  
   Lock,
   ArrowRight,
   Code
@@ -19,9 +18,9 @@ import {
   <div class="min-h-screen bg-background font-sans text-foreground selection:bg-blue-500/30 pt-24">
     
     <div class="fixed inset-0 -z-10 h-full w-full bg-background">
-      <div class="absolute top-0 right-0 z-[-2] h-[500px] w-[500px] bg-blue-500/20 rounded-full blur-[100px] opacity-50"></div>
-      <div class="absolute bottom-0 left-0 z-[-2] h-[500px] w-[500px] bg-purple-500/10 rounded-full blur-[100px] opacity-50"></div>
-      <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div class="absolute top-0 right-0 z-[-2] h-125 w-125 bg-blue-500/20 rounded-full blur-[100px] opacity-50"></div>
+      <div class="absolute bottom-0 left-0 z-[-2] h-125 w-125 bg-purple-500/10 rounded-full blur-[100px] opacity-50"></div>
+      <div class="absolute inset-0 bg-[linear-linear(to_right,#80808012_1px,transparent_1px),linear-linear(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
     </div>
 
     <section class="max-w-7xl mx-auto px-6 text-center mb-24">
@@ -30,7 +29,7 @@ import {
       </Badge>
       <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6 text-balance">
         Everything you need to <br/>
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">fire your micromanager.</span>
+        <span class="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-purple-600">fire your micromanager.</span>
       </h1>
       <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
         Tools designed to build "Trust Capital" so you can work asynchronously and get paid what you're worth.
@@ -40,7 +39,7 @@ import {
     <section class="max-w-7xl mx-auto px-6 mb-32">
       <div class="grid md:grid-cols-2 gap-12 items-center">
         <div class="order-2 md:order-1 relative group">
-          <div class="absolute -inset-1 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+          <div class="absolute -inset-1 bg-linear-to-r from-blue-500 to-cyan-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
           <div class="relative bg-background/80 backdrop-blur-xl border border-border/50 rounded-xl p-2 shadow-2xl overflow-hidden">
              <div class="rounded-lg bg-muted/50 aspect-video flex items-center justify-center border border-dashed border-border relative overflow-hidden group/player">
                 <Video class="h-16 w-16 text-muted-foreground/50 group-hover/player:scale-110 transition-transform" />
@@ -94,7 +93,7 @@ import {
           </ul>
         </div>
         <div class="relative group">
-           <div class="absolute -inset-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+           <div class="absolute -inset-1 bg-linear-to-r from-green-500 to-emerald-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
           <div class="relative bg-background/80 backdrop-blur-xl border border-border/50 rounded-xl p-6 shadow-2xl">
               <div class="space-y-3">
                   <div class="flex items-center gap-3 p-3 rounded-lg bg-muted/40 border border-border/50">
@@ -151,7 +150,7 @@ import {
                     Magic links ensure only your client sees your sensitive work, no passwords needed for them.
                 </CardContent>
             </Card>
-            <Card class="md:col-span-3 bg-gradient-to-br from-blue-600 to-purple-700 text-white border-none">
+            <Card class="md:col-span-3 bg-linear-to-br from-blue-600 to-purple-700 text-white border-none">
                 <CardContent class="flex flex-col md:flex-row items-center justify-between p-8 gap-6">
                     <div>
                         <h3 class="text-2xl font-bold mb-2">Ready to look professional?</h3>

@@ -110,7 +110,6 @@ app.get('/export', async (c) => {
  * SCALABILITY FIX: Uses Promise.all for concurrency & optimized SQL logic
  */
 app.get('/', async (c) => {
-  try {
     const userId = c.get('userId');
     const range = c.req.query('range') || '6m';
     
@@ -214,11 +213,6 @@ app.get('/', async (c) => {
       revenueHistory: formattedHistory,
       topClients: formattedTopClients
     });
-
-  } catch (err) {
-    console.error('Stats API Error:', err);
-    return c.json({ error: 'Internal Server Error' }, 500);
-  }
 });
 
 export { app as statsRouter };

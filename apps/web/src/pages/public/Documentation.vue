@@ -44,7 +44,7 @@ const scrollTo = (id: string) => {
 <template>
   <div class="min-h-screen bg-background font-sans text-foreground flex flex-col">
     
-    <header class="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header class="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div class="container flex h-14 items-center max-w-screen-2xl">
         <div class="mr-4 flex">
           <a class="mr-6 flex items-center space-x-2 font-bold" href="/">
