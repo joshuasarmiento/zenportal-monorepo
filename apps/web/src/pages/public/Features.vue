@@ -20,7 +20,7 @@ import {
     <div class="fixed inset-0 -z-10 h-full w-full bg-background">
       <div class="absolute top-0 right-0 z-[-2] h-125 w-125 bg-blue-500/20 rounded-full blur-[100px] opacity-50"></div>
       <div class="absolute bottom-0 left-0 z-[-2] h-125 w-125 bg-purple-500/10 rounded-full blur-[100px] opacity-50"></div>
-      <div class="absolute inset-0 bg-[linear-linear(to_right,#80808012_1px,transparent_1px),linear-linear(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div class="absolute inset-0 bg-[linear-linear(to_right,#80808012_1px,transparent_1px),linear-linear(to_bottom,#80808012_1px,transparent_1px)] bg-size-[24px_24px]"></div>
     </div>
 
     <section class="max-w-7xl mx-auto px-6 text-center mb-24">
