@@ -16,7 +16,10 @@ const clientSchema = z.object({
   contactName: z.string().optional(),
   contactEmail: z.string().email().optional().or(z.literal('')),
   hourlyRate: z.number().min(0),
+  status: z.enum(['active', 'archived']).optional(),
 });
+
+const updateClientSchema = clientSchema.partial();
 
 // GET /clients
 app.get('/', async (c) => {
@@ -85,10 +88,10 @@ app.post('/', zValidator('json', clientSchema), async (c) => {
 });
 
 // PUT /clients/:id
-app.put('/:id', async (c) => {
+app.put('/:id', zValidator('json', updateClientSchema), async (c) => {
   const userId = c.get('userId');
   const clientId = c.req.param('id');
-  const body = await c.req.json();
+  const body = c.req.valid('json');
 
   const updated = await db.update(clients)
     .set({

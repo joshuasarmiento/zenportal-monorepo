@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 // import { useAuth } from '@clerk/vue'
 
 // 1. App Pages (Protected)
-import Dashboard from '@/pages/Dashbard.vue'
+import Dashboard from '@/pages/Dashboard.vue'
 import Clients from '@/pages/Client.vue'
 import Earnings from '@/pages/Earnings.vue'
 import Settings from '@/pages/Settings.vue'

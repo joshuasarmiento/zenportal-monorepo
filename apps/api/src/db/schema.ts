@@ -34,7 +34,7 @@ export const users = sqliteTable('users', {
   stripeSubscriptionId: text('stripe_subscription_id'),
   
   createdAt: integer('created_at', { mode: 'timestamp' })
-    .default(sql`(strftime('%s', 'now'))`),
+    .default(sql`(strftime('%s', 'now') * 1000)`),
 });
 
 // --- CLIENTS TABLE (Unchanged) ---
@@ -54,7 +54,7 @@ export const clients = sqliteTable('clients', {
   currency: text('currency').default('USD'),
   
   createdAt: integer('created_at', { mode: 'timestamp' })
-    .default(sql`(strftime('%s', 'now'))`),
+    .default(sql`(strftime('%s', 'now') * 1000)`),
 }, (table) => {
   return {
     userIdIdx: index('client_user_idx').on(table.userId),
@@ -81,7 +81,7 @@ export const workLogs = sqliteTable('work_logs', {
   blockerDetails: text('blocker_details'),
   
   createdAt: integer('created_at', { mode: 'timestamp' })
-    .default(sql`(strftime('%s', 'now'))`),
+    .default(sql`(strftime('%s', 'now') * 1000)`),
 }, (table) => {
   return {
     userDateIdx: index('user_date_idx').on(table.userId, table.date),
