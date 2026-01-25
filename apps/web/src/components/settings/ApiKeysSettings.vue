@@ -24,7 +24,7 @@ const writeKey = computed(() => userStore.user?.apiKeyWrite)
 const generateKeys = async () => {
   generating.value = true
   try {
-    const newKeys = await fetchApi('/auth/api-key', { method: 'POST' })
+    // const newKeys = await fetchApi('/auth/api-key', { method: 'POST' })
     // The user object in the store is now stale, so we force a refetch.
     await userStore.fetchUser(true) 
     toast.success('API Keys generated successfully!')

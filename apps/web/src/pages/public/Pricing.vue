@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+// import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
@@ -7,7 +7,7 @@ import { Check, Zap, X } from 'lucide-vue-next'
 import ModeToggle from '@/components/ModeToggle.vue'
 
 const router = useRouter()
-const isYearly = ref(false)
+// const isYearly = ref(false)
 
 const plans = [
   {
