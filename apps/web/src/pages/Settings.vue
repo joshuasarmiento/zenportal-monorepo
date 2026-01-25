@@ -8,6 +8,7 @@ import ProfileSettings from '../components/settings/ProfileSettings.vue'
 import BrandingSettings from '../components/settings/BrandingSettings.vue'
 import BillingSettings from '../components/settings/BillingSettings.vue'
 import NotificationSettings from '../components/settings/NotificationSettings.vue'
+import ApiKeysSettings from '../components/settings/ApiKeysSettings.vue'
 
 const activeTab = ref('profile')
 </script>
@@ -54,6 +55,11 @@ const activeTab = ref('profile')
                         :class="activeTab === 'notifications' ? 'bg-background text-primary border-border shadow-sm' : 'text-muted-foreground border-transparent hover:bg-muted'">
                         Notifications
                     </button>
+                     <button @click="activeTab = 'api'"
+                        class="w-full text-left px-4 py-2.5 rounded-lg font-medium border transition text-sm"
+                        :class="activeTab === 'api' ? 'bg-background text-primary border-border shadow-sm' : 'text-muted-foreground border-transparent hover:bg-muted'">
+                        API Access
+                    </button>
                 </div>
 
                 <div class="md:col-span-3 space-y-6">
@@ -61,6 +67,7 @@ const activeTab = ref('profile')
                     <BrandingSettings v-if="activeTab === 'branding'" />
                     <BillingSettings v-if="activeTab === 'billing'" />
                     <NotificationSettings v-if="activeTab === 'notifications'" />
+                    <ApiKeysSettings v-if="activeTab === 'api'" />
                 </div>
             </div>
          </div>

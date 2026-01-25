@@ -3,6 +3,15 @@ import 'dotenv/config';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+const escapeHtml = (unsafe: string) => {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
 // 1. Existing: Notify Client of New Work
 interface SendLogEmailProps {
   to: string;
@@ -15,6 +24,8 @@ interface SendLogEmailProps {
 export const sendLogEmail = async ({ to, clientName, vaName, summary, link }: SendLogEmailProps) => {
   if (!process.env.RESEND_API_KEY) return;
 
+  const safeSummary = escapeHtml(summary);
+
   await resend.emails.send({
     from: 'ZenPortal <androekolokoy@gmail.com>',
     to: [to],
@@ -24,7 +35,7 @@ export const sendLogEmail = async ({ to, clientName, vaName, summary, link }: Se
         <h2>Hi ${clientName},</h2>
         <p>${vaName} just logged new work:</p>
         <blockquote style="border-left: 4px solid #4F46E5; padding-left: 10px; color: #555;">
-          ${summary}
+          ${safeSummary}
         </blockquote>
         <a href="${link}" style="background-color: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">
           View Full Report

@@ -5,7 +5,8 @@ import { useApi } from '../lib/api'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import AppSidebar from '@/components/AppSidebar.vue'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from "@/components/ui/separator"
@@ -21,7 +22,7 @@ const form = ref({
   companyName: '',
   contactName: '',
   contactEmail: '',
-  hourlyRate: 25.00
+  hourlyRate: 25.00,
 })
 
 const submit = async () => {
@@ -93,7 +94,7 @@ const submit = async () => {
                 <div class="space-y-2">
                   <Label>Hourly Rate (USD)</Label>
                   <div class="relative">
-                    <span class="absolute left-3 top-2.5 text-muted-foreground font-bold">$</span>
+                    <span class="absolute left-3 top-1.5 text-muted-foreground font-bold">$</span>
                     <Input v-model="form.hourlyRate" type="number" step="0.01" class="pl-7" placeholder="25.00" />
                   </div>
                   <p class="text-xs text-muted-foreground">Used to calculate your earnings estimates.</p>

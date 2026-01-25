@@ -94,13 +94,7 @@ app.put('/:id', zValidator('json', updateClientSchema), async (c) => {
   const body = c.req.valid('json');
 
   const updated = await db.update(clients)
-    .set({
-      companyName: body.companyName,
-      contactName: body.contactName,
-      contactEmail: body.contactEmail,
-      hourlyRate: body.hourlyRate,
-      status: body.status
-    })
+    .set(body)
     .where(and(eq(clients.id, clientId), eq(clients.userId, userId)))
     .returning();
 

@@ -102,7 +102,7 @@ const submit = async () => {
                 <div class="space-y-2">
                   <Label>Hourly Rate</Label>
                   <div class="relative">
-                    <span class="absolute left-3 top-2.5 text-muted-foreground font-bold">$</span>
+                    <span class="absolute left-3 top-1.5 text-muted-foreground font-bold">$</span>
                     <Input v-model="form.hourlyRate" type="number" step="0.01" class="pl-7" />
                   </div>
                 </div>

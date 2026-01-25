@@ -24,6 +24,8 @@ const logSchema = z.object({
   blockerDetails: z.string().optional()
 });
 
+const updateLogSchema = logSchema.partial();
+
 // GET /logs - Get logs with Pagination
 app.get('/', async (c) => {
   const userId = c.get('userId');
@@ -70,7 +72,7 @@ app.post('/', zValidator('json', logSchema), async (c) => {
       ));
 
     if (usage.count >= 100) {
-      return c.json({ 
+      return c.json({
         error: 'Monthly limit reached (100 logs). Upgrade to Pro for unlimited logs.',
         code: 'LIMIT_REACHED'
       }, 403);
@@ -102,7 +104,7 @@ app.post('/', zValidator('json', logSchema), async (c) => {
 
   if (client?.contactEmail && user?.fullName) {
     const reportLink = `${process.env.FRONTEND_URL}/c/${client.accessToken}`;
-    
+
     await sendLogEmail({
       to: client.contactEmail,
       clientName: client.companyName,
@@ -129,11 +131,11 @@ app.get('/:id', async (c) => {
   return c.json(log);
 });
 
-// PATCH /logs/:id (Unchanged)
-app.patch('/:id', async (c) => {
+// PATCH /logs/:id
+app.patch('/:id', zValidator('json', updateLogSchema), async (c) => {
   const userId = c.get('userId');
   const logId = c.req.param('id');
-  const body = await c.req.json();
+  const body = c.req.valid('json');
 
   const existingLog = await db.query.workLogs.findFirst({
     where: and(eq(workLogs.id, logId), eq(workLogs.userId, userId)),
@@ -142,14 +144,7 @@ app.patch('/:id', async (c) => {
   if (!existingLog) return c.json({ error: 'Log not found or unauthorized' }, 404);
 
   const updatedLog = await db.update(workLogs)
-    .set({
-      summary: body.summary,
-      hoursWorked: body.hoursWorked,
-      videoUrl: body.videoUrl,
-      attachmentUrl: body.attachmentUrl,
-      isBlocked: body.isBlocked,
-      blockerDetails: body.blockerDetails,
-    })
+    .set(body)
     .where(eq(workLogs.id, logId))
     .returning();
 

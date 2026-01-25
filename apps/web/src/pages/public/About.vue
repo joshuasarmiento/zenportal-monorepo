@@ -56,7 +56,7 @@ import { MapPin, Zap, HeartHandshake, ArrowRight } from 'lucide-vue-next'
                     <div>
                         <h3 class="font-bold text-foreground">Smart & Efficient ("Diskarte")</h3>
                         <p class="text-sm text-muted-foreground">
-                          We integrate with free tools like <strong class="text-foreground">Google Drive & Screenity</strong> so you don't need to pay for Loom or Dropbox just to look professional.
+                          We integrate with free tools like <strong class="text-foreground">Google Drive & Screenity</strong> so you don't need to pay for Loom or Dropbox just to look professional. For power users, a full API is available to automate everything.
                         </p>
                     </div>
                 </div>

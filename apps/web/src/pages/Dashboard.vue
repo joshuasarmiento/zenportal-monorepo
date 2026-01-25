@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi } from '../lib/api'
 import { useUserStore } from '@/stores/userStore'
+import { toast } from 'vue-sonner'
 
 // Components
 import AppSidebar from '@/components/AppSidebar.vue'
@@ -18,20 +19,24 @@ const userStore = useUserStore()
 
 const logs = ref<any[]>([])
 const stats = ref({ hoursThisMonth: 0, activeClients: 0, pendingBlockersCount: 0, logCount: 0 }) 
+const clients = ref<any[]>([]) // Add clients ref
 const loading = ref(true)
 
 const isPro = computed(() => userStore.user?.tier === 'pro')
 const LOG_LIMIT = 100 
+const hasClients = computed(() => clients.value.length > 0) // Add hasClients computed property
 
 onMounted(async () => {
   if (!userStore.user) await userStore.fetchUser()
   try {
-    const [logsRes, statsRes] = await Promise.all([
+    const [logsRes, statsRes, clientsRes] = await Promise.all([ // Fetch clients as well
       fetchApi('/logs'), 
-      fetchApi('/stats')
+      fetchApi('/stats'),
+      fetchApi('/clients')
     ])
     logs.value = logsRes
     stats.value = { ...stats.value, ...statsRes } 
+    clients.value = clientsRes // Assign fetched clients
   } catch (err) { 
     console.error(err) 
   } finally { 
@@ -40,7 +45,19 @@ onMounted(async () => {
 })
 
 // Actions
-const navigateToLog = () => router.push('/log/new')
+const navigateToLog = () => {
+  if (!hasClients.value) { // Check if clients exist
+    toast.error('Please add a client first!', {
+      description: 'You need at least one client to log work against.',
+      action: {
+        label: 'Add Client',
+        onClick: () => router.push('/clients/new'),
+      },
+    })
+    return
+  }
+  router.push('/log/new')
+}
 const viewLog = (id: string) => router.push(`/log/${id}`)
 
 const goToUpgrade = async () => {

@@ -14,7 +14,7 @@ import {
   Layout, 
   Code, 
   Terminal,
-  ChevronRight,
+  KeyRound,
   Menu
 } from 'lucide-vue-next'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
@@ -22,12 +22,14 @@ import ModeToggle from '@/components/ModeToggle.vue'
 
 const router = useRouter()
 const activeSection = ref('introduction')
+const codeTab = ref('curl')
 
 const sections = [
   { id: 'introduction', label: 'Introduction', icon: Book },
   { id: 'architecture', label: 'Architecture', icon: Layout },
+  { id: 'programmatic-api', label: 'Programmatic API', icon: KeyRound },
   { id: 'database', label: 'Database Schema', icon: Database },
-  { id: 'api', label: 'API Reference', icon: Server },
+  { id: 'api', label: 'Web App API', icon: Server },
   { id: 'auth', label: 'Authentication', icon: Shield },
   { id: 'scripts', label: 'Scripts & Cron', icon: Terminal },
 ]
@@ -153,6 +155,152 @@ const scrollTo = (id: string) => {
             </Card>
           </section>
 
+          <Separator />
+
+          <section id="programmatic-api" class="scroll-m-20 space-y-6">
+            <h2 class="text-3xl font-bold tracking-tight flex items-center gap-3"><KeyRound class="h-8 w-8 text-blue-500"/>Programmatic API</h2>
+            <p class="text-muted-foreground text-base leading-relaxed">
+              Automate your workflows by interacting with the ZenPortal API. This allows you to integrate with other services like time trackers, project management tools, or build custom reports. API Access is available to <Badge variant="secondary" class="bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">Pro</Badge> users.
+            </p>
+
+            <h3 class="text-xl font-bold tracking-tight pt-4">Authentication</h3>
+            <p class="text-muted-foreground">
+              Authentication is handled via Bearer Tokens. You can generate your unique API keys from the
+              <a href="/settings" class="text-blue-600 dark:text-blue-400 hover:underline">API Access</a> tab in your settings.
+              You must include your API key in the `Authorization` header with every request.
+            </p>
+            <div class="bg-muted p-3 rounded-lg text-sm font-mono border">
+              Authorization: Bearer &lt;YOUR_API_KEY&gt;
+            </div>
+
+             <h3 class="text-2xl font-bold tracking-tight pt-6">Endpoints</h3>
+            
+            <!-- GET /v1/logs -->
+            <div class="space-y-4 pt-4 border-t">
+              <div class="flex items-center gap-3">
+                <Badge variant="secondary" class="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 h-6">GET</Badge>
+                <code class="text-lg font-bold">/v1/logs</code>
+              </div>
+              <p class="text-muted-foreground">Retrieves a list of the 100 most recent work logs for the authenticated user.</p>
+              <p class="text-sm"><Badge variant="outline">Permission: `apiKeyRead` or `apiKeyWrite`</Badge></p>
+
+              <Card>
+                <CardHeader class="p-0">
+                  <div class="flex items-center border-b">
+                    <button @click="codeTab = 'curl'" :class="['flex-1 p-3 text-sm font-medium', codeTab === 'curl' ? 'bg-muted' : 'text-muted-foreground']">cURL</button>
+                    <button @click="codeTab = 'js'" :class="['flex-1 p-3 text-sm font-medium border-l', codeTab === 'js' ? 'bg-muted' : 'text-muted-foreground']">JavaScript</button>
+                    <button @click="codeTab = 'python'" :class="['flex-1 p-3 text-sm font-medium border-l', codeTab === 'python' ? 'bg-muted' : 'text-muted-foreground']">Python</button>
+                  </div>
+                </CardHeader>
+                <CardContent class="p-4 bg-muted/50 text-sm">
+                  <div v-if="codeTab === 'curl'" class="font-mono">
+                    <pre><code>curl -X GET "https://api.zenportal.io/v1/logs" \
+  -H "Authorization: Bearer your_read_key"</code></pre>
+                  </div>
+                  <div v-if="codeTab === 'js'" class="font-mono">
+                    <pre><code>const response = await fetch('https://api.zenportal.io/v1/logs', {
+  headers: {
+    'Authorization': 'Bearer your_read_key'
+  }
+});
+const logs = await response.json();</code></pre>
+                  </div>
+                  <div v-if="codeTab === 'python'" class="font-mono">
+                    <pre><code>import requests
+
+headers = {'Authorization': 'Bearer your_read_key'}
+response = requests.get('https://api.zenportal.io/v1/logs', headers=headers)
+logs = response.json()</code></pre>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <!-- POST /v1/logs -->
+            <div class="space-y-4 pt-8 border-t">
+              <div class="flex items-center gap-3">
+                <Badge variant="secondary" class="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 h-6">POST</Badge>
+                <code class="text-lg font-bold">/v1/logs</code>
+              </div>
+              <p class="text-muted-foreground">Creates a new work log entry.</p>
+              <p class="text-sm"><Badge variant="outline" class="border-red-500/30 text-red-500">Permission: `apiKeyWrite` only</Badge></p>
+
+              <h4 class="font-bold">Body Parameters</h4>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead class="text-left">
+                    <tr class="border-b">
+                      <th class="p-2">Parameter</th><th class="p-2">Type</th><th class="p-2">Required</th><th class="p-2">Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="border-b"><td class="p-2">`clientId`</td><td class="p-2">`string`</td><td class="p-2">Yes</td><td class="p-2">The ID of the client this log is for.</td></tr>
+                    <tr class="border-b"><td class="p-2">`date`</td><td class="p-2">`string`</td><td class="p-2">Yes</td><td class="p-2">Date in "YYYY-MM-DD" format.</td></tr>
+                    <tr class="border-b"><td class="p-2">`summary`</td><td class="p-2">`string`</td><td class="p-2">Yes</td><td class="p-2">A description of the work done.</td></tr>
+                    <tr><td class="p-2">`hoursWorked`</td><td class="p-2">`number`</td><td class="p-2">Yes</td><td class="p-2">The number of hours worked.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <Card>
+                <CardHeader class="p-0">
+                  <div class="flex items-center border-b">
+                    <button @click="codeTab = 'curl'" :class="['flex-1 p-3 text-sm font-medium', codeTab === 'curl' ? 'bg-muted' : 'text-muted-foreground']">cURL</button>
+                    <button @click="codeTab = 'js'" :class="['flex-1 p-3 text-sm font-medium border-l', codeTab === 'js' ? 'bg-muted' : 'text-muted-foreground']">JavaScript</button>
+                    <button @click="codeTab = 'python'" :class="['flex-1 p-3 text-sm font-medium border-l', codeTab === 'python' ? 'bg-muted' : 'text-muted-foreground']">Python</button>
+                  </div>
+                </CardHeader>
+                <CardContent class="p-4 bg-muted/50 text-sm">
+                  <div v-if="codeTab === 'curl'" class="font-mono">
+                    <pre><code>curl -X POST "https://api.zenportal.io/v1/logs" \
+  -H "Authorization: Bearer your_write_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "clientId": "clt_abc123",
+    "date": "2026-01-25",
+    "summary": "Automated log entry via API",
+    "hoursWorked": 1.5
+  }'</code></pre>
+                  </div>
+                  <div v-if="codeTab === 'js'" class="font-mono">
+                    <pre><code>const response = await fetch('https://api.zenportal.io/v1/logs', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer your_write_key',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    clientId: 'clt_abc123',
+    date: '2026-01-25',
+    summary: 'Automated log entry via API',
+    hoursWorked: 1.5
+  })
+});
+const newLog = await response.json();</code></pre>
+                  </div>
+                  <div v-if="codeTab === 'python'" class="font-mono">
+                    <pre><code>import requests
+
+headers = {
+    'Authorization': 'Bearer your_write_key',
+    'Content-Type': 'application/json'
+}
+payload = {
+    'clientId': 'clt_abc123',
+    'date': '2026-01-25',
+    'summary': 'Automated log entry via API',
+    'hoursWorked': 1.5
+}
+response = requests.post('https://api.zenportal.io/v1/logs', headers=headers, json=payload)
+new_log = response.json()</code></pre>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+
+          <Separator />
+
           <section id="database" class="scroll-m-20 space-y-6">
             <h2 class="text-3xl font-bold tracking-tight">Database Schema</h2>
             <p class="text-muted-foreground">The database consists of three core tables defined in <code>schema.ts</code>.</p>
@@ -170,7 +318,7 @@ const scrollTo = (id: string) => {
                     <li class="grid grid-cols-[120px_1fr]"><span class="font-bold">id</span> <span>Primary Key (Clerk User ID)</span></li>
                     <li class="grid grid-cols-[120px_1fr]"><span class="font-bold">tier</span> <span>Enum: 'free' | 'pro'</span></li>
                     <li class="grid grid-cols-[120px_1fr]"><span class="font-bold">portalSlug</span> <span>Unique agency handle</span></li>
-                    <li class="grid grid-cols-[120px_1fr]"><span class="font-bold">accentColor</span> <span>Branding color preference</span></li>
+                    <li class="grid grid-cols-[120px_1fr]"><span class="font-bold">apiKeyRead</span> <span>(Pro) Read-only API key</span></li>
                   </ul>
                 </CardContent>
               </Card>
@@ -209,45 +357,31 @@ const scrollTo = (id: string) => {
           </section>
 
           <section id="api" class="scroll-m-20 space-y-6">
-             <h2 class="text-3xl font-bold tracking-tight">API Reference</h2>
-             <p class="text-muted-foreground">Endpoints are secured via <code>requireAuth</code> middleware unless stated otherwise.</p>
+             <h2 class="text-3xl font-bold tracking-tight">Web App API Reference</h2>
+             <p class="text-muted-foreground">These are the internal endpoints used by the ZenPortal web application. They are all protected by Clerk session authentication.</p>
 
              <div class="space-y-4">
                
                <div class="border rounded-lg p-4">
                  <div class="flex items-center gap-3 mb-2">
                    <Badge variant="secondary" class="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">GET</Badge>
-                   <code class="text-sm font-bold">/logs</code>
+                   <code class="text-sm font-bold">/api/logs</code>
                  </div>
-                 <p class="text-sm text-muted-foreground mb-2">Fetches the last 20 work logs for the dashboard.</p>
-                 <div class="bg-muted p-2 rounded text-xs font-mono">
-                   Returns: [{ id, date, summary, client: { companyName }, isBlocked ... }]
-                 </div>
+                 <p class="text-sm text-muted-foreground">Fetches paginated work logs for the dashboard.</p>
                </div>
 
                <div class="border rounded-lg p-4">
                  <div class="flex items-center gap-3 mb-2">
                    <Badge variant="secondary" class="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">POST</Badge>
-                   <code class="text-sm font-bold">/logs</code>
+                   <code class="text-sm font-bold">/api/logs</code>
                  </div>
-                 <p class="text-sm text-muted-foreground mb-2">Creates a new work entry. Triggers email notification to client if configured.</p>
-                 <div class="bg-muted p-2 rounded text-xs font-mono">
-                   Body: { clientId, date, summary, hoursWorked, videoUrl?, isBlocked? }
-                 </div>
-               </div>
-
-               <div class="border rounded-lg p-4">
-                 <div class="flex items-center gap-3 mb-2">
-                   <Badge variant="secondary" class="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">GET</Badge>
-                   <code class="text-sm font-bold">/stats</code>
-                 </div>
-                 <p class="text-sm text-muted-foreground">Aggregates total earnings, monthly goals, and revenue history chart data.</p>
+                 <p class="text-sm text-muted-foreground">Creates a new work entry. Triggers email notification to client if configured.</p>
                </div>
 
                <div class="border rounded-lg p-4">
                  <div class="flex items-center gap-3 mb-2">
                    <Badge variant="secondary" class="bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300">PATCH</Badge>
-                   <code class="text-sm font-bold">/auth/me</code>
+                   <code class="text-sm font-bold">/api/auth/me</code>
                  </div>
                  <p class="text-sm text-muted-foreground">Updates user preferences (Notifications, Branding). Supports partial updates.</p>
                </div>
@@ -256,15 +390,15 @@ const scrollTo = (id: string) => {
           </section>
 
           <section id="auth" class="scroll-m-20 space-y-4">
-            <h2 class="text-3xl font-bold tracking-tight">Authentication</h2>
+            <h2 class="text-3xl font-bold tracking-tight">Web App Authentication</h2>
             <p class="text-muted-foreground">
-              Authentication is handled by <strong>Clerk</strong>. The frontend uses the <code>@clerk/vue</code> SDK to manage sessions.
+              Authentication for the web application is handled by <strong>Clerk</strong>. The frontend uses the <code>@clerk/vue</code> SDK to manage sessions.
             </p>
             <Card class="bg-muted/50">
               <CardContent class="pt-6">
                 <h4 class="font-bold mb-2">Backend Middleware</h4>
                 <p class="text-sm text-muted-foreground mb-4">
-                  The backend uses <code>requireAuth</code> middleware to verify the Bearer token sent in the Authorization header.
+                  The backend uses <code>clerkMiddleware</code> to verify the JWT sent in the Authorization header.
                 </p>
                 <div class="bg-black text-white p-3 rounded-md text-xs font-mono">
                   headers: {<br>

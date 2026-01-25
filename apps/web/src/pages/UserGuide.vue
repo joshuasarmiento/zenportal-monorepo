@@ -10,13 +10,14 @@ import { Separator } from '@/components/ui/separator'
 import AppSidebar from '@/components/AppSidebar.vue'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
-import { 
+import {
   Zap,
-  Settings, 
+  Settings,
   ExternalLink,
   AlertTriangle,
   DollarSign,
-  Video
+  Video,
+  KeyRound
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -56,7 +57,7 @@ const router = useRouter()
           </section>
 
           <Tabs defaultValue="getting-started" class="w-full">
-            <TabsList class="grid w-full grid-cols-2 md:grid-cols-4 h-auto p-1 bg-muted rounded-xl border border-border">
+            <TabsList class="grid w-full grid-cols-2 md:grid-cols-5 h-auto p-1 bg-muted rounded-xl border border-border">
               <TabsTrigger value="getting-started" class="py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg">
                 Getting Started
               </TabsTrigger>
@@ -68,6 +69,9 @@ const router = useRouter()
               </TabsTrigger>
               <TabsTrigger value="earnings" class="py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg">
                 Earnings & Goals
+              </TabsTrigger>
+               <TabsTrigger value="automation" class="py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg">
+                API & Automation
               </TabsTrigger>
             </TabsList>
 
@@ -187,7 +191,7 @@ const router = useRouter()
                     </CardHeader>
                     <CardContent class="text-sm space-y-3">
                       <p>Fixed homepage layout bugs.</p>
-                      <div class="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 p-2 rounded text-xs flex items-center gap-2 border border-indigo-100 dark:border-indigo-900">
+                      <div class="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 p-2 rounded-lg border border-indigo-100 dark:border-indigo-900 text-xs flex items-center gap-2">
                         <Video class="h-3 w-3" /> Watch Video (Drive)
                       </div>
                     </CardContent>
@@ -229,6 +233,46 @@ const router = useRouter()
                 </Card>
               </div>
             </TabsContent>
+
+            <TabsContent value="automation" class="mt-8 space-y-8 animate-in fade-in slide-in-from-bottom-2">
+              <div class="space-y-4">
+                <h2 class="text-2xl font-bold text-foreground flex items-center gap-3"><KeyRound class="h-6 w-6 text-blue-500" /> API & Automation</h2>
+                <p class="text-muted-foreground">For <Badge variant="secondary" class="bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">Pro</Badge> users who want to automate their workflow, ZenPortal provides a programmatic API.</p>
+              </div>
+
+              <Accordion type="single" collapsible class="w-full bg-background rounded-xl border border-border px-4">
+                <AccordionItem value="item-1">
+                  <AccordionTrigger>What is an API and why would I use it?</AccordionTrigger>
+                  <AccordionContent class="text-muted-foreground">
+                    <p>Think of an API as a messenger that lets different software applications talk to each other. You can use it to automate repetitive tasks.</p>
+                    <p class="mt-2">For example, you could write a script to automatically create a work log in ZenPortal every time you finish a task in a different app like Trello or a desktop time tracker.</p>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-2">
+                  <AccordionTrigger>How do I get my API Keys?</AccordionTrigger>
+                  <AccordionContent class="text-muted-foreground">
+                    <p class="mb-2">
+                      Go to <a href="/settings" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">Settings -> API Access</a>.
+                      You can generate two types of keys: a <code class="bg-muted px-1 py-0.5 rounded">Read-Only</code> key for fetching data, and a <code class="bg-muted px-1 py-0.5 rounded">Write-Access</code> key for creating data.
+                    </p>
+                    <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg border border-red-100 dark:border-red-900 mb-2">
+                      <strong class="text-red-700 dark:text-red-400">Important:</strong> Treat your API keys like passwords. Never share them publicly or commit them to GitHub.
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-3">
+                  <AccordionTrigger>Where can I find the technical details?</AccordionTrigger>
+                  <AccordionContent class="text-muted-foreground">
+                    For developers, we have complete technical documentation with code examples for `curl`, JavaScript, and Python.
+                    <br />
+                    <Button variant="outline" size="sm" class="mt-4" @click="router.push('/docs')">
+                       View API Documentation
+                    </Button>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </TabsContent>
+
           </Tabs>
 
           <Separator />

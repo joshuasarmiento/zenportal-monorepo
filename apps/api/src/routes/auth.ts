@@ -6,6 +6,8 @@ import { requireAuth } from '../lib/auth';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 
+import { v4 as uuidv4 } from 'uuid';
+
 const app = new Hono<{ Variables: { userId: string } }>();
 
 app.use('*', requireAuth);
@@ -87,6 +89,31 @@ app.patch('/me', zValidator('json', updateUserSchema), async (c) => {
     .returning();
 
   return c.json(updatedUser[0]);
+});
+
+// POST /api-key - Generate API Keys
+app.post('/api-key', async (c) => {
+  const userId = c.get('userId');
+  
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: { tier: true }
+  });
+
+  if (user?.tier !== 'pro') {
+    return c.json({ error: 'API access is a Pro feature. Please upgrade your account.' }, 403);
+  }
+
+  const newKeys = {
+    apiKeyRead: `zen_read_${uuidv4()}`,
+    apiKeyWrite: `zen_write_${uuidv4()}`,
+  };
+
+  await db.update(users)
+    .set(newKeys)
+    .where(eq(users.id, userId));
+
+  return c.json(newKeys);
 });
 
 export { app as authRouter };

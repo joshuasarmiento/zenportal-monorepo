@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import { onMounted,ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarGroup, SidebarGroupLabel } from '@/components/ui/sidebar'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub,
-  DropdownMenuSubTrigger,    
-  DropdownMenuSubContent, 
-  DropdownMenuPortal        
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuPortal } from '@/components/ui/dropdown-menu'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useColorMode } from '@vueuse/core'
+import { UserProfile, SignOutButton, useUser, useAuth } from '@clerk/vue'
 import { 
   LayoutDashboard, 
   Users, 
@@ -22,19 +20,56 @@ import {
   BookOpen,
   Moon,    
   Sun,  
-  Laptop   
+  Laptop,
+  UserCircle
 } from 'lucide-vue-next'
 import { useApi } from '@/lib/api'
-import { SignOutButton, useUser } from '@clerk/vue'
 
 const mode = useColorMode()
 const { fetchApi } = useApi()
 const route = useRoute()
 const userStore = useUserStore()
-const { user: clerkUser } = useUser()
+const { user: clerkUser, isLoaded } = useUser()
+const { isSignedIn } = useAuth()
+
 const loading = ref(false)
+const isProfileSheetOpen = ref(false)
 
 const isPro = computed(() => userStore.user?.tier === 'pro')
+
+// Improved user fetching and syncing logic
+watch([isLoaded, isSignedIn], async () => {
+  // Wait until Clerk has loaded its state
+  if (!isLoaded.value) return
+
+  if (isSignedIn.value) {
+    // If the user is signed in according to Clerk, ensure their data is in our store.
+    // fetchUser handles its own caching, so it's safe to call.
+    await userStore.fetchUser()
+
+    // If after fetching, we still don't have a user, it's a new user who needs to be synced.
+    if (!userStore.user && clerkUser.value) {
+      try {
+        console.log('Syncing new user to database...')
+        await fetchApi('/auth/sync', {
+          method: 'POST',
+          body: JSON.stringify({
+            email: clerkUser.value.primaryEmailAddress?.emailAddress,
+            fullName: clerkUser.value.fullName,
+            avatarUrl: clerkUser.value.imageUrl
+          })
+        })
+        // Force a refetch after the sync is complete.
+        await userStore.fetchUser(true)
+      } catch (err) {
+        console.error('Failed to sync user:', err)
+      }
+    }
+  } else {
+    // If user is not signed in, clear any local user data.
+    userStore.user = null
+  }
+}, { immediate: true })
 
 const handleUpgrade = async () => {
   loading.value = true
@@ -59,30 +94,6 @@ const handlePortal = async () => {
     loading.value = false
   }
 }
-
-onMounted(async () => {
-  // 1. Try to fetch user from DB
-  await userStore.fetchUser()
-
-  // 2. If user is logged in (Clerk) but not in DB (userStore), SYNC them.
-  if (!userStore.user && clerkUser.value) {
-    try {
-      console.log('Syncing new user to database...')
-      await fetchApi('/auth/sync', {
-        method: 'POST',
-        body: JSON.stringify({
-          email: clerkUser.value.primaryEmailAddress?.emailAddress,
-          fullName: clerkUser.value.fullName,
-          avatarUrl: clerkUser.value.imageUrl
-        })
-      })
-      // 3. Fetch again after sync
-      await userStore.fetchUser()
-    } catch (err) {
-      console.error('Failed to sync user:', err)
-    }
-  }
-})
 
 const links = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -179,9 +190,14 @@ const UserGuide = [
                 <span v-else>Upgrade Now ($12/mo)</span>
               </DropdownMenuItem>
 
+               <DropdownMenuItem @click="isProfileSheetOpen = true" class="cursor-pointer">
+                <UserCircle class="mr-2 h-4 w-4" />
+                <span>Manage Account</span>
+              </DropdownMenuItem>
+
               <DropdownMenuItem @click="$router.push('/settings')" class="cursor-pointer">
                 <Settings class="mr-2 h-4 w-4" />
-                <span>Settings</span>
+                <span>All Settings</span>
               </DropdownMenuItem>
 
               <DropdownMenuSeparator />
@@ -228,4 +244,28 @@ const UserGuide = [
     </SidebarFooter>
     <SidebarRail />
   </Sidebar>
+
+  <!-- Profile Settings Modal/Sheet -->
+  <Sheet :open="isProfileSheetOpen" @update:open="isProfileSheetOpen = $event">
+    <SheetContent class="w-full">
+        <SheetHeader class="mb-4">
+            <SheetTitle>Manage Account</SheetTitle>
+            <SheetDescription>Update your photo, password, and personal details via Clerk.</SheetDescription>
+        </SheetHeader>
+        <div class="py-4">
+             <UserProfile :appearance="{
+                elements: {
+                    rootBox: 'w-full',
+                    card: 'shadow-none border-none w-full',
+                    navbar: 'hidden',
+                    pageScrollBox: 'p-0',
+                    headerTitle: 'hidden',
+                    headerSubtitle: 'hidden',
+                    profilePage__security: 'p-0',
+                    profilePage__account: 'p-0'
+                }
+            }" />
+        </div>
+    </SheetContent>
+  </Sheet>
 </template>

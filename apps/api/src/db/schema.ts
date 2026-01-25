@@ -32,9 +32,18 @@ export const users = sqliteTable('users', {
   tier: text('tier', { enum: ['free', 'pro'] }).default('free'),
   stripeCustomerId: text('stripe_customer_id'),
   stripeSubscriptionId: text('stripe_subscription_id'),
+
+  // Programmatic Access
+  apiKeyRead: text('api_key_read').unique(),
+  apiKeyWrite: text('api_key_write').unique(),
   
   createdAt: integer('created_at', { mode: 'timestamp' })
     .default(sql`(strftime('%s', 'now') * 1000)`),
+}, (table) => {
+  return {
+    apiKeyReadIdx: index('api_key_read_idx').on(table.apiKeyRead),
+    apiKeyWriteIdx: index('api_key_write_idx').on(table.apiKeyWrite),
+  }
 });
 
 // --- CLIENTS TABLE (Unchanged) ---

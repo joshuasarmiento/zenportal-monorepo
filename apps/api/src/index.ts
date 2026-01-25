@@ -3,6 +3,8 @@ import { cors } from 'hono/cors';
 import { clerkMiddleware } from '@hono/clerk-auth';
 import { serve } from '@hono/node-server';
 import { handle } from 'hono/vercel';
+import { secureHeaders } from 'hono/secure-headers';
+import { csrf } from 'hono/csrf';
 
 import { clientsRouter } from './routes/clients';
 import { logsRouter } from './routes/logs';
@@ -11,28 +13,47 @@ import { webhooksRouter } from './routes/webhooks';
 import { statsRouter } from './routes/stats';
 import { authRouter } from './routes/auth';
 import { billingRouter } from './routes/billing';
+import { v1ProgrammaticRouter } from './routes/v1_programmatic';
 
-const app = new Hono();
+const app = new Hono().basePath('/');
 
-// 1. Global Middleware
-app.use('/*', cors()); 
-app.use('*', clerkMiddleware()); 
+// --- Global Middleware ---
+// Applied to all incoming requests
+app.use('*', secureHeaders());
+app.use(
+  '/*',
+  cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    credentials: true,
+    allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowMethods: ['POST', 'GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    exposeHeaders: ['Content-Length'],
+    maxAge: 600,
+  })
+);
 
-// 2. Protected Routes
-app.route('/api/clients', clientsRouter);
-app.route('/api/logs', logsRouter);
+// --- Specialized API Routers ---
+// These routers have their own specific authentication and do not use the default session-based auth.
+app.route('/v1', v1ProgrammaticRouter);          // Programmatic access via API keys
+app.route('/api/webhooks', webhooksRouter);     // Public webhooks (Stripe, Clerk)
+app.route('/api/public', publicRouter);         // Publicly accessible data (reports, profiles)
 
-// 3. Public Routes
-app.route('/api/public', publicRouter);
 
-// 4. Webhooks (Stripe) - Must be Public!
-app.route('/api/webhooks', webhooksRouter); 
+// --- User-Facing API ---
+// These routes are for the web frontend and are protected by Clerk (session auth) and CSRF.
+const api = new Hono();
+api.use('*', csrf());
+api.use('*', clerkMiddleware());
 
-app.route('/api/auth', authRouter);
+api.route('/clients', clientsRouter);
+api.route('/logs', logsRouter);
+api.route('/auth', authRouter);
+api.route('/stats', statsRouter);
+api.route('/billing', billingRouter);
 
-app.route('/api/stats', statsRouter);
+// Mount the user-facing API under the /api path
+app.route('/api', api);
 
-app.route('/api/billing', billingRouter);
 
 app.get('/', (c) => c.text('ZenPortal API is running! 🚀'));
 
@@ -44,5 +65,3 @@ const port = 3000
 console.log(`🚀 Node Server running on http://localhost:${port}`)
 serve({ fetch: app.fetch, port })
 export default { port: 3000, fetch: app.fetch };
-
-// export default app;

@@ -25,8 +25,8 @@ export const useUserStore = defineStore('user', () => {
   })
 
   // Actions
-  const fetchUser = async () => {
-    if (user.value) return // Don't refetch if we already have data
+  const fetchUser = async (force = false) => {
+    if (user.value && !force) return // Don't refetch if we already have data, unless forced
     
     loading.value = true
     try {
@@ -36,6 +36,7 @@ export const useUserStore = defineStore('user', () => {
       user.value = res
     } catch (err) {
       console.error('Failed to load user profile', err)
+      user.value = null // Clear user on error
     } finally {
       loading.value = false
     }

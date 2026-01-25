@@ -10,7 +10,8 @@ import {
   LayoutTemplate, 
   Globe, 
   Lock,
-  ArrowRight
+  ArrowRight,
+  Code
 } from 'lucide-vue-next'
 </script>
 
@@ -129,16 +130,16 @@ import {
                     <CardTitle>Client Portal</CardTitle>
                 </CardHeader>
                 <CardContent class="text-muted-foreground text-sm">
-                    A dedicated URL (zenportal.io/u/yourname) where clients can see everything without signing up.
+                    A dedicated URL (e.g. zenportal.io/p/your-name) where clients can see everything without signing up.
                 </CardContent>
             </Card>
             <Card class="bg-muted/20 border-border/50 hover:bg-muted/40 transition">
                 <CardHeader>
-                    <Globe class="h-8 w-8 mb-2 text-primary" />
-                    <CardTitle>Custom Domain</CardTitle>
+                    <Code class="h-8 w-8 mb-2 text-primary" />
+                    <CardTitle>Programmatic API</CardTitle>
                 </CardHeader>
                 <CardContent class="text-muted-foreground text-sm">
-                    (Pro) Connect `updates.youragency.com` so the client sees your brand, not ours.
+                    (Pro) Automate your workflow by connecting to time trackers or project management tools.
                 </CardContent>
             </Card>
             <Card class="bg-muted/20 border-border/50 hover:bg-muted/40 transition">
@@ -147,18 +148,20 @@ import {
                     <CardTitle>Secure Access</CardTitle>
                 </CardHeader>
                 <CardContent class="text-muted-foreground text-sm">
-                    Magic links and password protection ensure only your client sees your sensitive work.
+                    Magic links ensure only your client sees your sensitive work, no passwords needed for them.
                 </CardContent>
             </Card>
             <Card class="md:col-span-3 bg-gradient-to-br from-blue-600 to-purple-700 text-white border-none">
                 <CardContent class="flex flex-col md:flex-row items-center justify-between p-8 gap-6">
                     <div>
                         <h3 class="text-2xl font-bold mb-2">Ready to look professional?</h3>
-                        <p class="text-blue-100">Join the waitlist for the mobile app coming Q4 2026.</p>
+                        <p class="text-blue-100">Join thousands of Filipino VAs and Developers scaling their business.</p>
                     </div>
-                    <Button variant="secondary" size="lg" class="whitespace-nowrap">
-                        Start Free Trial <ArrowRight class="ml-2 h-4 w-4" />
-                    </Button>
+                     <router-link to="/sign-up">
+                      <Button variant="secondary" size="lg" class="whitespace-nowrap">
+                          Start Free Trial <ArrowRight class="ml-2 h-4 w-4" />
+                      </Button>
+                    </router-link>
                 </CardContent>
             </Card>
         </div>

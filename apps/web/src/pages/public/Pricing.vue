@@ -20,7 +20,7 @@ const plans = [
       'Standard Public Profile',
       '30 Days History'
     ],
-    missing: ['Video Embedding (Loom/Drive)', 'Custom Branding', 'Priority Support'],
+    missing: ['Video Embedding (Loom/Drive)', 'Custom Branding', 'Programmatic API Access', 'Priority Support'],
     cta: 'Start for Free',
     variant: 'outline',
     popular: false
@@ -35,6 +35,7 @@ const plans = [
       'Custom Branding & Colors',
       'Unlimited History',
       'Export to PDF/CSV',
+      'Programmatic API Access',
       'Priority Support'
     ],
     missing: [],
