@@ -10,7 +10,6 @@ import NewLog from '@/pages/NewLog.vue'
 import AddClient from '@/pages/AddClient.vue'
 import EditClient from '@/pages/EditClient.vue'
 import EditLog from '@/pages/EditLog.vue'
-import Documentation from '@/pages/Documentation.vue'
 import UserGuide from '@/pages/UserGuide.vue'
 
 // 2. Auth & Public Pages
@@ -26,6 +25,7 @@ import Features from '@/pages/public/Features.vue'
 import About from '@/pages/public/About.vue'
 import TermsCondition from '@/pages/public/Terms.vue'
 import PrivacyPolicy from '@/pages/public/PrivacyPolicy.vue'
+import Documentation from '@/pages/public/Documentation.vue'
 
 const router = createRouter({
   history: createWebHistory(),
