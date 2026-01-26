@@ -61,8 +61,8 @@ app.post('/checkout', async (c) => {
     ],
     automatic_tax: { enabled: true },
     customer_update: { address: 'auto' },
-    success_url: `${config.app.frontendUrl}/settings?success=true`,
-    cancel_url: `${config.app.frontendUrl}/settings?canceled=true`,
+    success_url: `${config.app.frontendUrl}/settings/billing/?success=true`,
+    cancel_url: `${config.app.frontendUrl}/settings/billing/?canceled=true`,
   });
 
   return c.json({ url: session.url });
@@ -82,7 +82,7 @@ app.post('/portal', async (c) => {
 
   const session = await stripe.billingPortal.sessions.create({
     customer: user.stripeCustomerId,
-    return_url: `${config.app.frontendUrl}/settings`,
+    return_url: `${config.app.frontendUrl}/settings/billing`,
   });
 
   return c.json({ url: session.url });
