@@ -17,6 +17,7 @@ export const config = {
   },
   clerk: {
     webhookSecret: getEnv('CLERK_WEBHOOK_SECRET'),
+    secretKey: getEnv('CLERK_SECRET_KEY'), // Add this line
   },
   stripe: {
     secretKey: getEnv('STRIPE_SECRET_KEY'),
