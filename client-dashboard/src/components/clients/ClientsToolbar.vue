@@ -26,7 +26,7 @@ const emit = defineEmits(['update:search', 'update:status', 'update:sort'])
     </div>
     
     <Select :model-value="status" @update:model-value="emit('update:status', $event)">
-      <SelectTrigger class="w-[180px] bg-background">
+      <SelectTrigger class="w-45 bg-background">
         <SelectValue placeholder="Filter Status" />
       </SelectTrigger>
       <SelectContent>
@@ -37,7 +37,7 @@ const emit = defineEmits(['update:search', 'update:status', 'update:sort'])
     </Select>
     
     <Select :model-value="sort" @update:model-value="emit('update:sort', $event)">
-      <SelectTrigger class="w-[180px] bg-background">
+      <SelectTrigger class="w-45 bg-background">
         <SelectValue placeholder="Sort By" />
       </SelectTrigger>
       <SelectContent>

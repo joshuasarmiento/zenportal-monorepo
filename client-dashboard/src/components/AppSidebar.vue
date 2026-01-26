@@ -2,13 +2,12 @@
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarGroup, SidebarGroupLabel } from '@/components/ui/sidebar'
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarGroup } from '@/components/ui/sidebar'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuPortal } from '@/components/ui/dropdown-menu'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useColorMode } from '@vueuse/core'
-import { UserProfile, SignOutButton } from '@clerk/vue'
+import { SignOutButton } from '@clerk/vue'
 import { 
   LayoutDashboard, 
   Users, 
@@ -22,7 +21,6 @@ import {
   Moon,    
   Sun,  
   Laptop,
-  UserCircle,
   ChevronRight
 } from 'lucide-vue-next'
 import { useApi } from '@/lib/api'
@@ -34,7 +32,6 @@ const route = useRoute()
 const userStore = useUserStore()
 
 const loading = ref(false)
-const isProfileSheetOpen = ref(false)
 
 const isPro = computed(() => userStore.user?.tier === 'pro')
 
@@ -188,11 +185,6 @@ const menuItems = [
                 <span v-else>Upgrade Now ($12/mo)</span>
               </DropdownMenuItem>
 
-               <!-- <DropdownMenuItem @click="isProfileSheetOpen = true" class="cursor-pointer">
-                <UserCircle class="mr-2 h-4 w-4" />
-                <span>Manage Account</span>
-              </DropdownMenuItem> -->
-
               <DropdownMenuItem @click="$router.push('/settings')" class="cursor-pointer">
                 <Settings class="mr-2 h-4 w-4" />
                 <span>All Settings</span>
@@ -242,28 +234,4 @@ const menuItems = [
     </SidebarFooter>
     <SidebarRail />
   </Sidebar>
-
-  <!-- Profile Settings Modal/Sheet -->
-  <!-- <Sheet :open="isProfileSheetOpen" @update:open="isProfileSheetOpen = $event">
-    <SheetContent class="w-full">
-        <SheetHeader class="mb-4">
-            <SheetTitle>Manage Account</SheetTitle>
-            <SheetDescription>Update your photo, password, and personal details via Clerk.</SheetDescription>
-        </SheetHeader>
-        <div class="py-4">
-             <UserProfile :appearance="{
-                elements: {
-                    rootBox: 'w-full',
-                    card: 'shadow-none border-none w-full',
-                    navbar: 'hidden',
-                    pageScrollBox: 'p-0',
-                    headerTitle: 'hidden',
-                    headerSubtitle: 'hidden',
-                    profilePage__security: 'p-0',
-                    profilePage__account: 'p-0'
-                }
-            }" />
-        </div>
-    </SheetContent>
-  </Sheet> -->
 </template>

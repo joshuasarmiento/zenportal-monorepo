@@ -103,7 +103,7 @@ const formatDate = (dateString: number) => {
            <div class="space-y-4 mb-8">
               <Skeleton class="h-4 w-full max-w-sm" />
               <Skeleton class="h-4 w-full max-w-xs" />
-              <Skeleton class="h-4 w-full max-w-[200px]" />
+              <Skeleton class="h-4 w-full max-w-50" />
            </div>
            <Skeleton class="h-10 w-32" />
         </div>

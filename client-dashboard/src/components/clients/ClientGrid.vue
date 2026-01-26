@@ -69,7 +69,7 @@ const copyLink = (token: string) => {
       <button 
         v-if="!isLimitReached"
         @click="emit('add')"
-        class="border-2 border-dashed border-muted-foreground/25 rounded-xl p-6 flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary hover:bg-muted/50 transition cursor-pointer min-h-[280px] group bg-background"
+        class="border-2 border-dashed border-muted-foreground/25 rounded-xl p-6 flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary hover:bg-muted/50 transition cursor-pointer min-h-70 group bg-background"
       >
         <div class="w-14 h-14 bg-muted rounded-full flex items-center justify-center mb-3 group-hover:bg-primary/10 transition-colors">
           <Plus class="h-6 w-6" />
@@ -80,13 +80,13 @@ const copyLink = (token: string) => {
       <button 
         v-else
         @click="emit('upgrade')"
-        class="border-2 border-dashed border-indigo-200 dark:border-indigo-800 rounded-xl p-6 flex flex-col items-center justify-center text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition cursor-pointer min-h-[280px] group bg-background"
+        class="border-2 border-dashed border-indigo-200 dark:border-indigo-800 rounded-xl p-6 flex flex-col items-center justify-center text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition cursor-pointer min-h-70 group bg-background"
       >
         <div class="w-14 h-14 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
           <Crown class="h-6 w-6" />
         </div>
         <span class="font-bold text-lg">Unlock Unlimited Clients</span>
-        <p class="text-sm text-center mt-2 text-muted-foreground max-w-[200px]">
+        <p class="text-sm text-center mt-2 text-muted-foreground max-w-50">
           You've reached the free limit. Upgrade to Pro to manage more clients.
         </p>
       </button>
