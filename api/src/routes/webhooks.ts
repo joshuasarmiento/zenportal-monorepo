@@ -32,13 +32,13 @@ app.post('/clerk', async (c) => {
 
   const eventType = evt.type;
 
+  // 1. User Created (Existing)
   if (eventType === 'user.created') {
     const { id, email_addresses, first_name, last_name, image_url, primary_email_address_id } = evt.data;
-
-    // Safer email extraction
+    
     const primaryEmailObj = email_addresses.find((e: any) => e.id === primary_email_address_id);
     const email = primaryEmailObj ? primaryEmailObj.email_address : null;
-
+    
     if (!email) {
       console.error(`❌ User ${id} created without a primary email.`);
       return c.json({ error: "No email found" }, 400);
@@ -53,9 +53,26 @@ app.post('/clerk', async (c) => {
       avatarUrl: image_url,
       tier: 'free',
     });
-    console.log(`✅ User ${id} synced to Turso!`);
+    console.log(`✅ User ${id} created in Turso!`);
   }
 
+  // 🟢 2. User Updated (NEW) - Syncs Name & Logo changes
+  if (eventType === 'user.updated') {
+    const { id, first_name, last_name, image_url } = evt.data;
+    
+    const fullName = `${first_name || ''} ${last_name || ''}`.trim();
+
+    await db.update(users)
+      .set({
+        fullName: fullName || 'User', // Fallback if empty
+        avatarUrl: image_url,
+      })
+      .where(eq(users.id, id));
+
+    console.log(`🔄 User ${id} updated in Turso!`);
+  }
+
+  // 3. User Deleted (Existing)
   if (eventType === 'user.deleted') {
     const { id } = evt.data;
     await db.delete(users).where(eq(users.id, id));
