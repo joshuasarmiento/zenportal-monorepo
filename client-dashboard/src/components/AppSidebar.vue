@@ -188,10 +188,10 @@ const menuItems = [
                 <span v-else>Upgrade Now ($12/mo)</span>
               </DropdownMenuItem>
 
-               <DropdownMenuItem @click="isProfileSheetOpen = true" class="cursor-pointer">
+               <!-- <DropdownMenuItem @click="isProfileSheetOpen = true" class="cursor-pointer">
                 <UserCircle class="mr-2 h-4 w-4" />
                 <span>Manage Account</span>
-              </DropdownMenuItem>
+              </DropdownMenuItem> -->
 
               <DropdownMenuItem @click="$router.push('/settings')" class="cursor-pointer">
                 <Settings class="mr-2 h-4 w-4" />
@@ -244,7 +244,7 @@ const menuItems = [
   </Sidebar>
 
   <!-- Profile Settings Modal/Sheet -->
-  <Sheet :open="isProfileSheetOpen" @update:open="isProfileSheetOpen = $event">
+  <!-- <Sheet :open="isProfileSheetOpen" @update:open="isProfileSheetOpen = $event">
     <SheetContent class="w-full">
         <SheetHeader class="mb-4">
             <SheetTitle>Manage Account</SheetTitle>
@@ -265,5 +265,5 @@ const menuItems = [
             }" />
         </div>
     </SheetContent>
-  </Sheet>
+  </Sheet> -->
 </template>
