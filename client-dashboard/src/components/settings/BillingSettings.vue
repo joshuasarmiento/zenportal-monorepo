@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Check, Crown, Loader2, ExternalLink, AlertTriangle } from 'lucide-vue-next'
-import { toast } from 'vue-sonner' 
+import { toast } from 'vue-sonner'
 
 const { fetchApi } = useApi()
 const userStore = useUserStore()
@@ -96,20 +96,42 @@ const formatDate = (dateString: number) => {
 
       <CardContent>
         <div v-if="loadingSubscription" class="bg-card border rounded-xl p-6">
-           <div class="flex justify-between items-center mb-6">
-              <Skeleton class="h-4 w-24" />
-              <Skeleton class="h-8 w-24" />
-           </div>
-           <div class="space-y-4 mb-8">
-              <Skeleton class="h-4 w-full max-w-sm" />
-              <Skeleton class="h-4 w-full max-w-xs" />
-              <Skeleton class="h-4 w-full max-w-50" />
-           </div>
-           <Skeleton class="h-10 w-32" />
+          <div class="flex justify-between items-center mb-6">
+            <Skeleton class="h-4 w-24" />
+            <Skeleton class="h-8 w-24" />
+          </div>
+          <div class="space-y-4 mb-8">
+            <Skeleton class="h-4 w-full max-w-sm" />
+            <Skeleton class="h-4 w-full max-w-xs" />
+            <Skeleton class="h-4 w-full max-w-50" />
+          </div>
+          <Skeleton class="h-10 w-32" />
         </div>
 
         <div v-else>
-          <div v-if="subscription?.status === 'active' && (subscription?.cancel_at_period_end || subscription?.cancel_at)" 
+
+          <div v-if="subscription?.status === 'past_due' || subscription?.status === 'unpaid'"
+            class="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-xl p-6 mb-6">
+            <div class="flex items-start gap-4">
+              <div class="bg-red-100 dark:bg-red-900/50 p-2 rounded-full">
+                <AlertTriangle class="h-6 w-6 text-red-600 dark:text-red-500" />
+              </div>
+              <div>
+                <h4 class="text-red-900 dark:text-red-100 font-bold text-lg">Payment Failed</h4>
+                <p class="text-red-800/80 dark:text-red-200/70 text-sm mt-1 mb-4">
+                  We couldn't process your latest payment. Your premium access has been paused. Please update your
+                  payment method to resume.
+                </p>
+                <Button variant="outline" size="sm" @click="handlePortal"
+                  class="bg-white hover:bg-red-50 dark:bg-transparent dark:hover:bg-red-900/20 border-red-300 text-red-800 dark:text-red-100">
+                  Update Payment Method
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div
+            v-else-if="subscription?.status === 'active' && (subscription?.cancel_at_period_end || subscription?.cancel_at)"
             class="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-xl p-6 mb-6">
             <div class="flex items-start gap-4">
               <div class="bg-amber-100 dark:bg-amber-900/50 p-2 rounded-full">
@@ -118,29 +140,35 @@ const formatDate = (dateString: number) => {
               <div>
                 <h4 class="text-amber-900 dark:text-amber-100 font-bold text-lg">Subscription Cancelled</h4>
                 <p class="text-amber-800/80 dark:text-amber-200/70 text-sm mt-1 mb-4">
-                  Your plan is set to cancel on <strong>{{ formatDate(subscription.cancel_at || subscription.current_period_end) }}</strong>. You will lose access to premium features after this date.
+                  Your plan is set to cancel on <strong>{{ formatDate(subscription.cancel_at ||
+                    subscription.current_period_end) }}</strong>. You will lose access to premium features after this
+                  date.
                 </p>
-                <Button variant="outline" size="sm" @click="handlePortal" class="bg-white hover:bg-amber-50 dark:bg-transparent dark:hover:bg-amber-900/20 border-amber-300 text-amber-800 dark:text-amber-100">
+                <Button variant="outline" size="sm" @click="handlePortal"
+                  class="bg-white hover:bg-amber-50 dark:bg-transparent dark:hover:bg-amber-900/20 border-amber-300 text-amber-800 dark:text-amber-100">
                   Reactivate Plan
                 </Button>
               </div>
             </div>
           </div>
 
-          <div v-else-if="isPro" class="bg-slate-950 text-white rounded-xl p-6 relative overflow-hidden dark:border dark:border-slate-800">
+          <div v-else-if="isPro"
+            class="bg-slate-950 text-white rounded-xl p-6 relative overflow-hidden dark:border dark:border-slate-800">
             <div class="relative z-10">
               <div class="flex justify-between items-center mb-4">
                 <span class="text-indigo-400 font-bold text-sm tracking-wider uppercase">Agency Pro</span>
                 <span class="text-2xl font-bold">$12<span class="text-sm text-slate-400 font-normal">/mo</span></span>
               </div>
               <ul class="text-sm text-slate-300 space-y-2 mb-6">
-                <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Unlimited Clients </li>
-                <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Loom & Drive Embeds </li>
-                <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Custom Branding & Colors </li>
-                <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Unlimited History </li>
-                <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Export to PDF/CSV </li>
-                <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Programmatic API Access </li>
-                <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Priority Support</li>
+                <li class="flex items-center gap-2">
+                  <Check class="h-4 w-4 text-indigo-400" /> Unlimited Clients
+                </li>
+                <li class="flex items-center gap-2">
+                  <Check class="h-4 w-4 text-indigo-400" /> Video Integrations
+                </li>
+                <li class="flex items-center gap-2">
+                  <Check class="h-4 w-4 text-indigo-400" /> Priority Support
+                </li>
               </ul>
               <Button variant="secondary" @click="handlePortal" :disabled="loading">
                 <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
@@ -152,15 +180,18 @@ const formatDate = (dateString: number) => {
             </div>
           </div>
 
-          <div v-else class="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800 rounded-xl p-6 text-center">
-            <div class="bg-indigo-100 dark:bg-indigo-900/50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400">
+          <div v-else
+            class="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-800 rounded-xl p-6 text-center">
+            <div
+              class="bg-indigo-100 dark:bg-indigo-900/50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400">
               <Crown class="h-6 w-6" />
             </div>
             <h4 class="text-indigo-900 dark:text-indigo-100 font-bold text-lg mb-2">Upgrade to Pro</h4>
             <p class="text-indigo-700/80 dark:text-indigo-300/80 text-sm mb-6 max-w-sm mx-auto">
               Get unlimited clients, video uploads, and custom branding to scale your agency.
             </p>
-            <Button size="lg" @click="handleUpgrade" :disabled="loading" class="bg-indigo-600 hover:bg-indigo-700 text-white">
+            <Button size="lg" @click="handleUpgrade" :disabled="loading"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white">
               <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
               {{ loading ? 'Redirecting...' : 'Upgrade Now ($12/mo)' }}
             </Button>
@@ -178,7 +209,7 @@ const formatDate = (dateString: number) => {
       <CardContent>
         <div v-if="loadingHistory">
           <Table>
-             <TableHeader>
+            <TableHeader>
               <TableRow>
                 <TableHead>Date</TableHead>
                 <TableHead>Amount</TableHead>
@@ -188,10 +219,18 @@ const formatDate = (dateString: number) => {
             </TableHeader>
             <TableBody>
               <TableRow v-for="i in 3" :key="i">
-                <TableCell><Skeleton class="h-4 w-24" /></TableCell>
-                <TableCell><Skeleton class="h-4 w-16" /></TableCell>
-                <TableCell><Skeleton class="h-6 w-20 rounded-full" /></TableCell>
-                <TableCell class="text-right flex justify-end"><Skeleton class="h-4 w-12" /></TableCell>
+                <TableCell>
+                  <Skeleton class="h-4 w-24" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton class="h-4 w-16" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton class="h-6 w-20 rounded-full" />
+                </TableCell>
+                <TableCell class="text-right flex justify-end">
+                  <Skeleton class="h-4 w-12" />
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -223,7 +262,8 @@ const formatDate = (dateString: number) => {
                 </Badge>
               </TableCell>
               <TableCell class="text-right">
-                <a :href="invoice.url" target="_blank" class="inline-flex items-center text-indigo-600 hover:underline text-sm">
+                <a :href="invoice.url" target="_blank"
+                  class="inline-flex items-center text-indigo-600 hover:underline text-sm">
                   View
                   <ExternalLink class="ml-1 h-3 w-3" />
                 </a>

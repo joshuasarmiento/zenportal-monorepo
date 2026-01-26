@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useApi } from '../lib/api'
 import { useAuth } from '@clerk/vue'
 import { useUserStore } from '@/stores/userStore'
@@ -27,6 +28,7 @@ interface StatsData {
 }
 
 // Logic / State
+const router = useRouter()
 const { fetchApi } = useApi()
 const { getToken } = useAuth()
 const userStore = useUserStore()
@@ -68,7 +70,28 @@ const loadStats = async () => {
   }
 }
 
+// Handler for Non-Pro clicks
+const handleUpgrade = () => {
+  toast('Upgrade to Pro', {
+    description: 'Exporting data is available on the Agency Pro plan.',
+    action: {
+      label: 'Upgrade',
+      onClick: () => router.push('/settings')
+    },
+  })
+}
+
+// 1. Export PDF Logic
+const exportPDF = () => {
+  if (!isPro.value) return handleUpgrade()
+  // Trigger browser print dialog which can save as PDF
+  window.print()
+}
+
+// 2. Export CSV Logic
 const exportCSV = async () => {
+  if (!isPro.value) return handleUpgrade()
+
   exporting.value = true
   try {
     const token = await getToken.value()
@@ -78,6 +101,9 @@ const exportCSV = async () => {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     
+    if (response.status === 403) {
+      throw new Error('Upgrade required')
+    }
     if (!response.ok) throw new Error('Export failed')
     
     const blob = await response.blob()
@@ -91,9 +117,13 @@ const exportCSV = async () => {
     document.body.removeChild(a)
     
     toast.success("Export downloaded successfully")
-  } catch (err) {
+  } catch (err: any) {
     console.error(err)
-    toast.error("Failed to export CSV.")
+    if (err.message === 'Upgrade required') {
+      handleUpgrade()
+    } else {
+      toast.error("Failed to export CSV.")
+    }
   } finally {
     exporting.value = false
   }
@@ -115,7 +145,10 @@ watch(selectedRange, () => loadStats())
       <EarningsHeader 
         :loading="loading" 
         :exporting="exporting"
-        @export="exportCSV" 
+        :is-pro="isPro"
+        @export-csv="exportCSV" 
+        @export-pdf="exportPDF"
+        @upgrade="handleUpgrade"
       />
 
       <div class="flex flex-1 flex-col p-4 md:p-8 bg-muted/40 overflow-y-auto">
@@ -147,3 +180,17 @@ watch(selectedRange, () => loadStats())
     </SidebarInset>
   </SidebarProvider>
 </template>
+
+<style>
+/* Clean up the PDF output by hiding sidebar and navigation */
+@media print {
+  aside, header, .sidebar-trigger { display: none !important; }
+  main, .group\/sidebar-wrapper { 
+    margin: 0 !important; 
+    padding: 0 !important; 
+    width: 100% !important; 
+  }
+  .bg-muted\/40 { background-color: white !important; }
+  .recharts-wrapper { width: 100% !important; }
+}
+</style>

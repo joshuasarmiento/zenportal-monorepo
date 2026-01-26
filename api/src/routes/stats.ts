@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { stream } from 'hono/streaming';
 import { db } from '../db';
-import { workLogs, clients } from '../db/schema';
+import { workLogs, clients, users } from '../db/schema';
 import { requireAuth } from '../lib/auth';
 import { eq, and, sql, desc, asc, gte, lte, count } from 'drizzle-orm';
 
@@ -38,6 +38,16 @@ app.get('/export', async (c) => {
   const userId = c.get('userId');
   const range = c.req.query('range') || 'all'; 
 
+  // 1. SECURITY CHECK: Is User Pro?
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: { tier: true }
+  });
+
+  if (user?.tier !== 'pro') {
+    return c.json({ error: 'Export is a Pro feature' }, 403);
+  }
+
   // Headers for CSV download
   c.header('Content-Type', 'text/csv; charset=utf-8');
   c.header('Content-Disposition', `attachment; filename="work_logs_${new Date().toISOString().split('T')[0]}.csv"`);
@@ -53,8 +63,7 @@ app.get('/export', async (c) => {
       filters.push(gte(workLogs.date, start));
     }
 
-    // 3. Batch Fetching (Chunking) to keep memory usage low
-    // Fetching 100k rows at once crashes Node. Fetching 1000 at a time does not.
+    // 3. Batch Fetching (Chunking)
     const BATCH_SIZE = 1000;
     let offset = 0;
     let hasMore = true;
@@ -81,13 +90,11 @@ app.get('/export', async (c) => {
         break;
       }
 
-      // Process and write chunk
       const chunkString = logs.map(log => {
         const rate = log.rate || 0;
         const hours = log.hours || 0;
         const total = (rate * hours).toFixed(2);
         
-        // CSV Injection protection and formatting
         const safeSummary = `"${(log.summary || '').replace(/"/g, '""').replace(/(\r\n|\n|\r)/g, ' ')}"`;
         const safeClient = `"${(log.clientName || 'Unknown').replace(/"/g, '""')}"`;
         const status = log.isBlocked ? 'Blocked' : 'Done';
@@ -98,8 +105,6 @@ app.get('/export', async (c) => {
       await stream.write(chunkString + '\n');
 
       offset += BATCH_SIZE;
-      
-      // Artificial break to allow event loop to handle other requests (optional but good for massive exports)
       await new Promise(resolve => setTimeout(resolve, 0));
     }
   });

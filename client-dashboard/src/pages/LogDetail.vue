@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApi } from '../lib/api'
-import LoomPlayer from '../components/video/LoomPlayer.vue'
+import LoomPlayer from '../components/video/VideoPlayer.vue'
 import AppSidebar from '@/components/AppSidebar.vue'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from "@/components/ui/separator"

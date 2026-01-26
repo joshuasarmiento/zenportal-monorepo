@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { db } from '../db';
 import { clients, users } from '../db/schema';
 import { requireAuth } from '../lib/auth';
-import { eq, and, desc, count, sql } from 'drizzle-orm';
+import { eq, and, desc, count } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
