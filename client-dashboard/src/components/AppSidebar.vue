@@ -35,7 +35,6 @@ const loading = ref(false)
 
 const isPro = computed(() => userStore.user?.tier === 'pro')
 
-// Centralized user fetching and syncing logic
 useAuthSync();
 
 const handleUpgrade = async () => {
@@ -89,6 +88,11 @@ const menuItems = [
     ],
   },
 ]
+
+// Helper: Check if any child route is currently active
+const isGroupActive = (children: { path: string }[]) => {
+  return children.some(child => child.path === route.path)
+}
 </script>
 
 <template>
@@ -123,21 +127,28 @@ const menuItems = [
                 </router-link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            <Collapsible v-else as-child>
-              <SidebarMenuItem class="relative">
+
+            <Collapsible 
+              v-else 
+              as-child 
+              :default-open="isGroupActive(item.children)" 
+              class="group/collapsible"
+            >
+              <SidebarMenuItem>
                 <CollapsibleTrigger as-child>
-                  <SidebarMenuButton>
+                  <SidebarMenuButton :isActive="isGroupActive(item.children)" :tooltip="item.name">
                     <component :is="item.icon" />
                     <span>{{ item.name }}</span>
                     <ChevronRight
-                      class="absolute right-2 size-4 shrink-0 translate-y-0.5 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+                      class="ml-auto size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" 
+                    />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <SidebarMenu class="ml-7 mt-2 border-l border-border pl-4 w-2/3">
                     <SidebarMenuItem v-for="child in item.children" :key="child.name">
                       <router-link :to="child.path" custom v-slot="{ href, navigate, isActive }">
-                        <SidebarMenuButton :href="href" @click="navigate" :isActive="isActive" size="sm" variant="default">
+                        <SidebarMenuButton :href="href" @click="navigate" :isActive="isActive" size="sm">
                           {{ child.name }}
                         </SidebarMenuButton>
                       </router-link>
@@ -185,9 +196,9 @@ const menuItems = [
                 <span v-else>Upgrade Now ($12/mo)</span>
               </DropdownMenuItem>
 
-              <DropdownMenuItem @click="$router.push('/settings')" class="cursor-pointer">
+              <DropdownMenuItem @click="$router.push('/settings/profile')" class="cursor-pointer">
                 <Settings class="mr-2 h-4 w-4" />
-                <span>All Settings</span>
+                <span>Account</span>
               </DropdownMenuItem>
 
               <DropdownMenuSeparator />

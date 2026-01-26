@@ -155,26 +155,22 @@ const formatDate = (dateString: number) => {
           <div v-else-if="isPro"
             class="bg-slate-950 text-white rounded-xl p-6 relative overflow-hidden dark:border dark:border-slate-800">
             <div class="relative z-10">
-              <div class="flex justify-between items-center mb-4">
-                <span class="text-indigo-400 font-bold text-sm tracking-wider uppercase">Agency Pro</span>
-                <span class="text-2xl font-bold">$12<span class="text-sm text-slate-400 font-normal">/mo</span></span>
+              <div class="flex items-center gap-2 mb-3">
+                <Crown class="h-5 w-5 text-indigo-400" />
+                <span class="text-indigo-400 font-bold text-sm tracking-wider uppercase">Plan Active</span>
               </div>
-              <ul class="text-sm text-slate-300 space-y-2 mb-6">
-                <li class="flex items-center gap-2">
-                  <Check class="h-4 w-4 text-indigo-400" /> Unlimited Clients
-                </li>
-                <li class="flex items-center gap-2">
-                  <Check class="h-4 w-4 text-indigo-400" /> Video Integrations
-                </li>
-                <li class="flex items-center gap-2">
-                  <Check class="h-4 w-4 text-indigo-400" /> Priority Support
-                </li>
-              </ul>
+
+              <p class="text-slate-300 text-base mb-6 max-w-lg">
+                You are currently subscribed to the <strong>Agency Pro</strong> plan with unlimited access to all
+                features.
+              </p>
+
               <Button variant="secondary" @click="handlePortal" :disabled="loading">
                 <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
                 {{ loading ? 'Loading...' : 'Manage Billing' }}
               </Button>
             </div>
+
             <div class="absolute right-0 top-0 opacity-10 pointer-events-none">
               <Crown class="h-32 w-32 -mr-4 -mt-4 text-white" />
             </div>

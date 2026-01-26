@@ -34,7 +34,7 @@ const router = useRouter()
             <p class="text-slate-300 mb-4">
                 Every Sunday, ZenPortal sends you an email summary of your total hours and earnings for the week.
             </p>
-            <Button variant="secondary" size="sm" class="w-full" @click="router.push('/settings')">
+            <Button variant="secondary" size="sm" class="w-full" @click="router.push('/settings/notifications')">
                 Check Email Settings
             </Button>
             </CardContent>
