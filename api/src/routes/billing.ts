@@ -59,6 +59,8 @@ app.post('/checkout', async (c) => {
         quantity: 1,
       },
     ],
+    automatic_tax: { enabled: true },
+    customer_update: { address: 'auto' },
     success_url: `${config.app.frontendUrl}/settings?success=true`,
     cancel_url: `${config.app.frontendUrl}/settings?canceled=true`,
   });
@@ -84,6 +86,77 @@ app.post('/portal', async (c) => {
   });
 
   return c.json({ url: session.url });
+});
+
+app.get('/invoices', async (c) => {
+  const userId = c.get('userId');
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+
+  if (!user?.stripeCustomerId) {
+    return c.json({ invoices: [] });
+  }
+
+  // Fetch last 10 invoices from Stripe
+  const invoices = await stripe.invoices.list({
+    customer: user.stripeCustomerId,
+    limit: 10,
+    status: 'paid', // Optional: only show paid invoices
+  });
+
+  // Format for frontend
+  const history = invoices.data.map((inv) => ({
+    id: inv.id,
+    date: inv.created * 1000, // Stripe uses seconds, JS uses ms
+    amount: inv.total / 100,  // Convert cents to dollars
+    currency: inv.currency,
+    status: inv.status,
+    url: inv.hosted_invoice_url, // Link to view invoice
+    pdf: inv.invoice_pdf,        // Link to download PDF
+  }));
+
+  return c.json({ invoices: history });
+});
+
+app.get('/subscription', async (c) => {
+  const userId = c.get('userId');
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+  });
+
+  if (!user?.stripeCustomerId) {
+    return c.json({ subscription: null });
+  }
+
+  // List subscriptions to find the active one
+  const subscriptions = await stripe.subscriptions.list({
+    customer: user.stripeCustomerId,
+    status: 'all',
+    limit: 1,
+  });
+
+  if (subscriptions.data.length === 0) {
+    return c.json({ subscription: null });
+  }
+
+  const sub = subscriptions.data[0];
+
+  // 🟢 FIX: Access current_period_end via the first item
+  const currentPeriodEnd = sub.items.data[0]?.current_period_end;
+
+  return c.json({
+    subscription: {
+      status: sub.status,
+      cancel_at_period_end: sub.cancel_at_period_end,
+      // 🟢 NEW: Send the specific cancellation date
+      cancel_at: sub.cancel_at ? sub.cancel_at * 1000 : null,
+      current_period_end: currentPeriodEnd ? currentPeriodEnd * 1000 : Date.now(),
+      plan: sub.items.data[0]?.price.nickname || 'Pro Plan',
+    }
+  });
 });
 
 export { app as billingRouter };

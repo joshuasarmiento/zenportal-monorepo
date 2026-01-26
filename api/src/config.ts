@@ -27,6 +27,6 @@ export const config = {
     apiKey: getEnv('RESEND_API_KEY'),
   },
   app: {
-    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+    frontendUrl: getEnv('FRONTEND_URL') || 'http://localhost:5173',
   }
 };
