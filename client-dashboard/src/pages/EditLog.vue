@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useApi } from '../lib/api'
+import { useUserStore } from '@/stores/userStore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,12 +12,13 @@ import AppSidebar from '@/components/AppSidebar.vue'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from "@/components/ui/separator"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
-import { X, Loader2, Save } from 'lucide-vue-next'
+import { X, Loader2, Save, Lock, Video } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
 const router = useRouter()
 const route = useRoute()
 const { fetchApi } = useApi()
+const userStore = useUserStore()
 const loading = ref(true)
 const saving = ref(false)
 const logId = route.params.id as string
@@ -32,7 +34,10 @@ const form = ref({
   blockerDetails: ''
 })
 
+const isPro = computed(() => userStore.user?.tier === 'pro')
+
 onMounted(async () => {
+  await userStore.fetchUser()
   try {
     const data = await fetchApi(`/logs/${logId}`)
     form.value = {
@@ -56,14 +61,32 @@ onMounted(async () => {
 const submit = async () => {
   saving.value = true
   try {
+    // Sanitize data before sending
+    const payload = { ...form.value }
+    if (!isPro.value) {
+      delete (payload as any).videoUrl
+    }
+
     await fetchApi(`/logs/${logId}`, {
       method: 'PATCH',
-      body: JSON.stringify(form.value)
+      body: JSON.stringify(payload)
     })
     toast.success('Log updated successfully')
     router.push(`/log/${logId}`)
   } catch (err) {
     toast.error('Failed to update log')
+  } finally {
+    saving.value = false
+  }
+}
+
+const handleUpgrade = async () => {
+  saving.value = true
+  try {
+    const res = await fetchApi('/billing/checkout', { method: 'POST' })
+    if (res.url) window.location.href = res.url
+  } catch (err) {
+    alert('Failed to start checkout')
   } finally {
     saving.value = false
   }
@@ -124,10 +147,31 @@ const submit = async () => {
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div class="space-y-2">
-                    <Label>Video Update (Loom / Google Drive)</Label>
-                    <Input v-model="form.videoUrl" />
+                  <div class="space-y-2 relative">
+                    <div class="flex items-center justify-between">
+                        <Label :class="{'text-muted-foreground': !isPro}">Video Update (Loom / Drive)</Label>
+                        <span v-if="!isPro" class="text-[10px] font-bold bg-indigo-100 text-indigo-600 px-1.5 py-0.5 rounded flex items-center gap-1">
+                            <Lock class="h-2.5 w-2.5" /> PRO
+                        </span>
+                    </div>
+                    
+                    <div class="relative">
+                        <Input 
+                            v-model="form.videoUrl" 
+                            :disabled="!isPro"
+                            :placeholder="isPro ? 'Paste Loom or Drive link here...' : 'Upgrade to attach videos'" 
+                            :class="{'pl-9': !isPro, 'opacity-60 cursor-not-allowed bg-muted': !isPro}"
+                        />
+                        <div v-if="!isPro" class="absolute left-3 top-2.5 text-muted-foreground">
+                             <Video class="h-4 w-4" />
+                        </div>
+                    </div>
+                    
+                    <p v-if="!isPro" class="text-[10px] text-indigo-600 dark:text-indigo-400 font-medium cursor-pointer hover:underline" @click="handleUpgrade">
+                        <Lock class="h-2.5 w-2.5 inline mr-0.5" /> Unlock video embeds with Pro
+                    </p>
                   </div>
+
                   <div class="space-y-2">
                     <Label>Attachment Link</Label>
                     <Input v-model="form.attachmentUrl" />

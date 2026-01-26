@@ -3,7 +3,7 @@ import { stream } from 'hono/streaming';
 import { db } from '../db';
 import { workLogs, clients } from '../db/schema';
 import { requireAuth } from '../lib/auth';
-import { eq, and, sql, desc, asc, gte, lte } from 'drizzle-orm';
+import { eq, and, sql, desc, asc, gte, lte, count } from 'drizzle-orm';
 
 const app = new Hono<{ Variables: { userId: string } }>();
 
@@ -117,9 +117,10 @@ app.get('/', async (c) => {
     const { start: startDateStr } = getDateRange(range);
     const isDailyGroup = ['24h', '7d', '30d'].includes(range);
     const groupByFormat = isDailyGroup ? '%Y-%m-%d' : '%Y-%m';
+    const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
 
     // 2. Run Heavy Queries in PARALLEL (Drastically reduces latency)
-    const [statsResult, historyResult, topClientsResult] = await Promise.all([
+    const [statsResult, historyResult, topClientsResult, usageResult] = await Promise.all([
       
       // Query A: Dashboard Aggregates
       db.select({
@@ -163,11 +164,21 @@ app.get('/', async (c) => {
         ))
         .groupBy(clients.id)
         .orderBy(desc(sql`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`))
-        .limit(5)
+        .limit(5),
+      
+      // Query D: Monthly Log Count for Usage Limit
+      db
+        .select({ count: count() })
+        .from(workLogs)
+        .where(and(
+          eq(workLogs.userId, userId),
+          sql`${workLogs.date} LIKE ${currentMonth + '%'}`
+        ))
     ]);
 
     // 3. Process Results
     const dashboardStats = statsResult[0];
+    const logCount = usageResult[0]?.count || 0;
 
     // Format History Data
     const formattedHistory = historyResult.map(r => {
@@ -208,6 +219,7 @@ app.get('/', async (c) => {
       activeClients: Number(dashboardStats?.activeClients || 0),
       blockedRevenue: Number(dashboardStats?.blockedRevenue || 0),
       pendingBlockersCount: Number(dashboardStats?.pendingBlockersCount || 0),
+      logCount: logCount,
       goalTarget: GOAL_TARGET,
       goalPercent: Math.min(100, Math.round((currentEarnings / GOAL_TARGET) * 100)),
       revenueHistory: formattedHistory,

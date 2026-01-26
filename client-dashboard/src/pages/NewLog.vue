@@ -137,7 +137,7 @@ const handleUpgrade = async () => {
                 <div class="space-y-2">
                   <Label>Accomplishments (One per line)</Label>
                   <Textarea v-model="form.summary" rows="5"
-                    placeholder="- Fixed the homepage bug&#10;- Sent 50 cold emails" />
+                    placeholder="- Fixed the homepage bug&#10;- Sent 50 cold emails" required />
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -172,13 +172,13 @@ const handleUpgrade = async () => {
 
                   <div class="space-y-2">
                     <Label>Attachment Link</Label>
-                    <Input v-model="form.attachmentUrl" placeholder="GDrive / Dropbox Link" />
+                    <Input v-model="form.attachmentUrl" placeholder="GDrive / Dropbox Link"/>
                   </div>
                 </div>
 
                 <div class="space-y-2">
                   <Label>Hours Worked</Label>
-                  <Input v-model="form.hoursWorked" type="number" step="0.5" />
+                  <Input v-model="form.hoursWorked" type="number" step="0.5" required/>
                 </div>
 
                 <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border border-red-200 dark:border-red-900">

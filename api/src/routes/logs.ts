@@ -15,12 +15,12 @@ app.use('*', requireAuth);
 
 // Schema Validation
 const logSchema = z.object({
-  clientId: z.string().uuid(),
+  clientId: z.uuid(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
   summary: z.string().min(1, 'Summary is required'),
   hoursWorked: z.number().positive(),
-  videoUrl: z.string().url().optional().or(z.literal('')),
-  attachmentUrl: z.string().url().optional().or(z.literal('')),
+  videoUrl: z.url().optional().or(z.literal('')),
+  attachmentUrl: z.url().optional().or(z.literal('')),
   isBlocked: z.boolean().optional(),
   blockerDetails: z.string().optional()
 });
@@ -82,7 +82,7 @@ app.post('/', zValidator('json', logSchema), async (c) => {
 
   // 3. Enforce Pro Features (Video/Attachment)
   const videoUrl = isPro ? body.videoUrl : null;
-  const attachmentUrl = isPro ? body.attachmentUrl : null;
+  const attachmentUrl = body.attachmentUrl || null;
 
   const newLog = await db.insert(workLogs).values({
     id: uuidv4(),
@@ -137,6 +137,15 @@ app.patch('/:id', zValidator('json', updateLogSchema), async (c) => {
   const userId = c.get('userId');
   const logId = c.req.param('id');
   const body = c.req.valid('json');
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: { tier: true }
+  });
+
+  if (body.videoUrl && user?.tier !== 'pro') {
+    delete body.videoUrl; // Strip video url if user is not pro
+  }
 
   const existingLog = await db.query.workLogs.findFirst({
     where: and(eq(workLogs.id, logId), eq(workLogs.userId, userId)),
