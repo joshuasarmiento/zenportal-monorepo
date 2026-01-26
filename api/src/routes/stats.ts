@@ -3,7 +3,7 @@ import { stream } from 'hono/streaming';
 import { db } from '../db';
 import { workLogs, clients, users } from '../db/schema';
 import { requireAuth } from '../lib/auth';
-import { eq, and, sql, desc, asc, gte, lte, count } from 'drizzle-orm';
+import { eq, and, sql, desc, asc, gte, count } from 'drizzle-orm';
 
 const app = new Hono<{ Variables: { userId: string } }>();
 
@@ -53,8 +53,8 @@ app.get('/export', async (c) => {
   c.header('Content-Disposition', `attachment; filename="work_logs_${new Date().toISOString().split('T')[0]}.csv"`);
 
   return stream(c, async (stream) => {
-    // 1. Write Header
-    await stream.write(`Date,Client,Summary,Hours,Rate,Total,Status\n`);
+    // 1. Write Header (Added Video & Attachment columns)
+    await stream.write(`Date,Client,Summary,Hours,Rate,Total,Status,Video Link,Attachment\n`);
 
     // 2. Build Query Filters
     const filters = [eq(workLogs.userId, userId)];
@@ -76,7 +76,11 @@ app.get('/export', async (c) => {
           summary: workLogs.summary,
           hours: workLogs.hoursWorked,
           rate: clients.hourlyRate,
-          isBlocked: workLogs.isBlocked
+          isBlocked: workLogs.isBlocked,
+          // 🟢 ADDED: Select the link columns
+          // Note: Verify these match your schema.ts exactly!
+          video: workLogs.videoUrl,       
+          file: workLogs.attachmentUrl   
         })
         .from(workLogs)
         .innerJoin(clients, eq(workLogs.clientId, clients.id))
@@ -98,8 +102,12 @@ app.get('/export', async (c) => {
         const safeSummary = `"${(log.summary || '').replace(/"/g, '""').replace(/(\r\n|\n|\r)/g, ' ')}"`;
         const safeClient = `"${(log.clientName || 'Unknown').replace(/"/g, '""')}"`;
         const status = log.isBlocked ? 'Blocked' : 'Done';
+        
+        // 🟢 ADDED: Handle nulls for links
+        const videoLink = log.video || '';
+        const fileLink = log.file || '';
 
-        return `${log.date},${safeClient},${safeSummary},${hours},${rate},${total},${status}`;
+        return `${log.date},${safeClient},${safeSummary},${videoLink},${fileLink},${hours},${rate},${total},${status}`;
       }).join('\n');
 
       await stream.write(chunkString + '\n');
