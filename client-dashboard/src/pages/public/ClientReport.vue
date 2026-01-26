@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import LoomPlayer from '../components/video/VideoPlayer.vue' // Ensure this path is correct
+import LoomPlayer from '@/components/video/VideoPlayer.vue' // Ensure this path is correct
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'

@@ -11,7 +11,7 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.use(clerkPlugin, {
-  publishableKey: env.VITE_CLERK_PUBLISHABLE_KEY
+  publishableKey: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || env.VITE_CLERK_PUBLISHABLE_KEY
 })
 
 app.mount('#app')

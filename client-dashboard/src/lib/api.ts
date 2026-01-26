@@ -15,7 +15,7 @@ export function useApi() {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     }
 
-    const res = await fetch(`${env.VITE_API_URL}${endpoint}`, {
+    const res = await fetch(`${ import.meta.env.VITE_API_URL || env.VITE_API_URL}${endpoint}`, {
       ...options,
       headers,
     })
