@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarGroup, SidebarGroupLabel } from '@/components/ui/sidebar'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuPortal } from '@/components/ui/dropdown-menu'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useColorMode } from '@vueuse/core'
@@ -21,7 +22,8 @@ import {
   Moon,    
   Sun,  
   Laptop,
-  UserCircle
+  UserCircle,
+  ChevronRight
 } from 'lucide-vue-next'
 import { useApi } from '@/lib/api'
 import { useAuthSync } from '@/composables/useAuthSync'
@@ -63,15 +65,32 @@ const handlePortal = async () => {
   }
 }
 
-const links = [
+const menuItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { name: 'Clients', path: '/clients', icon: Users },
   { name: 'Earnings', path: '/earnings', icon: BarChart3 },
-]
-
-const UserGuide = [
-  { name: 'User Guide', path: '/help', icon: BookOpen },
-  { name: 'Settings', path: '/settings', icon: Settings },
+  {
+    name: 'User Guide',
+    icon: BookOpen,
+    children: [
+      { name: 'Getting Started', path: '/help/getting-started' },
+      { name: 'Clients & Access', path: '/help/clients-access' },
+      { name: 'Logging Work', path: '/help/logging-work' },
+      { name: 'Earnings & Goals', path: '/help/earnings-goals' },
+      { name: 'API & Automation', path: '/help/api-automation' },
+    ],
+  },
+  {
+    name: 'Settings',
+    icon: Settings,
+    children: [
+      { name: 'My Profile', path: '/settings/profile' },
+      { name: 'Branding & Look', path: '/settings/branding' },
+      { name: 'Billing (Stripe)', path: '/settings/billing' },
+      { name: 'Notifications', path: '/settings/notifications' },
+      { name: 'API Access', path: '/settings/api' },
+    ],
+  },
 ]
 </script>
 
@@ -97,29 +116,40 @@ const UserGuide = [
 
     <SidebarContent>
       <SidebarGroup>
-        <SidebarGroupLabel>Platform</SidebarGroupLabel>
         <SidebarMenu>
-          <SidebarMenuItem v-for="link in links" :key="link.path">
-            <SidebarMenuButton as-child :isActive="route.path === link.path" :tooltip="link.name">
-              <router-link :to="link.path">
-                <component :is="link.icon" />
-                <span>{{ link.name }}</span>
-              </router-link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarGroup>
-      <SidebarGroup>
-        <SidebarGroupLabel>Settings</SidebarGroupLabel>
-        <SidebarMenu>
-          <SidebarMenuItem v-for="guide in UserGuide" :key="guide.path">
-            <SidebarMenuButton as-child :isActive="route.path === guide.path" :tooltip="guide.name">
-              <router-link :to="guide.path">
-                <component :is="guide.icon" />
-                <span>{{ guide.name }}</span>
-              </router-link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          <template v-for="item in menuItems" :key="item.name">
+            <SidebarMenuItem v-if="!item.children">
+              <SidebarMenuButton as-child :isActive="route.path === item.path" :tooltip="item.name">
+                <router-link :to="item.path">
+                  <component :is="item.icon" />
+                  <span>{{ item.name }}</span>
+                </router-link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <Collapsible v-else as-child>
+              <SidebarMenuItem class="relative">
+                <CollapsibleTrigger as-child>
+                  <SidebarMenuButton>
+                    <component :is="item.icon" />
+                    <span>{{ item.name }}</span>
+                    <ChevronRight
+                      class="absolute right-2 size-4 shrink-0 translate-y-0.5 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <SidebarMenu class="ml-7 mt-2 border-l border-border pl-4 w-2/3">
+                    <SidebarMenuItem v-for="child in item.children" :key="child.name">
+                      <router-link :to="child.path" custom v-slot="{ href, navigate, isActive }">
+                        <SidebarMenuButton :href="href" @click="navigate" :isActive="isActive" size="sm" variant="default">
+                          {{ child.name }}
+                        </SidebarMenuButton>
+                      </router-link>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </CollapsibleContent>
+              </SidebarMenuItem>
+            </Collapsible>
+          </template>
         </SidebarMenu>
       </SidebarGroup>
     </SidebarContent>

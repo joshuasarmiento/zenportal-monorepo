@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
             <CardDescription>Update your photo, password, and personal details via Clerk.</CardDescription>
         </CardHeader>
 
-        <CardContent class="pt-6">
+        <CardContent class="py-6 flex items-center justify-center mx-auto">
             <UserProfile :appearance="{
                 elements: {
                     rootBox: 'w-full',

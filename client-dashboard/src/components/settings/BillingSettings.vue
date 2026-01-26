@@ -94,8 +94,7 @@ const formatDate = (dateString: number) => {
         </Badge>
       </CardHeader>
 
-      <CardContent class="pt-6">
-        
+      <CardContent>
         <div v-if="loadingSubscription" class="bg-card border rounded-xl p-6">
            <div class="flex justify-between items-center mb-6">
               <Skeleton class="h-4 w-24" />
@@ -135,8 +134,12 @@ const formatDate = (dateString: number) => {
                 <span class="text-2xl font-bold">$12<span class="text-sm text-slate-400 font-normal">/mo</span></span>
               </div>
               <ul class="text-sm text-slate-300 space-y-2 mb-6">
-                <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Unlimited Clients</li>
-                <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Video Integrations</li>
+                <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Unlimited Clients </li>
+                <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Loom & Drive Embeds </li>
+                <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Custom Branding & Colors </li>
+                <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Unlimited History </li>
+                <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Export to PDF/CSV </li>
+                <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Programmatic API Access </li>
                 <li class="flex items-center gap-2"><Check class="h-4 w-4 text-indigo-400" /> Priority Support</li>
               </ul>
               <Button variant="secondary" @click="handlePortal" :disabled="loading">
