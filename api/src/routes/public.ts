@@ -28,7 +28,7 @@ app.get('/report/:token', async (c) => {
     }
   });
 
-  if (!clientData) {
+  if (!clientData || clientData.status === 'archived') {
     return c.json({ error: 'Report not found or expired' }, 404);
   }
 
