@@ -9,7 +9,7 @@ async function runWeeklyRecap() {
   // 1. Get users who enabled weekly recap
   const subscribedUsers = await db.query.users.findMany({
     where: eq(users.notifyWeeklyRecap, true),
-    columns: { id: true, email: true, fullName: true }
+    columns: { id: true, email: true, name: true }
   });
 
   // 2. Calculate stats for the last 7 days
@@ -36,7 +36,7 @@ async function runWeeklyRecap() {
 
     if (totalHours > 0) {
       console.log(`Sending email to ${user.email} (Hours: ${totalHours})`);
-      await sendWeeklyRecapEmail(user.email, user.fullName || 'User', totalHours, totalEarnings);
+      await sendWeeklyRecapEmail(user.email, user.name || 'User', totalHours, totalEarnings);
     }
   }
 

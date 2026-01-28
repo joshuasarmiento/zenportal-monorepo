@@ -1,44 +1,43 @@
+// api/src/db/schema.ts
 import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
 import { relations, sql } from 'drizzle-orm';
 
-// --- USERS TABLE (Updated) ---
-export const users = sqliteTable('users', {
-  id: text('id').primaryKey(), // Matches Clerk User ID
+// --- BETTER AUTH TABLES ---
+
+export const users = sqliteTable('user', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
   email: text('email').notNull().unique(),
-  fullName: text('full_name'),
-  avatarUrl: text('avatar_url'),
+  emailVerified: integer('email_verified', { mode: 'boolean' }).notNull(),
+  image: text('image'), // Renamed from avatarUrl
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+
+  lastLoginMethod: text("lastLoginMethod"),
   
-  // NEW PROFILE FIELDS
-  headline: text('headline'), // e.g. "Senior Full Stack Developer"
-  bio: text('bio'), // Longer description
+  // Custom Profile Fields
+  headline: text('headline'),
+  bio: text('bio'),
   websiteUrl: text('website_url'),
   linkedinUrl: text('linkedin_url'),
   twitterUrl: text('twitter_url'),
   
   // Branding & Settings
-  // We renamed 'handle' -> 'portalSlug' to match your frontend code
   portalSlug: text('portal_slug').unique(), 
-  // We renamed 'brandColor' -> 'accentColor' to match your frontend code
   accentColor: text('accent_color').default('indigo'),
-
   publicTemplate: text('public_template', { enum: ['modern', 'corporate', 'creative'] }).default('modern'),
   
-  // Notifications (NEW COLUMNS)
+  // Notifications
   notifyClientView: integer('notify_client_view', { mode: 'boolean' }).default(false),
   notifyWeeklyRecap: integer('notify_weekly_recap', { mode: 'boolean' }).default(false),
   notifyMarketing: integer('notify_marketing', { mode: 'boolean' }).default(false),
   
-  // SaaS / Billing
   tier: text('tier', { enum: ['free', 'pro'] }).default('free'),
-  stripeCustomerId: text('stripe_customer_id'),
-  stripeSubscriptionId: text('stripe_subscription_id'),
+  paymongoCustomerId: text('paymongo_customer_id'),
 
   // Programmatic Access
   apiKeyRead: text('api_key_read').unique(),
   apiKeyWrite: text('api_key_write').unique(),
-  
-  createdAt: integer('created_at', { mode: 'timestamp' })
-    .default(sql`(strftime('%s', 'now') * 1000)`),
 }, (table) => {
   return {
     apiKeyReadIdx: index('api_key_read_idx').on(table.apiKeyRead),
@@ -46,7 +45,49 @@ export const users = sqliteTable('users', {
   }
 });
 
-// --- CLIENTS TABLE (Unchanged) ---
+export const sessions = sqliteTable("session", {
+  id: text("id").primaryKey(),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  token: text("token").notNull().unique(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  ipAddress: text("ip_address"),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+});
+
+export const accounts = sqliteTable("account", {
+  id: text("id").primaryKey(),
+  accountId: text("account_id").notNull(),
+  providerId: text("provider_id").notNull(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  idToken: text("id_token"),
+  accessTokenExpiresAt: integer("access_token_expires_at", { mode: "timestamp" }),
+  refreshTokenExpiresAt: integer("refresh_token_expires_at", { mode: "timestamp" }),
+  scope: text("scope"),
+  password: text("password"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+export const verifications = sqliteTable("verification", {
+  id: text("id").primaryKey(),
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }),
+  updatedAt: integer("updated_at", { mode: "timestamp" }),
+});
+
+export const twoFactor = sqliteTable("two_factor", {
+  id: text("id").primaryKey(),
+  secret: text("secret").notNull(),
+  backupCodes: text("backup_codes").notNull(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+});
+
+// --- CLIENTS TABLE ---
 export const clients = sqliteTable('clients', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
@@ -55,7 +96,6 @@ export const clients = sqliteTable('clients', {
   contactName: text('contact_name'),
   contactEmail: text('contact_email'),
   
-  // The "Magic Link" Token
   accessToken: text('access_token').notNull().unique(),
   
   status: text('status', { enum: ['active', 'archived'] }).default('active'),
@@ -71,21 +111,33 @@ export const clients = sqliteTable('clients', {
   };
 });
 
-// --- WORK LOGS TABLE (Unchanged) ---
+export const subscription = sqliteTable("subscription", {
+  id: text("id").primaryKey(), // PayMongo Checkout Session ID or Reference
+  referenceId: text("reference_id").notNull(), // The User ID
+  plan: text("plan"), // 'pro'
+  status: text("status"), // 'paid', 'expired'
+  
+  // PayMongo doesn't have auto-recurring "subscriptions" in the basic Checkout API 
+  // like Stripe, so we calculate these manually based on the payment date.
+  periodStart: integer("period_start", { mode: "timestamp" }),
+  periodEnd: integer("period_end", { mode: "timestamp" }),
+  
+  createdAt: integer("created_at", { mode: "timestamp" }),
+});
+
+// --- WORK LOGS TABLE ---
 export const workLogs = sqliteTable('work_logs', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   clientId: text('client_id').notNull().references(() => clients.id, { onDelete: 'cascade' }),
   
-  date: text('date').notNull(), // ISO Date String "2026-10-24"
+  date: text('date').notNull(),
   summary: text('summary').notNull(),
   hoursWorked: real('hours_worked').default(0),
   
-  // Proof
-  videoUrl: text('video_url'), // Loom Link
+  videoUrl: text('video_url'),
   attachmentUrl: text('attachment_url'),
   
-  // Blockers
   isBlocked: integer('is_blocked', { mode: 'boolean' }).default(false),
   blockerDetails: text('blocker_details'),
   
@@ -100,7 +152,7 @@ export const workLogs = sqliteTable('work_logs', {
   };
 });
 
-// --- RELATIONS (Unchanged) ---
+// --- RELATIONS ---
 export const usersRelations = relations(users, ({ many }) => ({
   clients: many(clients),
   logs: many(workLogs),

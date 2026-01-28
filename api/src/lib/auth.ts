@@ -1,21 +1,110 @@
+// api/src/lib/auth.ts
+import { betterAuth, type User } from "better-auth";
+import { emailOTP, lastLoginMethod } from "better-auth/plugins"; 
+import { APIError } from "better-auth/api";
+import { haveIBeenPwned } from "better-auth/plugins"
+
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createMiddleware } from 'hono/factory';
-import { getAuth } from '@hono/clerk-auth';
+import { db } from '../db';
+import { config } from '../config';
+import * as schema from '../db/schema';
 
-// Middleware to FORCE login. 
-// If no user is found, it returns 401 Unauthorized immediately.
-export const requireAuth = createMiddleware(async (c, next) => {
-  const auth = getAuth(c);
+export const auth = betterAuth({
+    database: drizzleAdapter(db, {
+        provider: "sqlite", 
+        schema: {
+            ...schema,
+            user: schema.users,
+            session: schema.sessions,
+            account: schema.accounts,
+            verification: schema.verifications,
+            twoFactor: schema.twoFactor,
+            subscription: schema.subscription
+        }
+    }),
+    user: {
+        additionalFields: {
+            tier: {
+                type: "string",
+                required: false,
+                defaultValue: "free",
+                input: false // Not user-editable
+            },
+            paymongoCustomerId: {
+                type: "string",
+                required: false,
+                input: false 
+            }
+        }
+    },
+    trustedOrigins: [
+        config.app.frontendUrl || "http://localhost:5173", 
+    ],
+    baseURL: config.betterAuth.baseURL || "http://localhost:5173/api/auth",
+    emailAndPassword: {
+        enabled: true,
+        autoSignIn: true,
+        requireEmailVerification: true,
+        validator: {
+            validatePassword: async (password: string) => {
+                const isStrong = password.length >= 8 && 
+                                 /[A-Z].*[A-Z]/.test(password) && // At least 2 capital letters
+                                 /[0-9]/.test(password);         // At least 1 number
 
-  if (!auth?.userId) {
-    return c.json({ error: 'Unauthorized' }, 401);
-  }
-
-  // Pass the userId to the next handler
-  c.set('userId', auth.userId);
-  await next();
+                if (!isStrong) {
+                    throw new APIError("BAD_REQUEST", {
+                        message: "Your password is not strong enough. Add more words that are less common. Capitalize more than the first letter."
+                    });
+                }
+            }
+        }
+    },
+    socialProviders: {
+        google: {
+            accessType: "offline", 
+            prompt: "select_account consent", 
+            clientId: config.google.googleclientId,
+            clientSecret: config.google.googleclientSecret,
+            redirectURI: "http://localhost:3000/api/auth/callback/google"
+        },
+    },
+    plugins: [
+        haveIBeenPwned({
+            customPasswordCompromisedMessage: "This password has been found in a data breach. Please choose a more secure password."
+        }),
+        emailOTP({
+            async sendVerificationOTP({ email, otp, type }) {
+                if (type === "forget-password") {
+                    console.log(`Sending Password Reset OTP to ${email}: ${otp}`);
+                } else if (type === "sign-in") {
+                     console.log(`Sending Login OTP to ${email}: ${otp}`);
+                } else if (type === "email-verification") {
+                     console.log(`Sending Verification OTP to ${email}: ${otp}`);
+                }
+            },
+            otpLength: 6,
+            expiresIn: 300 // 5 minutes
+        }),
+        lastLoginMethod({
+            storeInDatabase: true 
+        }),
+    ]
 });
 
-// Type definition for Hono Variables
-type Variables = {
+export const requireAuth = createMiddleware<{ Variables: { userId: string, user: User, session: any } }>(async (c, next) => {
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  if (!session?.user) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+  c.set('user', session.user);
+  c.set('userId', session.user.id);
+  c.set('session', session.session);
+  return next();
+});
+
+export type AuthVariables = {
   userId: string;
+  user: User;
+  session: any;
 };

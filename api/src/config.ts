@@ -13,21 +13,25 @@ const getEnv = (key: string): string => {
 export const config = {
   turso: {
     databaseUrl: getEnv('TURSO_DATABASE_URL'),
-    authToken: getEnv('TURSO_AUTH_TOKEN'),
+    authToken: getEnv('TURSO_AUTH_TOKEN')
   },
-  clerk: {
-    webhookSecret: getEnv('CLERK_WEBHOOK_SECRET'),
-    secretKey: getEnv('CLERK_SECRET_KEY'), // Add this line
+   paymongo: {
+    secretKey: getEnv('PAYMONGO_SECRET_KEY'),
+    publicKey: getEnv('PAYMONGO_PUBLIC_KEY'),
+    webhookSecret: getEnv('PAYMONGO_WEBHOOK'),
   },
-  stripe: {
-    secretKey: getEnv('STRIPE_SECRET_KEY'),
-    webhookSecret: getEnv('STRIPE_WEBHOOK_SECRET'),
-    priceId: getEnv('STRIPE_PRICE_ID'),
+  betterAuth: {
+    secretKey: getEnv('BETTER_AUTH_SECRET'),
+    baseURL: getEnv('BETTER_AUTH_URL')
+  },
+  google: {
+      googleclientSecret: getEnv('GOOGLE_CLIENT_SECRET'),
+      googleclientId: getEnv('GOOGLE_CLIENT_ID')
   },
   resend: {
-    apiKey: getEnv('RESEND_API_KEY'),
+    apiKey: getEnv('RESEND_API_KEY')
   },
   app: {
-    frontendUrl: getEnv('FRONTEND_URL') || 'http://localhost:5173',
+    frontendUrl: getEnv('FRONTEND_URL') || 'http://localhost:5173'
   }
 };

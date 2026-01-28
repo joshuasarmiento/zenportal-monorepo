@@ -5,8 +5,12 @@
     "dev": "tsx watch src/index.ts",
     "build": "bun build src/index.ts --target=node --outdir=./dist --external=@libsql/client/sqlite3",
     "preview": "node dist/index.js",
-    "db:push": "npx drizzle-kit push",
-    "ngrok": "npx ngrok http 3000"
+    "ngrok": "bun ngrok http 3000",
+    "dk:push": "bun drizzle-kit push",
+    "dk:generate": "bun x drizzle-kit generate",
+    "dk:migrate": "bun x drizzle-kit migrate",
+    "ba:migrate": "bun x @better-auth/cli@latest migrate",
+    "ba:generate": "bun x @better-auth/cli@latest generate"
   },
   "dependencies": {
     "@hono/clerk-auth": "^3.1.0",
@@ -17,7 +21,6 @@
     "drizzle-orm": "^0.45.1",
     "hono": "^4.11.5",
     "resend": "^6.8.0",
-    "stripe": "^20.2.0",
     "svix": "^1.84.1",
     "uuid": "^13.0.0",
     "zod": "^4.3.6"

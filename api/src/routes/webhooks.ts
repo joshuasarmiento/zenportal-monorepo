@@ -1,186 +1,92 @@
 import { Hono } from 'hono';
 import { db } from '../db';
-import { users } from '../db/schema';
+import { users, subscription } from '../db/schema';
 import { eq } from 'drizzle-orm';
-import Stripe from 'stripe';
-import { Webhook } from 'svix';
 import { config } from '../config';
-import { sendSubscriptionEmail } from '../lib/email';
+import * as crypto from 'crypto';
 
 const app = new Hono();
 
-const stripe = new Stripe(config.stripe.secretKey, { apiVersion: '2025-12-15.clover' as any });
+// POST /webhooks/paymongo
+app.post('/paymongo', async (c) => {
+  const signatureHeader = c.req.header('paymongo-signature');
+  const rawBody = await c.req.text(); // We need the raw text for verification
 
-// CLERK WEBHOOK
-app.post('/clerk', async (c) => {
-  const payload = await c.req.json();
-  const headers = c.req.header();
-  const secret = config.clerk.webhookSecret;
+  if (!signatureHeader) {
+    return c.json({ error: 'Missing signature' }, 401);
+  }
 
-  const wh = new Webhook(secret);
-  let evt: any;
-
+  // 1. Signature Verification
   try {
-    evt = wh.verify(JSON.stringify(payload), {
-      "svix-id": headers["svix-id"] as string,
-      "svix-timestamp": headers["svix-timestamp"] as string,
-      "svix-signature": headers["svix-signature"] as string,
-    });
-  } catch (err) {
-    return c.json({ error: "Invalid Signature" }, 400);
-  }
+    const parts = signatureHeader.split(',');
+    const timestamp = parts.find(p => p.startsWith('t='))?.split('=')[1];
+    const testSignature = parts.find(p => p.startsWith('te='))?.split('=')[1];
+    const liveSignature = parts.find(p => p.startsWith('li='))?.split('=')[1];
 
-  const eventType = evt.type;
+    if (!timestamp) throw new Error('Missing timestamp');
 
-  // 1. User Created (Existing)
-  if (eventType === 'user.created') {
-    const { id, email_addresses, first_name, last_name, image_url, primary_email_address_id } = evt.data;
+    // Combine timestamp and raw body
+    const canonicalString = `${timestamp}.${rawBody}`;
     
-    const primaryEmailObj = email_addresses.find((e: any) => e.id === primary_email_address_id);
-    const email = primaryEmailObj ? primaryEmailObj.email_address : null;
-    
-    if (!email) {
-      console.error(`❌ User ${id} created without a primary email.`);
-      return c.json({ error: "No email found" }, 400);
-    }
+    // Create HMAC SHA256
+    const computedSignature = crypto
+      .createHmac('sha256', config.paymongo.webhookSecret)
+      .update(canonicalString)
+      .digest('hex');
 
-    const fullName = `${first_name || ''} ${last_name || ''}`.trim();
+    // Compare signatures (Use 'te' for test mode, 'li' for live)
+    // For safety in development, you can check both or toggle based on config
+    const signatureToMatch = config.paymongo.publicKey.startsWith('pk_live') ? liveSignature : testSignature;
 
-    await db.insert(users).values({
-      id: id,
-      email: email,
-      fullName: fullName || 'New User',
-      avatarUrl: image_url,
-      tier: 'free',
-    });
-    console.log(`✅ User ${id} created in Turso!`);
-  }
-
-  // 🟢 2. User Updated (NEW) - Syncs Name & Logo changes
-  if (eventType === 'user.updated') {
-    const { id, first_name, last_name, image_url } = evt.data;
-    
-    const fullName = `${first_name || ''} ${last_name || ''}`.trim();
-
-    await db.update(users)
-      .set({
-        fullName: fullName || 'User', // Fallback if empty
-        avatarUrl: image_url,
-      })
-      .where(eq(users.id, id));
-
-    console.log(`🔄 User ${id} updated in Turso!`);
-  }
-
-  // 3. User Deleted (Existing)
-  if (eventType === 'user.deleted') {
-    const { id } = evt.data;
-    await db.delete(users).where(eq(users.id, id));
-    console.log(`🗑️ User ${id} deleted from Turso.`);
-  }
-
-  return c.json({ success: true });
-});
-
-// STRIPE WEBHOOK
-app.post('/stripe', async (c) => {
-  const sig = c.req.header('stripe-signature');
-  const body = await c.req.text();
-  let event: Stripe.Event;
-
-  try {
-    event = stripe.webhooks.constructEvent(body, sig!, config.stripe.webhookSecret);
-  } catch (err: any) {
-    return c.json({ error: `Webhook Error: ${err.message}` }, 400);
-  }
-
-  try {
-    switch (event.type) {
-      case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
-        const subscriptionId = session.subscription as string;
-        const customerId = session.customer as string;
-
-        const result = await db.update(users)
-          .set({ tier: 'pro', stripeSubscriptionId: subscriptionId })
-          .where(eq(users.stripeCustomerId, customerId))
-          .returning({ email: users.email, fullName: users.fullName });
-
-        if (result[0]) {
-          // Send Welcome Email
-          await sendSubscriptionEmail(result[0].email, result[0].fullName || 'User', 'created');
-        }
-        break;
-      }
-
-      // case 'customer.subscription.updated': {
-      //   const subscription = event.data.object as Stripe.Subscription;
-      //   const customerId = subscription.customer as string;
-      //   const status = subscription.status;
-      //   const isValidPro = status === 'active';
-      //   const newTier = isValidPro ? 'pro' : 'free';
-
-      //   const result = await db.update(users)
-      //     .set({ tier: newTier, stripeSubscriptionId: subscription.id })
-      //     .where(eq(users.stripeCustomerId, customerId))
-      //     .returning({ email: users.email, fullName: users.fullName });
-
-      //   if (result[0]) {
-      //      // Send Update Email
-      //      await sendSubscriptionEmail(result[0].email, result[0].fullName || 'User', 'updated', newTier);
-      //   }
-      //   break;
-      // }
-      case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription;
-        const customerId = subscription.customer as string;
-        const status = subscription.status;
-
-        // 🟢 CHANGED: We now treat 'active' as PRO, even if they scheduled a cancellation.
-        // They paid for the month, so let them keep it until it expires.
-        const isValidPro = status === 'active' || status === 'trialing';
-
-        const newTier = isValidPro ? 'pro' : 'free';
-
-        const result = await db.update(users)
-          .set({ 
-            tier: newTier, 
-            stripeSubscriptionId: subscription.id 
-          })
-          .where(eq(users.stripeCustomerId, customerId))
-          .returning({ email: users.email, fullName: users.fullName, tier: users.tier });
-
-        // Only send email if the tier ACTUALLY changed (e.g., Active -> Past Due)
-        if (result[0] && result[0].tier !== newTier) {
-           await sendSubscriptionEmail(result[0].email, result[0].fullName || 'User', 'updated', newTier);
-        }
-        
-        console.log(`🔄 Subscription updated for ${customerId}. Status: ${status}`);
-        break;
-      }
-
-      case 'customer.subscription.deleted': {
-        const subscription = event.data.object as Stripe.Subscription;
-        const customerId = subscription.customer as string;
-
-        const result = await db.update(users)
-          .set({ tier: 'free', stripeSubscriptionId: null })
-          .where(eq(users.stripeCustomerId, customerId))
-          .returning({ email: users.email, fullName: users.fullName });
-
-        if (result[0]) {
-          // Send Cancellation Email
-          await sendSubscriptionEmail(result[0].email, result[0].fullName || 'User', 'deleted');
-        }
-        break;
-      }
+    if (computedSignature !== signatureToMatch) {
+       console.error("Signature Mismatch:", { computedSignature, signatureToMatch });
+       return c.json({ error: 'Invalid signature' }, 401);
     }
   } catch (err) {
-    console.error(`Error processing webhook: ${err}`);
-    return c.json({ error: 'Webhook processing failed' }, 500);
+    console.error("Webhook Verification Failed", err);
+    return c.json({ error: 'Verification failed' }, 401);
   }
 
-  return c.json({ received: true });
+  // 2. Process the Event
+  const event = JSON.parse(rawBody);
+  const type = event.data.attributes.type;
+
+  // Event: checkout_session.payment.paid
+  if (type === 'checkout_session.payment.paid') {
+    const attributes = event.data.attributes.data.attributes;
+    const metadata = attributes.metadata;
+    const userId = metadata?.userId;
+
+    if (userId) {
+      console.log(`✅ Payment received for User: ${userId}`);
+
+      // Calculate Subscription End Date (e.g., 30 days)
+      const now = new Date();
+      const periodEnd = new Date();
+      periodEnd.setDate(now.getDate() + 30);
+
+      // A. Update User
+      await db.update(users)
+        .set({ 
+          tier: 'pro',
+          paymongoCustomerId: attributes.billing?.email
+        })
+        .where(eq(users.id, userId));
+
+      // B. Record Subscription
+      await db.insert(subscription).values({
+        id: event.data.id, // Webhook Event ID or Checkout ID
+        referenceId: userId,
+        plan: 'pro',
+        status: 'paid',
+        periodStart: now,
+        periodEnd: periodEnd,
+        createdAt: now,
+      });
+    }
+  }
+
+  return c.json({ status: 'ok' });
 });
 
 export { app as webhooksRouter };

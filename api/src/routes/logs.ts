@@ -6,7 +6,7 @@ import { and, eq, desc, sql, count } from 'drizzle-orm'; // Added sql, count
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
-import { sendLogEmail } from '../lib/email';
+// import { sendLogEmail } from '../lib/email';
 import { config } from '../config';
 
 const app = new Hono<{ Variables: { userId: string } }>();
@@ -53,7 +53,7 @@ app.post('/', zValidator('json', logSchema), async (c) => {
   // 1. Get User Tier
   const user = await db.query.users.findFirst({
     where: eq(users.id, userId),
-    columns: { tier: true, fullName: true }
+    columns: { tier: true, name: true }
   });
 
   const isPro = user?.tier === 'pro';
@@ -103,16 +103,22 @@ app.post('/', zValidator('json', logSchema), async (c) => {
     columns: { contactEmail: true, companyName: true, accessToken: true }
   });
 
-  if (client?.contactEmail && user?.fullName) {
+  if (client?.contactEmail && user?.name) {
     const reportLink = `${config.app.frontendUrl}/c/${client.accessToken}`;
-
-    await sendLogEmail({
-      to: client.contactEmail,
-      clientName: client.companyName,
-      vaName: user.fullName,
-      summary: body.summary,
-      link: reportLink
-    });
+    console.log(`New Log 
+      ${client.contactEmail}, 
+      ${client.companyName}, 
+      ${user.name},
+      ${body.summary},
+      ${reportLink}`
+    );
+    // await sendLogEmail({
+    //   to: client.contactEmail,
+    //   clientName: client.companyName,
+    //   vaName: user.name, 
+    //   summary: body.summary,
+    //   link: reportLink
+    // });
   }
 
   return c.json(newLog[0]);
