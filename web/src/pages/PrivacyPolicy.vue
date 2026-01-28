@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { ArrowLeft, Lock, Eye, Server, ShieldCheck } from 'lucide-vue-next'
+import { Lock, Eye, Server, ShieldCheck } from 'lucide-vue-next'
 
-const router = useRouter()
 const lastUpdated = 'January 25, 2026'
 </script>
 
