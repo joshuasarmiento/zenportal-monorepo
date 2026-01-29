@@ -28,7 +28,7 @@ const form = ref({
   twitterUrl: ''
 })
 
-const isPro = computed(() => userStore.user?.tier === 'pro')
+const isPro = computed(() => userStore.isPro)
 
 // --- VISUAL PREVIEW CONFIGURATION ---
 const templates = [
@@ -84,16 +84,19 @@ const activeColor = computed(() => {
 })
 
 onMounted(async () => {
-  await userStore.fetchUser()
+  if (!userStore.user) await userStore.fetchUser()
   if (userStore.user) {
-    form.value.portalSlug = userStore.user.portalSlug || ''
-    form.value.accentColor = userStore.user.accentColor || 'indigo'
-    form.value.publicTemplate = userStore.user.publicTemplate || 'modern'
-    form.value.headline = userStore.user.headline || ''
-    form.value.bio = userStore.user.bio || ''
-    form.value.websiteUrl = userStore.user.websiteUrl || ''
-    form.value.linkedinUrl = userStore.user.linkedinUrl || ''
-    form.value.twitterUrl = userStore.user.twitterUrl || ''
+    const u = userStore.user as any
+    form.value = {
+      portalSlug: u.portalSlug || '',
+      accentColor: u.accentColor || 'indigo',
+      publicTemplate: u.publicTemplate || 'modern',
+      headline: u.headline || '',
+      bio: u.bio || '',
+      websiteUrl: u.websiteUrl || '',
+      linkedinUrl: u.linkedinUrl || '',
+      twitterUrl: u.twitterUrl || ''
+    }
   }
 })
 
@@ -108,14 +111,16 @@ const selectTemplate = (t: typeof templates[0]) => {
 const save = async () => {
   saving.value = true
   try {
-    const updatedUser = await fetchApi('/auth/me', {
+    // Better Auth updateUser handles most of these, 
+    // but custom fields need to be handled via your /auth/me PATCH endpoint
+    await fetchApi('/user/me', {
       method: 'PATCH',
       body: JSON.stringify(form.value)
     })
-    userStore.user = { ...userStore.user, ...updatedUser }
-    toast.success("Settings saved!")
-  } catch (err) {
-    toast.error("Error saving settings")
+    await userStore.fetchUser(true)
+    toast.success('Branding updated successfully!')
+  } catch (err: any) {
+    toast.error(err.message || 'Failed to save changes')
   } finally {
     saving.value = false
   }

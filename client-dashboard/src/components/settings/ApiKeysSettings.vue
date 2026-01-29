@@ -17,19 +17,22 @@ const upgrading = ref(false)
 
 const copiedKey = ref<'read' | 'write' | null>(null)
 
-const isPro = computed(() => userStore.user?.tier === 'pro')
-const readKey = computed(() => userStore.user?.apiKeyRead)
-const writeKey = computed(() => userStore.user?.apiKeyWrite)
+// 🟢 FIX: Use the store's getter directly
+const isPro = computed(() => userStore.isPro)
+
+// Access keys safely (casting to any is still fine here if types aren't fully inferred yet)
+const readKey = computed(() => (userStore.user as any)?.apiKeyRead)
+const writeKey = computed(() => (userStore.user as any)?.apiKeyWrite)
 
 const generateKeys = async () => {
   generating.value = true
   try {
-    // const newKeys = await fetchApi('/auth/api-key', { method: 'POST' })
-    // The user object in the store is now stale, so we force a refetch.
+    await fetchApi('/user/api-key', { method: 'POST' })
+    // Force refresh the user to get the new keys
     await userStore.fetchUser(true) 
     toast.success('API Keys generated successfully!')
   } catch (err: any) {
-    toast.error('Failed to generate keys', { description: err.message })
+    toast.error(err.message || 'Failed to generate keys')
   } finally {
     generating.value = false
   }
@@ -48,10 +51,18 @@ const copyToClipboard = (keyType: 'read' | 'write') => {
 const handleUpgrade = async () => {
   upgrading.value = true
   try {
-    const res = await fetchApi('/billing/checkout', { method: 'POST' })
-    if (res.url) window.location.href = res.url
-  } catch (err) {
-    toast.error('Failed to start upgrade.')
+    const res = await fetchApi('/api/billing/subscribe', { method: 'POST' })
+    const session = res.data
+    if (session?.attributes?.checkout_url) {
+      localStorage.setItem('pending_checkout_id', session.id);
+      window.location.href = session.attributes.checkout_url;
+    } else {
+      toast.error('Failed to create checkout session');
+    }
+  } catch (err: any) {
+    toast.error('Failed to start upgrade.', {
+      description: err.message
+    })
   } finally {
     upgrading.value = false
   }
@@ -84,7 +95,7 @@ const handleUpgrade = async () => {
             <Lock class="h-6 w-6" />
           </div>
           <h3 class="font-bold text-lg mb-2">API Access is a Pro Feature</h3>
-          <p class="text-muted-foreground text-sm mb-6">Upgrade to Agency Pro to generate API keys and build custom integrations.</p>
+          <p class="text-muted-foreground text-sm mb-6">Upgrade to {{ userStore.planName }} to generate API keys and build custom integrations.</p>
           <Button @click="handleUpgrade" :disabled="upgrading">
             <Loader2 v-if="upgrading" class="h-4 w-4 mr-2 animate-spin" />
             <Sparkles v-else class="h-4 w-4 mr-2" />

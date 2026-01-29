@@ -1,33 +1,22 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/vue'
-import { computed } from 'vue'
+import { useUserStore } from '@/stores/userStore'
 import { Toaster } from '@/components/ui/sonner'
+import { Loader2 } from 'lucide-vue-next'
 import 'vue-sonner/style.css'
 
-const route = useRoute()
-
-const isPublicPage = computed(() => route.meta.public)
+const userStore = useUserStore()
 </script>
 
 <template>
   <div id="app">
-    <div v-if="isPublicPage" class="min-h-screen bg-background text-foreground font-sans">
-      <router-view />
+    <div v-if="userStore.loading" class="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 class="h-8 w-8 animate-spin text-primary" />
     </div>
 
-    <template v-else>
-      <SignedIn>
-        <div class="min-h-screen bg-background text-foreground font-sans">
-          <router-view />
-        </div>
-      </SignedIn>
-
-      <SignedOut>
-        <RedirectToSignIn />
-      </SignedOut>
-    </template>
+    <div v-else class="min-h-screen bg-background text-foreground font-sans">
+      <router-view />
+    </div>
     
     <Toaster />
   </div>
-</template>
+</template> 

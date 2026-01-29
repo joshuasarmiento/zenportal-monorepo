@@ -2,9 +2,10 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi } from '../lib/api'
-import { useAuth } from '@clerk/vue'
+// Removed: import { useAuth } from '@clerk/vue' 
 import { useUserStore } from '@/stores/userStore'
 import { toast } from 'vue-sonner' 
+import { env } from '@/env'
 
 // Components
 import AppSidebar from '@/components/AppSidebar.vue'
@@ -30,7 +31,7 @@ interface StatsData {
 // Logic / State
 const router = useRouter()
 const { fetchApi } = useApi()
-const { getToken } = useAuth()
+// Removed: const { getToken } = useAuth()
 const userStore = useUserStore()
 
 const loading = ref(true)
@@ -47,7 +48,8 @@ const stats = ref<StatsData>({
   topClients: [] 
 })
 
-const isPro = computed(() => userStore.user?.tier === 'pro')
+// Ensure proper typing for tier if not yet updated in store types
+const isPro = computed(() => (userStore.user as any)?.tier === 'pro')
 
 const ranges = computed(() => [
   { label: 'Last 24 Hours', value: '24h', pro: false },
@@ -76,7 +78,7 @@ const handleUpgrade = () => {
     description: 'Exporting data is available on the Agency Pro plan.',
     action: {
       label: 'Upgrade',
-      onClick: () => router.push('/settings')
+      onClick: () => router.push('/settings/billing') // Updated path to billing settings
     },
   })
 }
@@ -84,7 +86,6 @@ const handleUpgrade = () => {
 // 1. Export PDF Logic
 const exportPDF = () => {
   if (!isPro.value) return handleUpgrade()
-  // Trigger browser print dialog which can save as PDF
   window.print()
 }
 
@@ -94,15 +95,21 @@ const exportCSV = async () => {
 
   exporting.value = true
   try {
-    const token = await getToken.value()
-    // Append range filter to export to keep consistency
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/stats/export?range=${selectedRange.value}`, {
+    // UPDATED: No need to get token manually. 
+    // We rely on the browser sending the HTTP-only cookie via credentials: 'include'
+    
+    const apiUrl = import.meta.env.VITE_API_URL || env.VITE_API_URL;
+    const response = await fetch(`${apiUrl}/stats/export?range=${selectedRange.value}`, {
       method: 'GET',
-      headers: { 'Authorization': `Bearer ${token}` }
+      credentials: 'include', // <--- Important for Better Auth
+      // Removed: headers with Authorization
     })
     
     if (response.status === 403) {
       throw new Error('Upgrade required')
+    }
+    if (response.status === 401) {
+       throw new Error('Unauthorized')
     }
     if (!response.ok) throw new Error('Export failed')
     

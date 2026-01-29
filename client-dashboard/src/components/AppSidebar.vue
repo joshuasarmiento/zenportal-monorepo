@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarGroup } from '@/components/ui/sidebar'
@@ -7,7 +7,6 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useColorMode } from '@vueuse/core'
-import { SignOutButton } from '@clerk/vue'
 import { 
   LayoutDashboard, 
   Users, 
@@ -23,42 +22,50 @@ import {
   Laptop,
   ChevronRight
 } from 'lucide-vue-next'
+import { toast } from 'vue-sonner'
 import { useApi } from '@/lib/api'
-import { useAuthSync } from '@/composables/useAuthSync'
 
-const mode = useColorMode()
 const { fetchApi } = useApi()
+const mode = useColorMode()
 const route = useRoute()
 const userStore = useUserStore()
 
 const loading = ref(false)
 
-const isPro = computed(() => userStore.user?.tier === 'pro')
+// Check for 'pro' tier (ensure your schema/types support this)
+const isPro = computed(() => userStore.isPro)
 
-useAuthSync();
+// Ensure user data is loaded on mount
+onMounted(() => {
+  userStore.fetchUser()
+})
+
+const handleLogout = async () => {
+  await userStore.logout()
+}
 
 const handleUpgrade = async () => {
   loading.value = true
   try {
-    const res = await fetchApi('/billing/checkout', { method: 'POST' })
-    if (res.url) window.location.href = res.url
-  } catch (err) {
-    alert('Failed to start checkout')
+    const response = await fetchApi('/api/billing/subscribe', { method: 'POST' })
+    const session = response.data
+    if (session?.attributes?.checkout_url) {
+      localStorage.setItem('pending_checkout_id', session.id)
+      window.location.href = session.attributes.checkout_url
+    } else {
+      toast.error('Failed to get checkout URL')
+    }
+  } catch (err: any) {
+    toast.error('An unexpected error occurred during upgrade.', {
+      description: err.message
+    })
   } finally {
     loading.value = false
   }
 }
 
-const handlePortal = async () => {
-  loading.value = true
-  try {
-    const res = await fetchApi('/billing/portal', { method: 'POST' })
-    if (res.url) window.location.href = res.url
-  } catch (err) {
-    alert('Failed to open portal')
-  } finally {
-    loading.value = false
-  }
+const handlePortal = () => {
+  toast.info("Manage Subscription", { description: "Contact support to modify your plan." })
 }
 
 const menuItems = [
@@ -89,7 +96,6 @@ const menuItems = [
   },
 ]
 
-// Helper: Check if any child route is currently active
 const isGroupActive = (children: { path: string }[]) => {
   return children.some(child => child.path === route.path)
 }
@@ -170,15 +176,15 @@ const isGroupActive = (children: { path: string }[]) => {
               <SidebarMenuButton size="lg"
                 class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
                 <Avatar class="h-8 w-8 rounded-lg">
-                  <AvatarImage :src="userStore.user?.avatarUrl || ''" :alt="userStore.user?.fullName || ''" />
+                  <AvatarImage :src="userStore.user?.image || ''" :alt="userStore.user?.name || ''" />
                   <AvatarFallback
                     class="rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-200 font-bold">
-                    {{ userStore.user?.fullName?.[0] || 'U' }}
+                    {{ userStore.initials }}
                   </AvatarFallback>
                 </Avatar>
 
                 <div class="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                  <span class="truncate font-semibold">{{ userStore.user?.fullName || 'Loading...' }}</span>
+                  <span class="truncate font-semibold">{{ userStore.user?.name || 'Loading...' }}</span>
                   <span class="truncate text-xs text-muted-foreground">{{ userStore.user?.email || '' }}</span>
                 </div>
 
@@ -229,14 +235,10 @@ const isGroupActive = (children: { path: string }[]) => {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem as-child>
-                <SignOutButton
-                  class="w-full items-center px-2 py-1.5 cursor-pointer text-red-600 focus:text-red-600 dark:text-red-400">
-                  <div class="flex">
-                    <LogOut class="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </div>
-                </SignOutButton>
+              <DropdownMenuItem @click="handleLogout"
+                class="cursor-pointer text-red-600 focus:text-red-600 dark:text-red-400">
+                <LogOut class="mr-2 h-4 w-4" />
+                <span>Log out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

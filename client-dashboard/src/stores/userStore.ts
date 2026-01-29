@@ -1,18 +1,25 @@
+// src/stores/userStore.ts
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useApi } from '../lib/api'
+import { authClient } from '@/lib/auth-client' 
+
+// 1. Define the User type locally 
+type UserWithTier = typeof authClient.$Infer.Session.user & {
+  tier?: 'free' | 'pro' | null
+  paymongoCustomerId?: string | null
+}
 
 export const useUserStore = defineStore('user', () => {
-  const { fetchApi } = useApi()
-  
   // State
-  const user = ref<any>(null)
+  const user = ref<UserWithTier | null>(null)
   const loading = ref(false)
 
-  // Getters (Computed)
+  // Getters
   const initials = computed(() => {
-    if (!user.value?.fullName) return 'ME'
-    return user.value.fullName
+    const name = user.value?.name || ''
+    if (!name) return 'ME'
+    
+    return name
       .split(' ')
       .map((n: string) => n[0])
       .join('')
@@ -20,33 +27,51 @@ export const useUserStore = defineStore('user', () => {
       .substring(0, 2)
   })
 
+  // 2. Dedicated check for Pro status
+  const isPro = computed(() => {
+    return user.value?.tier === 'pro'
+  })
+
   const planName = computed(() => {
-    return user.value?.tier === 'pro' ? 'Agency Pro' : 'Free Starter'
+    return isPro.value ? 'Agency Pro' : 'Free Starter'
   })
 
   // Actions
   const fetchUser = async (force = false) => {
-    if (user.value && !force) return // Don't refetch if we already have data, unless forced
+    // If we have data and aren't forcing a refresh, return early
+    if (user.value && !force) return 
     
     loading.value = true
     try {
-      // You'll need to create this endpoint in your backend (GET /auth/me)
-      // Or just infer from Clerk, but fetching from DB gives you the 'tier' info
-      const res = await fetchApi('/auth/me') 
-      user.value = res
+      // 3. getSession() returns the full user object from the DB
+      const { data } = await authClient.getSession()
+      
+      if (data) {
+        user.value = data.user as UserWithTier
+      } else {
+        user.value = null
+      }
     } catch (err) {
       console.error('Failed to load user profile', err)
-      user.value = null // Clear user on error
+      user.value = null
     } finally {
       loading.value = false
     }
+  }
+
+  const logout = async () => {
+    await authClient.signOut()
+    user.value = null
+    window.location.href = '/login' 
   }
 
   return { 
     user, 
     loading, 
     initials, 
+    isPro,  
     planName,
-    fetchUser 
+    fetchUser,
+    logout
   }
 })

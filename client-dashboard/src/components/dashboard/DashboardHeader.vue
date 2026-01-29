@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from "@/components/ui/separator"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb"
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { PlusCircle, Crown } from 'lucide-vue-next'
@@ -30,10 +30,6 @@ const logUsagePercent = computed(() => Math.min(100, (props.logCount / props.log
       <Separator orientation="vertical" class="mr-2 h-4" />
       <Breadcrumb>
         <BreadcrumbList>
-          <BreadcrumbItem class="hidden md:block">
-            <BreadcrumbLink href="#">Platform</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator class="hidden md:block" />
           <BreadcrumbItem>
             <BreadcrumbPage>Dashboard</BreadcrumbPage>
           </BreadcrumbItem>

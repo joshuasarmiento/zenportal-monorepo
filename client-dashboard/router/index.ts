@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/stores/userStore'
 
 // 1. App Pages (Protected)
 import Dashboard from '@/pages/Dashboard.vue'
@@ -27,6 +28,8 @@ import ApiAutomation from '@/components/user-guide/ApiAutomation.vue'
 
 import Login from '@/pages/Login.vue'
 import Signup from '@/pages/Singup.vue'
+import ForgotPassword from '@/pages/ForgotPassword.vue'
+import ResetPassword from '@/pages/ResetPassword.vue'
 import ClientReport from '@/pages/public/ClientReport.vue'
 import NotFound from '@/pages/404.vue'
 import LogDetail from '@/pages/LogDetail.vue'
@@ -38,11 +41,11 @@ const router = createRouter({
   routes: [
     // --- Public Routes ---
     {
-      path: '/',
+      path: '/dashboard',
       component: Dashboard,
     },
     {
-      path: '/sign-in',
+      path: '/login',
       component: Login,
       meta: { public: true }
     },
@@ -50,6 +53,16 @@ const router = createRouter({
       path: '/sign-up',
       component: Signup,
       meta: { public: true } 
+    },
+    {
+      path: '/forgot-password',
+      component: ForgotPassword,
+      meta: { public: true }
+    },
+    {
+      path: '/reset-password',
+      component: ResetPassword,
+      meta: { public: true }
     },
     {
       path: '/c/:token',
@@ -122,6 +135,46 @@ const router = createRouter({
       meta: { public: true }
     }
   ]
+})
+
+router.beforeEach(async (to, _from, next) => {
+  const userStore = useUserStore()
+  
+  // 1. Attempt session restoration if the user isn't loaded yet
+  if (!userStore.user && !userStore.loading) {
+    await userStore.fetchUser()
+  }
+
+  const isAuthenticated = !!userStore.user
+  const isPublic = to.meta.public
+
+  // 2. Handle non-existent pages (404 logic)
+  // If the route doesn't match any defined path (matches the catch-all)
+  if (to.name === 'NotFound' || to.matched.some(record => record.path === '/:pathMatch(.*)*')) {
+    if (isAuthenticated) {
+      return next('/dashboard') // Authenticated users go to Dashboard
+    } else {
+      return next('/login') // Unauthenticated users go to Login
+    }
+  }
+
+  // 3. Authenticated user logic
+  if (isAuthenticated) {
+    // Prevent logged-in users from visiting Login or Sign-up
+    if (to.path === '/login' || to.path === '/sign-up') {
+      return next('/dashboard')
+    }
+    return next()
+  }
+
+  // 4. Unauthenticated user logic
+  // Only allow access to routes explicitly marked as public
+  if (isPublic) {
+    return next()
+  } else {
+    // Redirect all other attempts to Login
+    return next('/login')
+  }
 })
 
 export default router

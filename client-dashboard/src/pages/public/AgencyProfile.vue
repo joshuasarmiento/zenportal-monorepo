@@ -116,7 +116,7 @@ const memberSince = computed(() => {
 })
 
 const handleLogin = () => { 
-    toast.info(`Existing clients should check their inbox for a magic link from ${agency.value?.fullName}.`)
+    toast.info(`Existing clients should check their inbox for a magic link from ${agency.value?.name}.`)
 }
 
 onMounted(async () => {
@@ -165,9 +165,9 @@ onMounted(async () => {
                             <div v-if="agency.publicTemplate === 'modern'" :class="`absolute -inset-0.5 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500 ${themeColor?.bg}`"></div>
                             
                             <Avatar class="h-32 w-32 relative bg-background" :class="activeTheme.avatarContainer">
-                                <AvatarImage :src="agency.avatarUrl" class="object-cover" :class="activeTheme.avatar" />
+                                <AvatarImage :src="agency.image" class="object-cover" :class="activeTheme.avatar" />
                                 <AvatarFallback class="text-white text-4xl font-bold" :class="[themeColor?.bg, activeTheme.avatar]">
-                                    {{ agency.fullName?.[0] || 'A' }}
+                                    {{ agency.name?.[0] || 'A' }}
                                 </AvatarFallback>
                             </Avatar>
                         </div>
@@ -175,7 +175,7 @@ onMounted(async () => {
                         <div class="flex-1 space-y-1.5 mb-1 pt-2">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-foreground text-balance">
-                                    {{ agency.fullName }}
+                                    {{ agency.name }}
                                 </h1>
                                 <Badge v-if="agency.tier === 'pro'" variant="secondary" :class="[activeTheme.badge, 'px-2 py-0.5 h-6 gap-1.5 font-medium']">
                                     <CheckCircle2 :class="`h-3.5 w-3.5 ${themeColor?.text}`" />
@@ -266,7 +266,7 @@ onMounted(async () => {
 
             <div class="mt-8 text-center">
                 <p class="text-muted-foreground/60 text-xs font-medium uppercase tracking-widest">
-                    &copy; {{ new Date().getFullYear() }} {{ agency.fullName }}. Powered by ZenPortal.
+                    &copy; {{ new Date().getFullYear() }} {{ agency.name }}. Powered by ZenPortal.
                 </p>
             </div>
         </main>

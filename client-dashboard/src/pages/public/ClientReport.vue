@@ -108,6 +108,7 @@ const copyLink = () => {
 
 onMounted(async () => {
   try {
+    loading.value = true
     const res = await fetch(`${import.meta.env.VITE_API_URL}/public/report/${token}`)
     if (!res.ok) throw new Error('Report not found')
     data.value = await res.json()
@@ -148,13 +149,17 @@ onMounted(async () => {
         
         <div class="flex items-center gap-3 pl-1">
           <Avatar class="h-9 w-9 border-2 border-white shadow-sm cursor-default">
-            <AvatarImage :src="data.client.owner.avatarUrl" class="object-cover" />
-            <AvatarFallback class="bg-zinc-900 text-white font-bold text-xs">
-                {{ data.client.owner.fullName?.[0] || 'V' }}
+            <AvatarImage 
+              v-if="data.client.owner.image"
+              :src="data.client.owner.image" 
+              class="object-cover" 
+            />
+            <AvatarFallback :class="accentSolid" class="text-white font-bold text-xs">
+                {{ data.client.owner.name?.[0] || 'V' }}
             </AvatarFallback>
           </Avatar>
           <div class="hidden sm:block text-sm">
-             <span class="font-semibold text-zinc-800">{{ data.client.owner.fullName }}</span>
+             <span class="font-semibold text-zinc-800">{{ data.client.owner.name }}</span>
              <span class="text-zinc-400 mx-1.5">/</span>
              <span class="text-zinc-500">{{ data.client.companyName }}</span>
           </div>

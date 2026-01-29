@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from "@/components/ui/separator"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb"
 import { Button } from '@/components/ui/button'
 import { 
   DropdownMenu, 
@@ -27,8 +27,6 @@ const emit = defineEmits(['export-csv', 'export-pdf', 'upgrade'])
       <Separator orientation="vertical" class="mr-2 h-4" />
       <Breadcrumb>
         <BreadcrumbList>
-          <BreadcrumbItem class="hidden md:block"><BreadcrumbLink href="#">Platform</BreadcrumbLink></BreadcrumbItem>
-          <BreadcrumbSeparator class="hidden md:block" />
           <BreadcrumbItem><BreadcrumbPage>Earnings</BreadcrumbPage></BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

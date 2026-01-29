@@ -20,13 +20,14 @@ const settings = ref({
 })
 
 onMounted(async () => {
-  await userStore.fetchUser()
+  if (!userStore.user) await userStore.fetchUser()
   if (userStore.user) {
+    const u = userStore.user as any
     settings.value = {
       // Use nullish coalescing to default to true/false if undefined in DB
-      notifyClientView: userStore.user.notifyClientView ?? true,
-      notifyWeeklyRecap: userStore.user.notifyWeeklyRecap ?? true,
-      notifyMarketing: userStore.user.notifyMarketing ?? false
+      notifyClientView: u.notifyClientView ?? true,
+      notifyWeeklyRecap: u.notifyWeeklyRecap ?? true,
+      notifyMarketing: u.notifyMarketing ?? false
     }
   }
 })
@@ -34,18 +35,15 @@ onMounted(async () => {
 const save = async () => {
   saving.value = true
   try {
-    const updatedUser = await fetchApi('/auth/me', {
+    // Updated endpoint to /user/me to match your userRouter
+    await fetchApi('/user/me', {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify(settings.value)
     })
-    // Update local store immediately
-    userStore.user = { ...userStore.user, ...updatedUser }
-    toast.success('Preferences updated.')
-  } catch (err) {
-    toast.error('Error saving preferences.')
+    toast.success('Notification preferences saved!')
+    await userStore.fetchUser(true)
+  } catch (err: any) {
+    toast.error('Failed to save settings')
   } finally {
     saving.value = false
   }

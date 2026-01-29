@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi } from '../lib/api'
 import { useUserStore } from '@/stores/userStore'
+import { toast } from 'vue-sonner'
 
 // Components
 import AppSidebar from '@/components/AppSidebar.vue'
@@ -65,10 +66,18 @@ const goToEdit = (id: string) => router.push(`/clients/${id}/edit`)
 const goToUpgrade = async () => {
   loading.value = true
   try {
-    const res = await fetchApi('/billing/checkout', { method: 'POST' })
-    if (res.url) window.location.href = res.url
-  } catch (err) {
-    alert('Failed to start checkout')
+    const res = await fetchApi('/api/billing/subscribe', { method: 'POST' })
+    const session = res.data
+    if (session?.attributes?.checkout_url) {
+      localStorage.setItem('pending_checkout_id', session.id);
+      window.location.href = session.attributes.checkout_url;
+    } else {
+      toast.error('Failed to create checkout session');
+    }
+  } catch (err: any) {
+    toast.error('Failed to start checkout.', {
+      description: err.message
+    })
   } finally {
     loading.value = false
   }
