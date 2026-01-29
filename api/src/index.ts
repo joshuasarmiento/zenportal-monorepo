@@ -1,71 +1,59 @@
+// api/src/index.ts
+import { serve } from '@hono/node-server'; // [!code ++]
 import { Hono } from 'hono';
-
 import { cors } from 'hono/cors';
-import { csrf } from 'hono/csrf';
-import { secureHeaders } from 'hono/secure-headers'
+import { logger } from 'hono/logger';
 
-import { serve } from '@hono/node-server';
+// Import the auth instance and middleware
+import { auth } from './lib/auth'; 
 
-import { config } from './config'; // Ensure config is loaded and validated at startup
-import { auth } from './lib/auth';
+// Import your new Routers
+import { billingRouter } from './routes/billing';
+import { webhooksRouter } from './routes/webhooks';
 import { clientsRouter } from './routes/clients';
 import { logsRouter } from './routes/logs';
-import { publicRouter } from './routes/public';
-import { statsRouter } from './routes/stats';
-import { webhooksRouter } from './routes/webhooks';
 import { userRouter } from './routes/user';
+import { statsRouter } from './routes/stats';
+import { publicRouter } from './routes/public';
 import { v1ProgrammaticRouter } from './routes/v1_programmatic';
+import { config } from './config';
 
-const app = new Hono().basePath('/');
+const app = new Hono();
 
-app.onError((err, c) => {
-  console.error('API Global Error:', err);
-  return c.json({ error: 'Internal Server Error', message: err.message }, 500);
+// 1. Global Middleware
+app.use('*', logger());
+app.use('*', cors({
+    origin: [config.app.frontendUrl],
+    credentials: true,
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowHeaders: ['Content-Type', 'Authorization', 'paymongo-signature'], 
+}));
+
+// 2. Mount Better Auth
+app.on(['POST', 'GET'], '/api/auth/**', (c) => {
+    return auth.handler(c.req.raw);
 });
 
-// --- Global Middleware ---
-// Applied to all incoming requests
-app.use('*', secureHeaders());
-app.use(
-  '/*',
-  cors({
-    origin: config.app.frontendUrl,
-    credentials: true,
-    allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    allowMethods: ['POST', 'GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    exposeHeaders: ['Content-Length'],
-    maxAge: 600,
-  })
-);
+// 3. Mount Your API Routes
+app.route('/api/billing', billingRouter);
+app.route('/webhooks', webhooksRouter);
+app.route('/clients', clientsRouter);
+app.route('/logs', logsRouter);
+app.route('/user', userRouter);
+app.route('/stats', statsRouter);
+app.route('/public', publicRouter);
+app.route('/api/v1', v1ProgrammaticRouter);
 
-// --- Auth Handler ---
-app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+// 4. Health Check - This is what you see in the browser
+app.get('/', (c) => c.text('ZenPortal API is running 🚀'));
 
-// --- Specialized API Routers ---
-// These routers have their own specific authentication and do not use the default session-based auth.
-app.route('/v1', v1ProgrammaticRouter);          // Programmatic access via API keys
-app.route('/webhooks', webhooksRouter);     // Public webhooks (Paymongo)
-app.route('/public', publicRouter);         // Publicly accessible data (reports, profiles)
+// 5. START THE SERVER [!code ++]
+const port = 3000;
+console.log(`Server is running on http://localhost:${port}`);
 
-// --- User-Facing API ---
-// These routes are for the web frontend and are protected by session auth and CSRF.
-const api = new Hono();
-api.use('*', csrf());
+serve({
+  fetch: app.fetch,
+  port
+});
 
-api.route('/clients', clientsRouter);
-api.route('/logs', logsRouter);
-api.route('/user', userRouter);
-api.route('/stats', statsRouter);
-
-
-// Mount the user-facing API under the /api path
-app.route('/', api);
-
-app.get('/', (c) => c.text('ZenPortal API is running! 🚀'));
-
-const port = 3000
-console.log(`🚀 Node Server running on http://localhost:${port}`)
-
-serve(app)
-
-export default app
+export default app;

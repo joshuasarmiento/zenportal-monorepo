@@ -52,6 +52,7 @@ export const sessions = sqliteTable("session", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
   ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
 });
 
