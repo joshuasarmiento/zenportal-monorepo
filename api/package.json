@@ -1,12 +1,11 @@
 {
   "name": "api",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "prebuild": "rimraf dist",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node dist/src/index.js",
     "ngrok": "bun ngrok http 3000",
-    "dk:push": "bun drizzle-kit push"
+    "dk:push": "bun drizzle-kit push",
+    "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.9",
