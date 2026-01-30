@@ -1,9 +1,8 @@
 {
   "name": "api",
-  "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "esbuild src/index.ts --bundle --platform=node --target=node20 --format=esm --outfile=dist/index.js --external:@libsql/client --external:better-auth",
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node20 --format=cjs --outfile=dist/index.js --external:@libsql/client --external:better-auth",
     "start": "node dist/index.js",
     "ngrok": "bun ngrok http 3000",
     "dk:push": "bun drizzle-kit push",
