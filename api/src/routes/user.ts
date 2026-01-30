@@ -30,9 +30,14 @@ const updateUserSchema = z.object({
 });
 
 // GET /me - Return the authenticated user
-app.get('/me', (c) => {
-  const user = c.get('user');
-  // requireAuth ensures user exists, but we handle the edge case just in case
+app.get('/me', async (c) => {
+  const userId = c.get('userId');
+
+  // Fetch the full user profile including all custom fields
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId)
+  });
+
   if (!user) return c.json({ error: 'User not found' }, 404);
   return c.json(user);
 });

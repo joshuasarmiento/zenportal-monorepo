@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useApi } from '../../lib/api'
 import { useUserStore } from '../../stores/userStore'
 import { Button } from '@/components/ui/button'
@@ -19,17 +19,23 @@ const settings = ref({
   notifyMarketing: false
 })
 
-onMounted(async () => {
-  if (!userStore.user) await userStore.fetchUser()
-  if (userStore.user) {
+const syncSettings = () => {
+    if (userStore.user) {
     const u = userStore.user as any
+    // Map with explicit checks
     settings.value = {
-      // Use nullish coalescing to default to true/false if undefined in DB
-      notifyClientView: u.notifyClientView ?? true,
-      notifyWeeklyRecap: u.notifyWeeklyRecap ?? true,
-      notifyMarketing: u.notifyMarketing ?? false
+        notifyClientView: !!(u.notifyClientView ?? true),
+        notifyWeeklyRecap: !!(u.notifyWeeklyRecap ?? true),
+        notifyMarketing: !!(u.notifyMarketing ?? false)
     }
   }
+}
+
+watch(() => userStore.user, syncSettings, { immediate: true })
+
+onMounted(async () => {
+  if (!userStore.user) await userStore.fetchUser()
+  // syncSettings will be called by watch when userStore.user changes
 })
 
 const save = async () => {

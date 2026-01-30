@@ -1,13 +1,13 @@
 // src/lib/auth-client.ts
 import { createAuthClient } from "better-auth/vue"
-import { 
+import {
     emailOTPClient,
     inferAdditionalFields,
     lastLoginMethodClient
 } from "better-auth/client/plugins"
 import { env } from "@/env"
 
-const apiUrl = import.meta.env.VITE_BETTERAUTH_URL || env.VITE_BETTERAUTH_URL || "http://localhost:3000/api/auth";
+const apiUrl = import.meta.env.VITE_BETTERAUTH_URL || env.VITE_BETTERAUTH_URL;
 
 export const authClient = createAuthClient({
     baseURL: apiUrl,
@@ -27,14 +27,14 @@ export const authClient = createAuthClient({
     ],
 })
 
-export const { 
-    signIn, 
-    signUp, 
-    signOut, 
-    useSession, 
-    updateUser, 
+export const {
+    signIn,
+    signUp,
+    signOut,
+    useSession,
+    updateUser,
     changePassword,
     deleteUser,
     forgetPassword,
-    resetPassword 
+    resetPassword
 } = authClient;

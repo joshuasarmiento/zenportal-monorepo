@@ -1,7 +1,8 @@
 // src/stores/userStore.ts
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { authClient } from '@/lib/auth-client' 
+import { authClient } from '@/lib/auth-client'
+import { useApi } from '@/lib/api'
 
 // 1. Define the User type locally 
 type UserWithTier = typeof authClient.$Infer.Session.user & {
@@ -18,7 +19,7 @@ export const useUserStore = defineStore('user', () => {
   const initials = computed(() => {
     const name = user.value?.name || ''
     if (!name) return 'ME'
-    
+
     return name
       .split(' ')
       .map((n: string) => n[0])
@@ -37,17 +38,22 @@ export const useUserStore = defineStore('user', () => {
   })
 
   // Actions
+  const { fetchApi } = useApi() // Initialize API helper
+
   const fetchUser = async (force = false) => {
     // If we have data and aren't forcing a refresh, return early
-    if (user.value && !force) return 
-    
+    if (user.value && !force) return
+
     loading.value = true
     try {
-      // 3. getSession() returns the full user object from the DB
-      const { data } = await authClient.getSession()
-      
-      if (data) {
-        user.value = data.user as UserWithTier
+      // 3. getSession() checks if we are logged in
+      const { data: session } = await authClient.getSession()
+
+      if (session) {
+        // If logged in, fetch full profile from our API
+        // This ensures we get all custom fields like notification settings
+        const fullProfile = await fetchApi<UserWithTier>('/user/me')
+        user.value = fullProfile
       } else {
         user.value = null
       }
@@ -62,14 +68,14 @@ export const useUserStore = defineStore('user', () => {
   const logout = async () => {
     await authClient.signOut()
     user.value = null
-    window.location.href = '/login' 
+    window.location.href = '/login'
   }
 
-  return { 
-    user, 
-    loading, 
-    initials, 
-    isPro,  
+  return {
+    user,
+    loading,
+    initials,
+    isPro,
     planName,
     fetchUser,
     logout
