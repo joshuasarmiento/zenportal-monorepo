@@ -21,8 +21,7 @@ export const config = {
     webhookSecret: getEnv('PAYMONGO_WEBHOOK'),
   },
   betterAuth: {
-    secretKey: getEnv('BETTER_AUTH_SECRET'),
-    baseURL: getEnv('BETTER_AUTH_URL')
+    secretKey: getEnv('BETTER_AUTH_SECRET')
   },
   google: {
     googleclientSecret: getEnv('GOOGLE_CLIENT_SECRET'),
@@ -32,6 +31,7 @@ export const config = {
     apiKey: getEnv('RESEND_API_KEY')
   },
   app: {
+    backendUrl: getEnv('BACKEND_URL'),
     frontendUrl: getEnv('FRONTEND_URL')
   }
 };

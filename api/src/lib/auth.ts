@@ -41,7 +41,7 @@ export const auth = betterAuth({
     trustedOrigins: [
         config.app.frontendUrl,
     ],
-    baseURL: config.betterAuth.baseURL,
+    baseURL: config.app.backendUrl,
     emailAndPassword: {
         enabled: true,
         autoSignIn: true,
@@ -66,8 +66,8 @@ export const auth = betterAuth({
             prompt: "select_account consent",
             clientId: config.google.googleclientId,
             clientSecret: config.google.googleclientSecret,
-            redirectURI: `${config.app.frontendUrl}/api/auth/callback/google`
-        },
+            redirectURI: `${config.app.backendUrl}/api/auth/callback/google`
+        }
     },
     plugins: [
         haveIBeenPwned({
