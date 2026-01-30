@@ -3,7 +3,7 @@ import { serve } from '@hono/node-server'; // [!code ++]
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
-
+import { handle } from 'hono/vercel';
 // Import the auth instance and middleware
 import { auth } from './lib/auth'; 
 
@@ -47,10 +47,14 @@ app.route('/api/v1', v1ProgrammaticRouter);
 // 4. Health Check - This is what you see in the browser
 app.get('/', (c) => c.text('ZenPortal API is running 🚀'));
 
-// 5. START THE SERVER [!code ++]
-const port = 3000;
-console.log(`Server is running on http://localhost:${port}`);
+export const GET = handle(app);
+export const POST = handle(app);
+export const PUT = handle(app);
+export const PATCH = handle(app);
+export const UPDATE = handle(app);
+export const OPTIONS = handle(app);
 
+const port = 3000;
 serve({
   fetch: app.fetch,
   port
