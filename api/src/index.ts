@@ -5,7 +5,7 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { handle } from 'hono/vercel';
 // Import the auth instance and middleware
-import { auth } from './lib/auth'; 
+import { auth } from './lib/auth';
 
 // Import your new Routers
 import { billingRouter } from './routes/billing';
@@ -23,15 +23,15 @@ const app = new Hono();
 // 1. Global Middleware
 app.use('*', logger());
 app.use('*', cors({
-    origin: [config.app.frontendUrl],
-    credentials: true,
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowHeaders: ['Content-Type', 'Authorization', 'paymongo-signature'], 
+  origin: [config.app.frontendUrl],
+  credentials: true,
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowHeaders: ['Content-Type', 'Authorization', 'paymongo-signature'],
 }));
 
 // 2. Mount Better Auth
 app.on(['POST', 'GET'], '/api/auth/**', (c) => {
-    return auth.handler(c.req.raw);
+  return auth.handler(c.req.raw);
 });
 
 // 3. Mount Your API Routes
@@ -51,13 +51,16 @@ export const GET = handle(app);
 export const POST = handle(app);
 export const PUT = handle(app);
 export const PATCH = handle(app);
-export const UPDATE = handle(app);
+export const DELETE = handle(app);
 export const OPTIONS = handle(app);
 
-const port = 3000;
-serve({
-  fetch: app.fetch,
-  port
-});
+if (process.env.NODE_ENV !== 'production') {
+  const port = 3000;
+  console.log(`🚀 Hono Server running on http://localhost:${port}`)
+  serve({
+    fetch: app.fetch,
+    port
+  });
+}
 
-export default app;
+export default handle(app);

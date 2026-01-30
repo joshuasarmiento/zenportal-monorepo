@@ -3,8 +3,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "bun build src/index.ts --target=node --outdir=./dist --external=@libsql/client/sqlite3",
-    "preview": "node dist/index.js",
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node20 --format=esm --outfile=dist/index.js --external:@libsql/client --external:better-auth",
+    "start": "node dist/index.js",
     "ngrok": "bun ngrok http 3000",
     "dk:push": "bun drizzle-kit push",
     "dk:generate": "bun x drizzle-kit generate",
@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "^25.0.10",
+    "@types/node": "^22.0.0",
     "drizzle-kit": "^0.31.8",
     "esbuild": "^0.20.0",
     "tsx": "^4.21.0"
