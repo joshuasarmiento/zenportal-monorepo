@@ -56,4 +56,4 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-export default handle(app);
+export default handle(app as any);
