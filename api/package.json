@@ -2,14 +2,11 @@
   "name": "api",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "esbuild src/index.ts --bundle --platform=node --target=node20 --format=cjs --outfile=dist/index.js --external:@libsql/client --external:better-auth",
+    "prebuild": "rimraf dist",
+    "build": "tsc",
     "start": "node dist/index.js",
     "ngrok": "bun ngrok http 3000",
-    "dk:push": "bun drizzle-kit push",
-    "dk:generate": "bun x drizzle-kit generate",
-    "dk:migrate": "bun x drizzle-kit migrate",
-    "ba:migrate": "bun x @better-auth/cli@latest migrate",
-    "ba:generate": "bun x @better-auth/cli@latest generate"
+    "dk:push": "bun drizzle-kit push"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.9",
