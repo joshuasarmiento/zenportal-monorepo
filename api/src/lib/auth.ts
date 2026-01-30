@@ -9,6 +9,7 @@ import { createMiddleware } from 'hono/factory';
 import { db } from '../db/index.js';
 import { config } from '../config.js';
 import * as schema from '../db/schema.js';
+import { sendAuthEmail } from './email.js';
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -75,12 +76,16 @@ export const auth = betterAuth({
         }),
         emailOTP({
             async sendVerificationOTP({ email, otp, type }) {
-                if (type === "forget-password") {
-                    console.log(`Sending Password Reset OTP to ${email}: ${otp}`);
-                } else if (type === "sign-in") {
-                    console.log(`Sending Login OTP to ${email}: ${otp}`);
-                } else if (type === "email-verification") {
-                    console.log(`Sending Verification OTP to ${email}: ${otp}`);
+                try {
+                    if (type === "forget-password") {
+                        await sendAuthEmail(email, "Reset your password", `<p>Your password reset code is: <strong>${otp}</strong></p>`);
+                    } else if (type === "sign-in") {
+                        await sendAuthEmail(email, "Your login code", `<p>Your login code is: <strong>${otp}</strong></p>`);
+                    } else if (type === "email-verification") {
+                        await sendAuthEmail(email, "Verify your email", `<p>Your verification code is: <strong>${otp}</strong></p>`);
+                    }
+                } catch (e) {
+                    console.error("Failed to send OTP email", e)
                 }
             },
             otpLength: 6,

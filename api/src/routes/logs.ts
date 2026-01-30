@@ -6,7 +6,7 @@ import { and, eq, desc, sql, count } from 'drizzle-orm'; // Added sql, count
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
-// import { sendLogEmail } from '../lib/email.js';
+import { sendLogEmail } from '../lib/email.js';
 import { config } from '../config.js';
 
 const app = new Hono<{ Variables: { userId: string } }>();
@@ -112,13 +112,14 @@ app.post('/', zValidator('json', logSchema), async (c) => {
       ${body.summary},
       ${reportLink}`
     );
-    // await sendLogEmail({
-    //   to: client.contactEmail,
-    //   clientName: client.companyName,
-    //   vaName: user.name, 
-    //   summary: body.summary,
-    //   link: reportLink
-    // });
+    await sendLogEmail({
+      to: client.contactEmail,
+      clientName: client.companyName,
+      vaName: user.name,
+      summary: body.summary,
+      link: reportLink
+    });
+    console.log(`📧 Sent Work Log Email to ${client.contactEmail}`);
   }
 
   return c.json(newLog[0]);

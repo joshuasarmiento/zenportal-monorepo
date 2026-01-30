@@ -14,24 +14,24 @@ export const users = sqliteTable('user', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
 
   lastLoginMethod: text("lastLoginMethod"),
-  
+
   // Custom Profile Fields
   headline: text('headline'),
   bio: text('bio'),
   websiteUrl: text('website_url'),
   linkedinUrl: text('linkedin_url'),
   twitterUrl: text('twitter_url'),
-  
+
   // Branding & Settings
-  portalSlug: text('portal_slug').unique(), 
+  portalSlug: text('portal_slug').unique(),
   accentColor: text('accent_color').default('indigo'),
   publicTemplate: text('public_template', { enum: ['modern', 'corporate', 'creative'] }).default('modern'),
-  
+
   // Notifications
-  notifyClientView: integer('notify_client_view', { mode: 'boolean' }).default(false),
-  notifyWeeklyRecap: integer('notify_weekly_recap', { mode: 'boolean' }).default(false),
+  notifyClientView: integer('notify_client_view', { mode: 'boolean' }).default(true),
+  notifyWeeklyRecap: integer('notify_weekly_recap', { mode: 'boolean' }).default(true),
   notifyMarketing: integer('notify_marketing', { mode: 'boolean' }).default(false),
-  
+
   tier: text('tier', { enum: ['free', 'pro'] }).default('free'),
   paymongoCustomerId: text('paymongo_customer_id'),
 
@@ -92,17 +92,17 @@ export const twoFactor = sqliteTable("two_factor", {
 export const clients = sqliteTable('clients', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  
+
   companyName: text('company_name').notNull(),
   contactName: text('contact_name'),
   contactEmail: text('contact_email'),
-  
+
   accessToken: text('access_token').notNull().unique(),
-  
+
   status: text('status', { enum: ['active', 'archived'] }).default('active'),
   hourlyRate: real('hourly_rate'),
   currency: text('currency').default('USD'),
-  
+
   createdAt: integer('created_at', { mode: 'timestamp' })
     .default(sql`(strftime('%s', 'now') * 1000)`),
 }, (table) => {
@@ -117,12 +117,12 @@ export const subscription = sqliteTable("subscription", {
   referenceId: text("reference_id").notNull(), // The User ID
   plan: text("plan"), // 'pro'
   status: text("status"), // 'paid', 'expired'
-  
+
   // PayMongo doesn't have auto-recurring "subscriptions" in the basic Checkout API 
   // like Stripe, so we calculate these manually based on the payment date.
   periodStart: integer("period_start", { mode: "timestamp" }),
   periodEnd: integer("period_end", { mode: "timestamp" }),
-  
+
   createdAt: integer("created_at", { mode: "timestamp" }),
 });
 
@@ -131,17 +131,17 @@ export const workLogs = sqliteTable('work_logs', {
   id: text('id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   clientId: text('client_id').notNull().references(() => clients.id, { onDelete: 'cascade' }),
-  
+
   date: text('date').notNull(),
   summary: text('summary').notNull(),
   hoursWorked: real('hours_worked').default(0),
-  
+
   videoUrl: text('video_url'),
   attachmentUrl: text('attachment_url'),
-  
+
   isBlocked: integer('is_blocked', { mode: 'boolean' }).default(false),
   blockerDetails: text('blocker_details'),
-  
+
   createdAt: integer('created_at', { mode: 'timestamp' })
     .default(sql`(strftime('%s', 'now') * 1000)`),
 }, (table) => {

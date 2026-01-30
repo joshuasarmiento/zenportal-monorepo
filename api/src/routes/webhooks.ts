@@ -5,6 +5,7 @@ import { users, subscription } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 import { config } from '../config.js';
 import * as crypto from 'crypto';
+import { sendSubscriptionEmail } from '../lib/email.js';
 
 const app = new Hono();
 
@@ -78,6 +79,7 @@ app.post('/paymongo', async (c) => {
       const periodEnd = new Date();
       periodEnd.setDate(now.getDate() + 30);
 
+      // 1. Update User to Pro
       await db.update(users)
         .set({
           tier: 'pro',
@@ -85,6 +87,7 @@ app.post('/paymongo', async (c) => {
         })
         .where(eq(users.id, userId));
 
+      // 2. Insert Subscription Record
       await db.insert(subscription).values({
         id: event.data.id,
         referenceId: userId,
@@ -94,6 +97,19 @@ app.post('/paymongo', async (c) => {
         periodEnd: periodEnd,
         createdAt: now,
       });
+
+      // 3. Send Email Notification
+      // Fetch fresh user data to get email/name
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, userId),
+        columns: { email: true, name: true }
+      });
+
+      if (user?.email && user?.name) {
+        await sendSubscriptionEmail(user.email, user.name, 'created', 'Pro');
+        console.log(`📧 Subscription email sent to ${user.email}`);
+      }
+
       console.log("🎉 User Upgraded to PRO successfully");
     } else {
       console.warn("⚠️ No UserId found in metadata");

@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { db } from '../db/index.js';
 import { clients, workLogs, users } from '../db/schema.js';
 import { eq, desc } from 'drizzle-orm';
-// import { sendClientViewedEmail } from '../lib/email.js';
+import { sendClientViewedEmail } from '../lib/email.js';
 
 const app = new Hono();
 
@@ -33,12 +33,20 @@ app.get('/report/:token', async (c) => {
   }
 
   // --- Trigger Notification Logic ---
+  console.log("🔍 Debug View Notification:", {
+    hasOwner: !!clientData.owner,
+    notifyEnabled: clientData.owner?.notifyClientView,
+    hasEmail: !!clientData.owner?.email,
+    ownerEmail: clientData.owner?.email
+  });
+
   // Check if owner enabled notifications and has an email
   if (clientData.owner && clientData.owner.notifyClientView && clientData.owner.email) {
     // Fire and forget (don't await to keep response fast)
     console.log(` ${clientData.owner.email} - ${clientData.companyName} just viewed your report`);
-    // sendClientViewedEmail(clientData.owner.email, clientData.companyName)
-    //   .catch(err => console.error('Failed to send view alert', err));
+    sendClientViewedEmail(clientData.owner.email, clientData.companyName)
+      .then(() => console.log(`📧 Sent Client View Alert to ${clientData.owner.email}`))
+      .catch(err => console.error('Failed to send view alert', err));
   }
 
   const logs = await db.query.workLogs.findMany({
