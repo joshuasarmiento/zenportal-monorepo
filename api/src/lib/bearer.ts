@@ -1,9 +1,9 @@
 import { createMiddleware } from 'hono/factory';
 import { bearerAuth } from 'hono/bearer-auth';
-import { db } from '../db';
-import { users } from '../db/schema';
+import { db } from '../db/index.js';
+import { users } from '../db/schema.js';
 import { eq, or } from 'drizzle-orm';
-import { User } from '../types';
+import { User } from '../types.js';
 
 type BearerUser = {
   user: User;
@@ -28,7 +28,7 @@ const verifyApiKey = (requiredAccess: 'read' | 'write') => {
         const user = await db.query.users.findFirst({
           where: or(...searchConditions)
         });
-        
+
         // 4. If no user is found, the token is invalid. Return false.
         if (!user) {
           return false;
@@ -42,7 +42,7 @@ const verifyApiKey = (requiredAccess: 'read' | 'write') => {
         return true; // Token is valid
       }
     });
-    
+
     // 7. Execute the bearerAuth handler. If it fails, it will automatically send a 401 response.
     return authHandler(c, next);
   });

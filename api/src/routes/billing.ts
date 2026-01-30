@@ -1,10 +1,10 @@
 // api/src/routes/billing.ts
 import { Hono } from 'hono';
-import { db } from '../db';
-import { users, subscription } from '../db/schema';
+import { db } from '../db/index.js';
+import { users, subscription } from '../db/schema.js';
 import { eq, desc } from 'drizzle-orm';
-import { requireAuth } from '../lib/auth';
-import { config } from '../config';
+import { requireAuth } from '../lib/auth.js';
+import { config } from '../config.js';
 
 const app = new Hono<{ Variables: { userId: string } }>();
 
@@ -27,13 +27,13 @@ async function paymongoRequest(endpoint: string, method: string = 'GET', body?: 
   }
 
   const response = await fetch(url, options);
-  
+
   if (!response.ok) {
     const errorData = await response.json();
     console.error('PayMongo Error:', JSON.stringify(errorData, null, 2));
     throw new Error('Payment service error');
   }
-  
+
   return response.json();
 }
 
@@ -41,7 +41,7 @@ async function paymongoRequest(endpoint: string, method: string = 'GET', body?: 
 // Creates a new PayMongo Checkout Session
 app.post('/subscribe', async (c) => {
   const userId = c.get('userId');
-  
+
   const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
   if (!user) return c.json({ error: 'User not found' }, 404);
 
@@ -58,7 +58,7 @@ app.post('/subscribe', async (c) => {
             amount: 200000, // 2,000.00 PHP (in centavos)
             currency: "PHP",
             quantity: 1,
-            images: ["https://placehold.co/400"], 
+            images: ["https://placehold.co/400"],
           },
         ],
         payment_method_types: ["qrph", "gcash", "card"],
@@ -69,14 +69,14 @@ app.post('/subscribe', async (c) => {
         show_description: true,
         show_line_items: true,
         metadata: {
-          userId: userId, 
+          userId: userId,
           tier: 'pro'
         }
       },
     };
 
     const sessionData = await paymongoRequest('/checkout_sessions', 'POST', payload);
-    
+
     // Return the full data so the frontend can get the ID and URL
     return c.json(sessionData);
 
@@ -92,11 +92,11 @@ app.get('/session/:id', async (c) => {
   const sessionId = c.req.param('id');
   try {
     const sessionData = await paymongoRequest(`/checkout_sessions/${sessionId}`, 'GET');
-    
+
     // Security: Ensure the session belongs to the requesting user
     const metaUserId = sessionData.data.attributes.metadata?.userId;
     if (metaUserId && metaUserId !== c.get('userId')) {
-       return c.json({ error: 'Unauthorized access to this session' }, 403);
+      return c.json({ error: 'Unauthorized access to this session' }, 403);
     }
 
     return c.json(sessionData);
@@ -113,9 +113,9 @@ app.post('/session/:id/expire', async (c) => {
     // Optional: Retrieve first to verify ownership before expiring
     const currentSession = await paymongoRequest(`/checkout_sessions/${sessionId}`, 'GET');
     const metaUserId = currentSession.data.attributes.metadata?.userId;
-    
+
     if (metaUserId && metaUserId !== c.get('userId')) {
-       return c.json({ error: 'Unauthorized' }, 403);
+      return c.json({ error: 'Unauthorized' }, 403);
     }
 
     const expiredSession = await paymongoRequest(`/checkout_sessions/${sessionId}/expire`, 'POST');
