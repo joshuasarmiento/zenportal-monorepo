@@ -15,6 +15,7 @@ const saving = ref(false)
 
 const settings = ref({
   notifyClientView: true,
+  notifyClientOnLog: true,
   notifyWeeklyRecap: true,
   notifyMarketing: false
 })
@@ -25,6 +26,7 @@ const syncSettings = () => {
     // Map with explicit checks
     settings.value = {
         notifyClientView: !!(u.notifyClientView ?? true),
+        notifyClientOnLog: !!(u.notifyClientOnLog ?? true),
         notifyWeeklyRecap: !!(u.notifyWeeklyRecap ?? true),
         notifyMarketing: !!(u.notifyMarketing ?? false)
     }
@@ -81,6 +83,21 @@ const save = async () => {
           </div>
         </div>
         <Switch v-model="settings.notifyClientView" />
+      </div>
+
+      <div class="flex items-start justify-between space-x-4">
+        <div class="flex gap-3 items-center">
+          <div class="mt-1 bg-violet-50 dark:bg-violet-900/20 p-2 rounded-lg text-violet-600 dark:text-violet-400">
+            <Megaphone class="h-5 w-5" />
+          </div>
+          <div class="space-y-0.5">
+            <Label class="text-base font-semibold">Email Clients on Log</Label>
+            <p class="text-sm text-muted-foreground">
+              Automatically send an email to clients when you add a new work log.
+            </p>
+          </div>
+        </div>
+        <Switch v-model="settings.notifyClientOnLog" />
       </div>
 
       <div class="flex items-start justify-between space-x-4">

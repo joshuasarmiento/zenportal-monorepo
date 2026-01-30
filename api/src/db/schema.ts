@@ -29,6 +29,7 @@ export const users = sqliteTable('user', {
 
   // Notifications
   notifyClientView: integer('notify_client_view', { mode: 'boolean' }).default(true),
+  notifyClientOnLog: integer('notify_client_on_log', { mode: 'boolean' }).default(true),
   notifyWeeklyRecap: integer('notify_weekly_recap', { mode: 'boolean' }).default(true),
   notifyMarketing: integer('notify_marketing', { mode: 'boolean' }).default(false),
 

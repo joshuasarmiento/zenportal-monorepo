@@ -19,6 +19,7 @@ const updateUserSchema = z.object({
   portalSlug: z.string().optional(),
   accentColor: z.string().optional(),
   notifyClientView: z.boolean().optional(),
+  notifyClientOnLog: z.boolean().optional(),
   notifyWeeklyRecap: z.boolean().optional(),
   notifyMarketing: z.boolean().optional(),
   headline: z.string().optional(),

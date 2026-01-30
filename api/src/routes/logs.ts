@@ -53,7 +53,7 @@ app.post('/', zValidator('json', logSchema), async (c) => {
   // 1. Get User Tier
   const user = await db.query.users.findFirst({
     where: eq(users.id, userId),
-    columns: { tier: true, name: true }
+    columns: { tier: true, name: true, notifyClientOnLog: true }
   });
 
   const isPro = user?.tier === 'pro';
@@ -103,7 +103,7 @@ app.post('/', zValidator('json', logSchema), async (c) => {
     columns: { contactEmail: true, companyName: true, accessToken: true }
   });
 
-  if (client?.contactEmail && user?.name) {
+  if (client?.contactEmail && user?.name && user.notifyClientOnLog) {
     const reportLink = `${config.app.frontendUrl}/c/${client.accessToken}`;
     console.log(`New Log 
       ${client.contactEmail}, 
