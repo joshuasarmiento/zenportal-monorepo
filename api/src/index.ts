@@ -5,18 +5,18 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { handle } from 'hono/vercel';
 // Import the auth instance and middleware
-import { auth } from './lib/auth';
+import { auth } from './lib/auth.js';
 
 // Import your new Routers
-import { billingRouter } from './routes/billing';
-import { webhooksRouter } from './routes/webhooks';
-import { clientsRouter } from './routes/clients';
-import { logsRouter } from './routes/logs';
-import { userRouter } from './routes/user';
-import { statsRouter } from './routes/stats';
-import { publicRouter } from './routes/public';
-import { v1ProgrammaticRouter } from './routes/v1_programmatic';
-import { config } from './config';
+import { billingRouter } from './routes/billing.js';
+import { webhooksRouter } from './routes/webhooks.js';
+import { clientsRouter } from './routes/clients.js';
+import { logsRouter } from './routes/logs.js';
+import { userRouter } from './routes/user.js';
+import { statsRouter } from './routes/stats.js';
+import { publicRouter } from './routes/public.js';
+import { v1ProgrammaticRouter } from './routes/v1_programmatic.js';
+import { config } from './config.js';
 
 const app = new Hono();
 

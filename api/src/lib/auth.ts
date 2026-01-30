@@ -1,18 +1,18 @@
 // api/src/lib/auth.ts
 import { betterAuth, type User } from "better-auth";
-import { emailOTP, lastLoginMethod } from "better-auth/plugins"; 
+import { emailOTP, lastLoginMethod } from "better-auth/plugins";
 import { APIError } from "better-auth/api";
 import { haveIBeenPwned } from "better-auth/plugins"
 
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createMiddleware } from 'hono/factory';
-import { db } from '../db';
-import { config } from '../config';
-import * as schema from '../db/schema';
+import { db } from '../db/index.js';
+import { config } from '../config.js';
+import * as schema from '../db/schema.js';
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
-        provider: "sqlite", 
+        provider: "sqlite",
         schema: {
             ...schema,
             user: schema.users,
@@ -34,12 +34,12 @@ export const auth = betterAuth({
             paymongoCustomerId: {
                 type: "string",
                 required: false,
-                input: false 
+                input: false
             }
         }
     },
     trustedOrigins: [
-        config.app.frontendUrl || "http://localhost:5173", 
+        config.app.frontendUrl || "http://localhost:5173",
     ],
     baseURL: config.betterAuth.baseURL || "http://localhost:5173/api/auth",
     emailAndPassword: {
@@ -48,9 +48,9 @@ export const auth = betterAuth({
         requireEmailVerification: true,
         validator: {
             validatePassword: async (password: string) => {
-                const isStrong = password.length >= 8 && 
-                                 /[A-Z].*[A-Z]/.test(password) && // At least 2 capital letters
-                                 /[0-9]/.test(password);         // At least 1 number
+                const isStrong = password.length >= 8 &&
+                    /[A-Z].*[A-Z]/.test(password) && // At least 2 capital letters
+                    /[0-9]/.test(password);         // At least 1 number
 
                 if (!isStrong) {
                     throw new APIError("BAD_REQUEST", {
@@ -62,8 +62,8 @@ export const auth = betterAuth({
     },
     socialProviders: {
         google: {
-            accessType: "offline", 
-            prompt: "select_account consent", 
+            accessType: "offline",
+            prompt: "select_account consent",
             clientId: config.google.googleclientId,
             clientSecret: config.google.googleclientSecret,
             redirectURI: "http://localhost:3000/api/auth/callback/google"
@@ -78,33 +78,33 @@ export const auth = betterAuth({
                 if (type === "forget-password") {
                     console.log(`Sending Password Reset OTP to ${email}: ${otp}`);
                 } else if (type === "sign-in") {
-                     console.log(`Sending Login OTP to ${email}: ${otp}`);
+                    console.log(`Sending Login OTP to ${email}: ${otp}`);
                 } else if (type === "email-verification") {
-                     console.log(`Sending Verification OTP to ${email}: ${otp}`);
+                    console.log(`Sending Verification OTP to ${email}: ${otp}`);
                 }
             },
             otpLength: 6,
             expiresIn: 300 // 5 minutes
         }),
         lastLoginMethod({
-            storeInDatabase: true 
+            storeInDatabase: true
         }),
     ]
 });
 
 export const requireAuth = createMiddleware<{ Variables: { userId: string, user: User, session: any } }>(async (c, next) => {
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  if (!session?.user) {
-    return c.json({ error: 'Unauthorized' }, 401);
-  }
-  c.set('user', session.user);
-  c.set('userId', session.user.id);
-  c.set('session', session.session);
-  return next();
+    const session = await auth.api.getSession({ headers: c.req.raw.headers });
+    if (!session?.user) {
+        return c.json({ error: 'Unauthorized' }, 401);
+    }
+    c.set('user', session.user);
+    c.set('userId', session.user.id);
+    c.set('session', session.session);
+    return next();
 });
 
 export type AuthVariables = {
-  userId: string;
-  user: User;
-  session: any;
+    userId: string;
+    user: User;
+    session: any;
 };

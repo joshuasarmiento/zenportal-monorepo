@@ -1,6 +1,6 @@
 // import { createInsertSchema, createSelectSchema } from 'drizzle-typebox'; // Optional: if using typebox
 import { type InferSelectModel, type InferInsertModel } from 'drizzle-orm';
-import { users, clients, workLogs } from './db/schema';
+import { users, clients, workLogs } from './db/schema.js';
 
 // --- DATABASE TYPES ---
 

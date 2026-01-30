@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
-import { db } from '../db';
-import { clients, users } from '../db/schema';
-import { requireAuth } from '../lib/auth';
+import { db } from '../db/index.js';
+import { clients, users } from '../db/schema.js';
+import { requireAuth } from '../lib/auth.js';
 import { eq, and, desc, count } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
@@ -38,7 +38,7 @@ app.get('/', async (c) => {
 app.get('/:id', async (c) => {
   const userId = c.get('userId');
   const clientId = c.req.param('id');
-  
+
   const client = await db.query.clients.findFirst({
     where: and(eq(clients.id, clientId), eq(clients.userId, userId)),
   });
@@ -61,7 +61,7 @@ app.post('/', zValidator('json', clientSchema), async (c) => {
     db.select({ count: count() })
       .from(clients)
       .where(and(
-        eq(clients.userId, userId), 
+        eq(clients.userId, userId),
         eq(clients.status, 'active') // Only count active clients
       ))
   ]);
@@ -71,9 +71,9 @@ app.post('/', zValidator('json', clientSchema), async (c) => {
 
   // 2. The Soft Lock Logic
   if (!isPro && currentCount >= FREE_PLAN_LIMIT) {
-    return c.json({ 
-      error: 'Limit Reached', 
-      message: `You have reached the free limit of ${FREE_PLAN_LIMIT} active client. Archive existing clients or upgrade to Pro.` 
+    return c.json({
+      error: 'Limit Reached',
+      message: `You have reached the free limit of ${FREE_PLAN_LIMIT} active client. Archive existing clients or upgrade to Pro.`
     }, 403);
   }
 
@@ -82,9 +82,9 @@ app.post('/', zValidator('json', clientSchema), async (c) => {
     userId: userId,
     companyName: body.companyName,
     contactName: body.contactName,
-    contactEmail: body.contactEmail, 
+    contactEmail: body.contactEmail,
     hourlyRate: body.hourlyRate,
-    status: 'active',               
+    status: 'active',
     accessToken: uuidv4(),
   }).returning();
 

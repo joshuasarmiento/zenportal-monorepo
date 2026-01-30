@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
-import { db } from '../db';
-import { clients, workLogs, users } from '../db/schema';
+import { db } from '../db/index.js';
+import { clients, workLogs, users } from '../db/schema.js';
 import { eq, desc } from 'drizzle-orm';
-// import { sendClientViewedEmail } from '../lib/email';
+// import { sendClientViewedEmail } from '../lib/email.js';
 
 const app = new Hono();
 
@@ -12,13 +12,13 @@ app.get('/report/:token', async (c) => {
 
   const clientData = await db.query.clients.findFirst({
     where: eq(clients.accessToken, token),
-    with: { 
+    with: {
       owner: {
         // STRICT Privacy: Only return what is needed for the report display
-        columns: { 
-          name: true, 
-          email: true, 
-          tier: true, 
+        columns: {
+          name: true,
+          email: true,
+          tier: true,
           image: true,
           accentColor: true,
           publicTemplate: true,
@@ -64,7 +64,7 @@ app.get('/agency/:slug', async (c) => {
       image: true,
       accentColor: true,
       email: true,
-      
+
       headline: true,
       bio: true,
       websiteUrl: true,
@@ -73,7 +73,7 @@ app.get('/agency/:slug', async (c) => {
       publicTemplate: true,
 
       tier: true,
-      createdAt: true, 
+      createdAt: true,
     }
   });
 

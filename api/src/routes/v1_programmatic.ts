@@ -4,10 +4,10 @@ import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import { and, eq, desc } from 'drizzle-orm';
 
-import { db } from '../db';
-import { workLogs, clients } from '../db/schema';
-import { requireReadAccess, requireWriteAccess } from '../lib/bearer';
-import { User } from '../types';
+import { db } from '../db/index.js';
+import { workLogs, clients } from '../db/schema.js';
+import { requireReadAccess, requireWriteAccess } from '../lib/bearer.js';
+import { User } from '../types.js';
 
 // Define the shape of the context's bearerUser variable
 type BearerUser = {

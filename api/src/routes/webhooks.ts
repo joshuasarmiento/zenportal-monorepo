@@ -1,9 +1,9 @@
 // api/src/routes/webhooks.ts
 import { Hono } from 'hono';
-import { db } from '../db';
-import { users, subscription } from '../db/schema';
+import { db } from '../db/index.js';
+import { users, subscription } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
-import { config } from '../config';
+import { config } from '../config.js';
 import * as crypto from 'crypto';
 
 const app = new Hono();
@@ -23,9 +23,9 @@ app.get('/paymongo', (c) => {
 // POST /webhooks/paymongo - The actual PayMongo handler
 app.post('/paymongo', async (c) => {
   console.log("📝 Webhook POST received. verifying...");
-  
+
   const signatureHeader = c.req.header('paymongo-signature');
-  const rawBody = await c.req.text(); 
+  const rawBody = await c.req.text();
 
   if (!signatureHeader) {
     console.error("❌ Missing PayMongo Signature");
@@ -41,7 +41,7 @@ app.post('/paymongo', async (c) => {
     if (!timestamp) throw new Error('Missing timestamp');
 
     const canonicalString = `${timestamp}.${rawBody}`;
-    
+
     const computedSignature = crypto
       .createHmac('sha256', config.paymongo.webhookSecret)
       .update(canonicalString)
@@ -50,10 +50,10 @@ app.post('/paymongo', async (c) => {
     const signatureToMatch = config.paymongo.publicKey.startsWith('pk_live') ? liveSignature : testSignature;
 
     if (computedSignature !== signatureToMatch) {
-       console.error("❌ Signature Mismatch:", { computed: computedSignature, received: signatureToMatch });
-       return c.json({ error: 'Invalid signature' }, 401);
+      console.error("❌ Signature Mismatch:", { computed: computedSignature, received: signatureToMatch });
+      return c.json({ error: 'Invalid signature' }, 401);
     }
-    
+
     console.log("✅ Signature Verified!");
 
   } catch (err) {
@@ -79,14 +79,14 @@ app.post('/paymongo', async (c) => {
       periodEnd.setDate(now.getDate() + 30);
 
       await db.update(users)
-        .set({ 
+        .set({
           tier: 'pro',
           paymongoCustomerId: attributes.billing?.email
         })
         .where(eq(users.id, userId));
 
       await db.insert(subscription).values({
-        id: event.data.id, 
+        id: event.data.id,
         referenceId: userId,
         plan: 'pro',
         status: 'paid',
@@ -96,7 +96,7 @@ app.post('/paymongo', async (c) => {
       });
       console.log("🎉 User Upgraded to PRO successfully");
     } else {
-        console.warn("⚠️ No UserId found in metadata");
+      console.warn("⚠️ No UserId found in metadata");
     }
   }
 

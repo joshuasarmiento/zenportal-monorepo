@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
-import { db } from '../db';
-import { users } from '../db/schema';
+import { db } from '../db/index.js';
+import { users } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
-import { requireAuth, type AuthVariables } from '../lib/auth';
+import { requireAuth, type AuthVariables } from '../lib/auth.js';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { v4 as uuidv4 } from 'uuid';
@@ -57,7 +57,7 @@ app.patch('/me', zValidator('json', updateUserSchema), async (c) => {
 // POST /api-key - Generate API Keys
 app.post('/api-key', async (c) => {
   const userId = c.get('userId');
-  
+
   // We query the DB to ensure we have the absolute latest 'tier' status
   const user = await db.query.users.findFirst({
     where: eq(users.id, userId),

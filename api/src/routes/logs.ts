@@ -1,13 +1,13 @@
 import { Hono } from 'hono';
-import { db } from '../db';
-import { workLogs, users, clients } from '../db/schema';
-import { requireAuth } from '../lib/auth';
+import { db } from '../db/index.js';
+import { workLogs, users, clients } from '../db/schema.js';
+import { requireAuth } from '../lib/auth.js';
 import { and, eq, desc, sql, count } from 'drizzle-orm'; // Added sql, count
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
-// import { sendLogEmail } from '../lib/email';
-import { config } from '../config';
+// import { sendLogEmail } from '../lib/email.js';
+import { config } from '../config.js';
 
 const app = new Hono<{ Variables: { userId: string } }>();
 

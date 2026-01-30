@@ -1,7 +1,7 @@
-import { db } from '../db';
-import { users, workLogs, clients } from '../db/schema';
+import { db } from '../db/index.js';
+import { users, workLogs, clients } from '../db/schema.js';
 import { eq, and, sql, gte } from 'drizzle-orm';
-import { sendWeeklyRecapEmail } from '../lib/email';
+import { sendWeeklyRecapEmail } from '../lib/email.js';
 
 async function runWeeklyRecap() {
   console.log('⏳ Starting Weekly Recap...');

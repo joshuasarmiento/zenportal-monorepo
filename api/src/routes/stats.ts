@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { stream } from 'hono/streaming';
-import { db } from '../db';
-import { workLogs, clients, users } from '../db/schema';
-import { requireAuth } from '../lib/auth';
+import { db } from '../db/index.js';
+import { workLogs, clients, users } from '../db/schema.js';
+import { requireAuth } from '../lib/auth.js';
 import { eq, and, sql, desc, asc, gte, count } from 'drizzle-orm';
 
 const app = new Hono<{ Variables: { userId: string } }>();
@@ -13,7 +13,7 @@ app.use('*', requireAuth);
 const getDateRange = (range: string) => {
   const now = new Date();
   const d = new Date(now);
-  
+
   switch (range) {
     case '24h': d.setDate(now.getDate() - 1); break;
     case '7d': d.setDate(now.getDate() - 7); break;
@@ -23,7 +23,7 @@ const getDateRange = (range: string) => {
     case '1y': d.setFullYear(d.getFullYear() - 1); break;
     default: d.setMonth(d.getMonth() - 6); break;
   }
-  
+
   return {
     start: d.toISOString().split('T')[0], // "2026-01-01"
     end: now.toISOString().split('T')[0]
@@ -36,7 +36,7 @@ const getDateRange = (range: string) => {
  */
 app.get('/export', async (c) => {
   const userId = c.get('userId');
-  const range = c.req.query('range') || 'all'; 
+  const range = c.req.query('range') || 'all';
 
   // 1. SECURITY CHECK: Is User Pro?
   const user = await db.query.users.findFirst({
@@ -79,8 +79,8 @@ app.get('/export', async (c) => {
           isBlocked: workLogs.isBlocked,
           // 🟢 ADDED: Select the link columns
           // Note: Verify these match your schema.ts exactly!
-          video: workLogs.videoUrl,       
-          file: workLogs.attachmentUrl   
+          video: workLogs.videoUrl,
+          file: workLogs.attachmentUrl
         })
         .from(workLogs)
         .innerJoin(clients, eq(workLogs.clientId, clients.id))
@@ -98,11 +98,11 @@ app.get('/export', async (c) => {
         const rate = log.rate || 0;
         const hours = log.hours || 0;
         const total = (rate * hours).toFixed(2);
-        
+
         const safeSummary = `"${(log.summary || '').replace(/"/g, '""').replace(/(\r\n|\n|\r)/g, ' ')}"`;
         const safeClient = `"${(log.clientName || 'Unknown').replace(/"/g, '""')}"`;
         const status = log.isBlocked ? 'Blocked' : 'Done';
-        
+
         // 🟢 ADDED: Handle nulls for links
         const videoLink = log.video || '';
         const fileLink = log.file || '';
@@ -123,121 +123,121 @@ app.get('/export', async (c) => {
  * SCALABILITY FIX: Uses Promise.all for concurrency & optimized SQL logic
  */
 app.get('/', async (c) => {
-    const userId = c.get('userId');
-    const range = c.req.query('range') || '6m';
-    
-    // 1. Prepare Date Logic
-    const { start: startDateStr } = getDateRange(range);
-    const isDailyGroup = ['24h', '7d', '30d'].includes(range);
-    const groupByFormat = isDailyGroup ? '%Y-%m-%d' : '%Y-%m';
-    const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+  const userId = c.get('userId');
+  const range = c.req.query('range') || '6m';
 
-    // 2. Run Heavy Queries in PARALLEL (Drastically reduces latency)
-    const [statsResult, historyResult, topClientsResult, usageResult] = await Promise.all([
-      
-      // Query A: Dashboard Aggregates
-      db.select({
-          hoursPeriod: sql<number>`COALESCE(SUM(${workLogs.hoursWorked}), 0)`,
-          earningsPeriod: sql<number>`COALESCE(SUM(${workLogs.hoursWorked} * ${clients.hourlyRate}), 0)`,
-          blockedRevenue: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.isBlocked} = 1 THEN ${workLogs.hoursWorked} * ${clients.hourlyRate} ELSE 0 END), 0)`,
-          pendingBlockersCount: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.isBlocked} = 1 THEN 1 ELSE 0 END), 0)`,
-          activeClients: sql<number>`COUNT(DISTINCT ${workLogs.clientId})` // Only count clients active IN THIS PERIOD
-        })
-        .from(workLogs)
-        .innerJoin(clients, eq(workLogs.clientId, clients.id))
-        .where(and(
-          eq(workLogs.userId, userId),
-          gte(workLogs.date, startDateStr)
-        )),
+  // 1. Prepare Date Logic
+  const { start: startDateStr } = getDateRange(range);
+  const isDailyGroup = ['24h', '7d', '30d'].includes(range);
+  const groupByFormat = isDailyGroup ? '%Y-%m-%d' : '%Y-%m';
+  const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
 
-      // Query B: Revenue History (Chart)
-      db.select({
-          rawDate: sql<string>`strftime(${groupByFormat}, ${workLogs.date})`,
-          amount: sql<number>`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`
-        })
-        .from(workLogs)
-        .innerJoin(clients, eq(workLogs.clientId, clients.id))
-        .where(and(
-          eq(workLogs.userId, userId),
-          gte(workLogs.date, startDateStr)
-        ))
-        .groupBy(sql`strftime(${groupByFormat}, ${workLogs.date})`)
-        .orderBy(asc(sql`strftime(${groupByFormat}, ${workLogs.date})`)),
+  // 2. Run Heavy Queries in PARALLEL (Drastically reduces latency)
+  const [statsResult, historyResult, topClientsResult, usageResult] = await Promise.all([
 
-      // Query C: Top Clients
-      db.select({
-          name: clients.companyName,
-          amount: sql<number>`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`
-        })
-        .from(workLogs)
-        .innerJoin(clients, eq(workLogs.clientId, clients.id))
-        .where(and(
-          eq(workLogs.userId, userId),
-          gte(workLogs.date, startDateStr)
-        ))
-        .groupBy(clients.id)
-        .orderBy(desc(sql`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`))
-        .limit(5),
-      
-      // Query D: Monthly Log Count for Usage Limit
-      db
-        .select({ count: count() })
-        .from(workLogs)
-        .where(and(
-          eq(workLogs.userId, userId),
-          sql`${workLogs.date} LIKE ${currentMonth + '%'}`
-        ))
-    ]);
+    // Query A: Dashboard Aggregates
+    db.select({
+      hoursPeriod: sql<number>`COALESCE(SUM(${workLogs.hoursWorked}), 0)`,
+      earningsPeriod: sql<number>`COALESCE(SUM(${workLogs.hoursWorked} * ${clients.hourlyRate}), 0)`,
+      blockedRevenue: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.isBlocked} = 1 THEN ${workLogs.hoursWorked} * ${clients.hourlyRate} ELSE 0 END), 0)`,
+      pendingBlockersCount: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.isBlocked} = 1 THEN 1 ELSE 0 END), 0)`,
+      activeClients: sql<number>`COUNT(DISTINCT ${workLogs.clientId})` // Only count clients active IN THIS PERIOD
+    })
+      .from(workLogs)
+      .innerJoin(clients, eq(workLogs.clientId, clients.id))
+      .where(and(
+        eq(workLogs.userId, userId),
+        gte(workLogs.date, startDateStr)
+      )),
 
-    // 3. Process Results
-    const dashboardStats = statsResult[0];
-    const logCount = usageResult[0]?.count || 0;
+    // Query B: Revenue History (Chart)
+    db.select({
+      rawDate: sql<string>`strftime(${groupByFormat}, ${workLogs.date})`,
+      amount: sql<number>`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`
+    })
+      .from(workLogs)
+      .innerJoin(clients, eq(workLogs.clientId, clients.id))
+      .where(and(
+        eq(workLogs.userId, userId),
+        gte(workLogs.date, startDateStr)
+      ))
+      .groupBy(sql`strftime(${groupByFormat}, ${workLogs.date})`)
+      .orderBy(asc(sql`strftime(${groupByFormat}, ${workLogs.date})`)),
 
-    // Format History Data
-    const formattedHistory = historyResult.map(r => {
-      let label = r.rawDate;
-      if (!r.rawDate) return { period: 'Unknown', amount: 0, rawDate: '' };
+    // Query C: Top Clients
+    db.select({
+      name: clients.companyName,
+      amount: sql<number>`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`
+    })
+      .from(workLogs)
+      .innerJoin(clients, eq(workLogs.clientId, clients.id))
+      .where(and(
+        eq(workLogs.userId, userId),
+        gte(workLogs.date, startDateStr)
+      ))
+      .groupBy(clients.id)
+      .orderBy(desc(sql`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`))
+      .limit(5),
 
-      // Helper to make dates readable
-      try {
-        if (!isDailyGroup) {
-          const [y, m] = r.rawDate.split('-');
-          const date = new Date(parseInt(y), parseInt(m) - 1, 1);
-          label = date.toLocaleString('default', { month: 'short' });
-        } else {
-          const date = new Date(r.rawDate);
-          label = date.toLocaleString('default', { month: 'short', day: 'numeric' });
-        }
-      } catch (e) {
-        label = r.rawDate;
+    // Query D: Monthly Log Count for Usage Limit
+    db
+      .select({ count: count() })
+      .from(workLogs)
+      .where(and(
+        eq(workLogs.userId, userId),
+        sql`${workLogs.date} LIKE ${currentMonth + '%'}`
+      ))
+  ]);
+
+  // 3. Process Results
+  const dashboardStats = statsResult[0];
+  const logCount = usageResult[0]?.count || 0;
+
+  // Format History Data
+  const formattedHistory = historyResult.map(r => {
+    let label = r.rawDate;
+    if (!r.rawDate) return { period: 'Unknown', amount: 0, rawDate: '' };
+
+    // Helper to make dates readable
+    try {
+      if (!isDailyGroup) {
+        const [y, m] = r.rawDate.split('-');
+        const date = new Date(parseInt(y), parseInt(m) - 1, 1);
+        label = date.toLocaleString('default', { month: 'short' });
+      } else {
+        const date = new Date(r.rawDate);
+        label = date.toLocaleString('default', { month: 'short', day: 'numeric' });
       }
-      return { period: label, amount: Number(r.amount || 0), rawDate: r.rawDate };
-    });
+    } catch (e) {
+      label = r.rawDate;
+    }
+    return { period: label, amount: Number(r.amount || 0), rawDate: r.rawDate };
+  });
 
-    // Format Top Clients
-    const totalRangeEarnings = topClientsResult.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
-    const formattedTopClients = topClientsResult.map(c => ({
-      name: c.name,
-      amount: Number(c.amount || 0),
-      percent: totalRangeEarnings > 0 ? Math.round((Number(c.amount || 0) / totalRangeEarnings) * 100) : 0
-    }));
+  // Format Top Clients
+  const totalRangeEarnings = topClientsResult.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
+  const formattedTopClients = topClientsResult.map(c => ({
+    name: c.name,
+    amount: Number(c.amount || 0),
+    percent: totalRangeEarnings > 0 ? Math.round((Number(c.amount || 0) / totalRangeEarnings) * 100) : 0
+  }));
 
-    // Goals (Hardcoded for now, could be moved to User Settings DB)
-    const GOAL_TARGET = 2000;
-    const currentEarnings = Number(dashboardStats?.earningsPeriod || 0);
+  // Goals (Hardcoded for now, could be moved to User Settings DB)
+  const GOAL_TARGET = 2000;
+  const currentEarnings = Number(dashboardStats?.earningsPeriod || 0);
 
-    return c.json({
-      totalEarnings: currentEarnings,
-      hoursThisMonth: Number(dashboardStats?.hoursPeriod || 0),
-      activeClients: Number(dashboardStats?.activeClients || 0),
-      blockedRevenue: Number(dashboardStats?.blockedRevenue || 0),
-      pendingBlockersCount: Number(dashboardStats?.pendingBlockersCount || 0),
-      logCount: logCount,
-      goalTarget: GOAL_TARGET,
-      goalPercent: Math.min(100, Math.round((currentEarnings / GOAL_TARGET) * 100)),
-      revenueHistory: formattedHistory,
-      topClients: formattedTopClients
-    });
+  return c.json({
+    totalEarnings: currentEarnings,
+    hoursThisMonth: Number(dashboardStats?.hoursPeriod || 0),
+    activeClients: Number(dashboardStats?.activeClients || 0),
+    blockedRevenue: Number(dashboardStats?.blockedRevenue || 0),
+    pendingBlockersCount: Number(dashboardStats?.pendingBlockersCount || 0),
+    logCount: logCount,
+    goalTarget: GOAL_TARGET,
+    goalPercent: Math.min(100, Math.round((currentEarnings / GOAL_TARGET) * 100)),
+    revenueHistory: formattedHistory,
+    topClients: formattedTopClients
+  });
 });
 
 export { app as statsRouter };
