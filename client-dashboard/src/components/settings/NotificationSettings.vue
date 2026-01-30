@@ -79,6 +79,7 @@ const save = async () => {
             <Label class="text-base font-semibold">Client Views Report</Label>
             <p class="text-sm text-muted-foreground">
               Get an email notification the moment a client opens their magic link.
+              <span class="text-xs text-muted-foreground/70 block mt-1">(Includes a 6-hour cooldown to prevent spam)</span>
             </p>
           </div>
         </div>

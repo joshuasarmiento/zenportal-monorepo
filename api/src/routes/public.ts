@@ -41,12 +41,29 @@ app.get('/report/:token', async (c) => {
   });
 
   // Check if owner enabled notifications and has an email
+  // Check if owner enabled notifications and has an email
   if (clientData.owner && clientData.owner.notifyClientView && clientData.owner.email) {
-    // Fire and forget (don't await to keep response fast)
-    console.log(` ${clientData.owner.email} - ${clientData.companyName} just viewed your report`);
-    sendClientViewedEmail(clientData.owner.email, clientData.companyName)
-      .then(() => console.log(`📧 Sent Client View Alert to ${clientData.owner.email}`))
-      .catch(err => console.error('Failed to send view alert', err));
+    const NOW = new Date();
+    // 6 hours cooldown
+    const COOLDOWN_MS = 6 * 60 * 60 * 1000;
+
+    const lastViewed = clientData.lastViewedAt ? new Date(clientData.lastViewedAt).getTime() : 0;
+    const timeSinceLastView = NOW.getTime() - lastViewed;
+
+    if (timeSinceLastView > COOLDOWN_MS) {
+      // Fire and forget (don't await to keep response fast)
+      console.log(` ${clientData.owner.email} - ${clientData.companyName} just viewed your report`);
+      sendClientViewedEmail(clientData.owner.email, clientData.companyName)
+        .then(() => console.log(`📧 Sent Client View Alert to ${clientData.owner.email}`))
+        .catch(err => console.error('Failed to send view alert', err));
+
+      // Update last viewed time
+      await db.update(clients)
+        .set({ lastViewedAt: NOW })
+        .where(eq(clients.id, clientData.id));
+    } else {
+      console.log(`⏳ Rate limited view notification for ${clientData.owner.email} (Last sent: ${new Date(lastViewed).toISOString()})`);
+    }
   }
 
   const logs = await db.query.workLogs.findMany({

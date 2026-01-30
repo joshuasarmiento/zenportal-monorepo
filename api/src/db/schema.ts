@@ -104,6 +104,8 @@ export const clients = sqliteTable('clients', {
   hourlyRate: real('hourly_rate'),
   currency: text('currency').default('USD'),
 
+  lastViewedAt: integer('last_viewed_at', { mode: 'timestamp' }),
+
   createdAt: integer('created_at', { mode: 'timestamp' })
     .default(sql`(strftime('%s', 'now') * 1000)`),
 }, (table) => {
