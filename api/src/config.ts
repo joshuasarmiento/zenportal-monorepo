@@ -15,7 +15,7 @@ export const config = {
     databaseUrl: getEnv('TURSO_DATABASE_URL'),
     authToken: getEnv('TURSO_AUTH_TOKEN')
   },
-   paymongo: {
+  paymongo: {
     secretKey: getEnv('PAYMONGO_SECRET_KEY'),
     publicKey: getEnv('PAYMONGO_PUBLIC_KEY'),
     webhookSecret: getEnv('PAYMONGO_WEBHOOK'),
@@ -25,13 +25,13 @@ export const config = {
     baseURL: getEnv('BETTER_AUTH_URL')
   },
   google: {
-      googleclientSecret: getEnv('GOOGLE_CLIENT_SECRET'),
-      googleclientId: getEnv('GOOGLE_CLIENT_ID')
+    googleclientSecret: getEnv('GOOGLE_CLIENT_SECRET'),
+    googleclientId: getEnv('GOOGLE_CLIENT_ID')
   },
   resend: {
     apiKey: getEnv('RESEND_API_KEY')
   },
   app: {
-    frontendUrl: getEnv('FRONTEND_URL') || 'http://localhost:5173'
+    frontendUrl: getEnv('FRONTEND_URL')
   }
 };
