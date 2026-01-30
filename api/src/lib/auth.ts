@@ -39,9 +39,9 @@ export const auth = betterAuth({
         }
     },
     trustedOrigins: [
-        config.app.frontendUrl || "http://localhost:5173",
+        config.app.frontendUrl,
     ],
-    baseURL: config.betterAuth.baseURL || "http://localhost:5173/api/auth",
+    baseURL: config.betterAuth.baseURL,
     emailAndPassword: {
         enabled: true,
         autoSignIn: true,
@@ -66,7 +66,7 @@ export const auth = betterAuth({
             prompt: "select_account consent",
             clientId: config.google.googleclientId,
             clientSecret: config.google.googleclientSecret,
-            redirectURI: "http://localhost:3000/api/auth/callback/google"
+            redirectURI: `${config.app.frontendUrl}/api/auth/callback/google`
         },
     },
     plugins: [
