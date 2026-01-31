@@ -73,7 +73,7 @@ const lastUpdated = 'January 25, 2026'
           <section class="space-y-4">
             <h2 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">2. Information We Collect</h2>
             <ul class="list-disc pl-5 space-y-2 marker:text-zinc-300 dark:marker:text-zinc-700">
-              <li><strong class="text-zinc-900 dark:text-white">Account Info:</strong> Email/Name via Clerk.</li>
+              <li><strong class="text-zinc-900 dark:text-white">Account Info:</strong> Email/Name</li>
               <li><strong class="text-zinc-900 dark:text-white">Professional Profile:</strong> Bio, Headlines, and Social Links you choose to display publicly.</li>
               <li><strong class="text-zinc-900 dark:text-white">Billing Info:</strong> Stored securely by PayMongo. We never see your card number.</li>
               <li><strong class="text-zinc-900 dark:text-white">Client Data:</strong> Names, work logs (including videos/attachments), and client contacts.</li>
@@ -90,7 +90,7 @@ const lastUpdated = 'January 25, 2026'
                     <strong class="text-zinc-900 dark:text-white">Turso</strong> (Database)
                 </div>
                 <div class="p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900">
-                    <strong class="text-zinc-900 dark:text-white">Clerk</strong> (Auth)
+                    <strong class="text-zinc-900 dark:text-white">Better Auth</strong> (Auth)
                 </div>
                 <div class="p-4 border border-zinc-200 dark:border-zinc-800 rounded-lg text-sm bg-zinc-50 dark:bg-zinc-900">
                     <strong class="text-zinc-900 dark:text-white">PayMongo</strong> (Payments)

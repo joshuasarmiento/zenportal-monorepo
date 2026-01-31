@@ -92,7 +92,7 @@ const handleVerifySignup = async () => {
        <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
     </div>
 
-    <div class="w-full max-w-sm relative z-10">
+    <div class="w-full max-w-md relative z-10">
       <div class="flex flex-col gap-6">
         <Card class="overflow-hidden border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl shadow-zinc-200/50 dark:shadow-black/50">
           <CardContent class="grid p-0">

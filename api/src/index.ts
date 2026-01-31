@@ -51,7 +51,11 @@ if (process.env.NODE_ENV !== 'production') {
   const port = 3000;
   console.log(`🚀 Hono Server running on http://localhost:${port}`)
   serve({
-    fetch: app.fetch,
+    fetch: (req) => app.fetch(req, {}, {
+      waitUntil: (promise: Promise<unknown>) => promise,
+      passThroughOnException: () => { },
+      props: {},
+    }),
     port
   });
 }
