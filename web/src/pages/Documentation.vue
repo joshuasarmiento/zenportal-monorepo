@@ -107,7 +107,7 @@ const scrollTo = (id: string) => {
         </ScrollArea>
       </aside>
 
-      <main class="relative py-6 lg:gap-10 lg:py-8 xl:grid xl:grid-cols-[1fr_200px]">
+      <main class="relative py-6 lg:gap-10 lg:py-8 xl:grid xl:grid-cols-[1fr_200px] px-4 md:px-0">
         <div class="mx-auto w-full min-w-0 space-y-12">
           
           <section id="introduction" class="scroll-m-20">

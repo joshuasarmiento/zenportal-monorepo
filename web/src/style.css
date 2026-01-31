@@ -118,3 +118,15 @@
     @apply bg-background text-foreground;
   }
 }
+
+@utility text-gradient {
+  @apply bg-clip-text text-transparent bg-linear-to-r from-blue-600 via-cyan-600 to-emerald-600 dark:from-blue-400 dark:via-cyan-400 dark:to-emerald-400;
+}
+
+@utility glass-card {
+  @apply bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md border border-zinc-200 dark:border-white/5;
+}
+
+@utility hover-card-premium {
+  @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-blue-500/30;
+}
