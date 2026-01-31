@@ -72,7 +72,7 @@ useHead({
              </div>
              
              <div class="aspect-video bg-zinc-100 dark:bg-black/50 flex items-center justify-center relative group/player overflow-hidden">
-                <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center opacity-50 grayscale group-hover/player:scale-105 transition-transform duration-700"></div>
+                <!-- <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center opacity-50 grayscale group-hover/player:scale-105 transition-transform duration-700"></div> -->
                 <div class="absolute inset-0 bg-black/20"></div>
                 
                 <div class="relative h-16 w-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 cursor-pointer group-hover/player:scale-110 transition-transform">
@@ -84,7 +84,7 @@ useHead({
                       <div class="h-2 w-2 bg-red-500 rounded-full animate-pulse"></div>
                       <span class="text-xs font-mono text-zinc-800 dark:text-zinc-200">Google Drive Embed Active</span>
                     </div>
-                    <Badge variant="secondary" class="text-[10px] h-5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500">Free Tool</Badge>
+                    <Badge variant="secondary" class="text-[10px] h-5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500">Proof of Work</Badge>
                 </div>
              </div>
           </div>
