@@ -4,8 +4,9 @@ import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
+// Trigger restart for env vars
 export default defineConfig({
-  plugins: [vue(),tailwindcss()],
+  plugins: [vue(), tailwindcss()],
   base: "/",
   resolve: {
     alias: {
