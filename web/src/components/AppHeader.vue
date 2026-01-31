@@ -11,6 +11,8 @@ if (typeof window !== 'undefined') {
     isScrolled.value = window.scrollY > 20
   })
 }
+
+const appUrl = import.meta.env.VITE_APP_URL
 </script>
 
 <template>
@@ -24,7 +26,7 @@ if (typeof window !== 'undefined') {
       </router-link>
       <div class="flex items-center gap-4 md:gap-6">
         <ModeToggle />
-        <a href="http://localhost:5173/sign-in" target="__blank" class="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-white transition hidden sm:block">Log in</a>
+        <a :href="`${appUrl}/login`" target="__blank" class="text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-white transition hidden sm:block">Log in</a>
         <Button class="rounded-full px-6 font-semibold bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-lg shadow-zinc-500/20 dark:shadow-none" as-child>
           <router-link to="/pricing">Simulan Mo Na</router-link>
         </Button>
