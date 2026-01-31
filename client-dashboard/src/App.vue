@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores/userStore'
 import { Toaster } from '@/components/ui/sonner'
-import { Loader2, Zap } from 'lucide-vue-next'
+import { Zap } from 'lucide-vue-next'
 import 'vue-sonner/style.css'
 
 const userStore = useUserStore()
