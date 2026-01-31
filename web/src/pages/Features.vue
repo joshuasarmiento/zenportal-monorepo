@@ -17,6 +17,17 @@ import {
 const handleSignUp = () => {
   window.open(`${import.meta.env.VITE_APP_URL}/sign-up`, '_blank')
 }
+
+import { useHead } from '@unhead/vue'
+
+useHead({
+  title: 'Features - Proof of Work, Not Spyware',
+  meta: [
+    { name: 'description', content: 'Output verification, video embeds, and client portals without the invasion of privacy. See all features of ZenPortal.' },
+    { property: 'og:title', content: 'ZenPortal Features - Everything you need to fire your micromanager' },
+    { property: 'og:description', content: 'Tools designed to build Trust Capital so you can work asynchronously.' },
+  ]
+})
 </script>
 
 <template>

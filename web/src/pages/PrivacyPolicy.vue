@@ -3,8 +3,18 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Eye, Server, ShieldCheck, FileLock } from 'lucide-vue-next'
+import { useHead } from '@unhead/vue'
 
 const lastUpdated = 'January 25, 2026'
+
+useHead({
+  title: 'Privacy Policy - Your Data, Your Control',
+  meta: [
+    { name: 'description', content: 'We process data, you control it. No tracking cookies, no ad sales. Read our Privacy Policy to understand how we protect your data.' },
+    { property: 'og:title', content: 'ZenPortal Privacy Policy' },
+    { property: 'og:description', content: 'We process data, you control it. Simple as that.' },
+  ]
+})
 </script>
 
 <template>

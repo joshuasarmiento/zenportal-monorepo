@@ -3,6 +3,16 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { MapPin, Zap, HeartHandshake, ArrowRight, TrendingUp, ShieldCheck, Flag } from 'lucide-vue-next'
+import { useHead } from '@unhead/vue'
+
+useHead({
+  title: 'About Us - Built by Filipinos for the Global Economy',
+  meta: [
+    { name: 'description', content: 'ZenPortal was built to help Filipino VAs and freelancers command higher rates and trust. Learn about our mission and story.' },
+    { property: 'og:title', content: 'About ZenPortal - Our Mission' },
+    { property: 'og:description', content: 'We believe Filipino talent is world-class. The tools we use should be too.' },
+  ]
+})
 </script>
 
 <template>

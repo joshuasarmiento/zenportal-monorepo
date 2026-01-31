@@ -94,6 +94,17 @@ const faqs = [
     answer: "No, hindi kami bangko. We help you get the work *approved* quickly so you get paid faster via your preferred method (Wise, Parallax, etc). We handle the 'Proof of Work'."
   }
 ]
+
+import { useHead } from '@unhead/vue'
+
+useHead({
+  title: 'ZenPortal - Free Client Portal for Filipino VAs & Freelancers',
+  meta: [
+    { name: 'description', content: 'Stop sending screenshots. Give your clients a professional portal. Proof of work, automated reports, and zero spyware. Built for Pinoy Freelancers.' },
+    { property: 'og:title', content: 'ZenPortal - Free Client Portal for Filipino VAs & Freelancers' },
+    { property: 'og:description', content: 'Stop sending screenshots. Give your clients a professional portal. Proof of work, automated reports, and zero spyware.' },
+  ],
+})
 </script>
 
 <template>

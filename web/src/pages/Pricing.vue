@@ -42,6 +42,17 @@ const plans = [
 const handleSignUp = () => {
   window.open(`${import.meta.env.VITE_APP_URL}/sign-up`, '_blank')
 }
+
+import { useHead } from '@unhead/vue'
+
+useHead({
+  title: 'Pricing - Free Forever for Starters',
+  meta: [
+    { name: 'description', content: 'Start using ZenPortal for free. Upgrade to Agency Pro for unlimited clients and custom branding only when you need it.' },
+    { property: 'og:title', content: 'ZenPortal Pricing - Simple & Transparent' },
+    { property: 'og:description', content: 'Perfect for your first client. Scale your freelance business with Agency Pro.' },
+  ]
+})
 </script>
 
 <template>

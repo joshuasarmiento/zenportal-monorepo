@@ -3,8 +3,18 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Gavel, ShieldAlert, CreditCard, Scale, Lock } from 'lucide-vue-next'
+import { useHead } from '@unhead/vue'
 
 const lastUpdated = 'January 25, 2026'
+
+useHead({
+  title: 'Terms of Service - ZenPortal',
+  meta: [
+    { name: 'description', content: 'Read the Terms of Service for ZenPortal. Understand your rights, responsibilities, and our billing policies.' },
+    { property: 'og:title', content: 'ZenPortal Terms of Service' },
+    { property: 'og:description', content: 'Read the Terms of Service for ZenPortal.' },
+  ]
+})
 </script>
 
 <template>
