@@ -112,8 +112,7 @@ const isGroupActive = (children: { path: string }[]) => {
               <Zap class="size-4" />
             </div>
             <div class="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-              <span class="truncate font-bold text-blue-600 dark:text-blue-400">ZenPortal<span
-                  class="text-muted-foreground">.io</span></span>
+              <span class="truncate font-bold text-blue-600 dark:text-blue-400">ZenPortal</span>
               <span class="truncate text-xs text-muted-foreground">Agency Admin</span>
             </div>
           </SidebarMenuButton>
