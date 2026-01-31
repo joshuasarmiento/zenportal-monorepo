@@ -32,6 +32,10 @@ export const config = {
   },
   app: {
     backendUrl: getEnv('BACKEND_URL'),
-    frontendUrl: getEnv('FRONTEND_URL')
+    frontendUrl: getEnv('FRONTEND_URL'),
+    allowedOrigins: [
+      ...getEnv('FRONTEND_URL').split(',').map((url) => url.trim()),
+      'https://app.zenportal.com.ph'
+    ]
   }
 };

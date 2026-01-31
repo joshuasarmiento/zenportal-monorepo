@@ -39,9 +39,7 @@ export const auth = betterAuth({
             }
         }
     },
-    trustedOrigins: [
-        config.app.frontendUrl,
-    ],
+    trustedOrigins: config.app.allowedOrigins,
     baseURL: config.app.backendUrl,
     emailAndPassword: {
         enabled: true,

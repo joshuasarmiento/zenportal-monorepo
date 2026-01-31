@@ -23,7 +23,7 @@ const app = new Hono();
 // 1. Global Middleware
 app.use('*', logger());
 app.use('*', cors({
-  origin: [config.app.frontendUrl],
+  origin: config.app.allowedOrigins,
   credentials: true,
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowHeaders: ['Content-Type', 'Authorization', 'paymongo-signature'],
