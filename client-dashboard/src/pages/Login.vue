@@ -67,11 +67,11 @@ const handleVerifyOtp = async () => {
 </script>
 
 <template>
-    <div class="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
-        <div class="w-full max-w-sm md:max-w-4xl">
+    <div class="dark bg-background flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
+        <div class="w-full max-w-sm">
             <div class="flex flex-col gap-6">
                 <Card class="overflow-hidden p-0 shadow-2xl border-white/5">
-                    <CardContent class="grid p-0 md:grid-cols-2">
+                    <CardContent class="grid p-0">
                         <div class="p-6 md:p-8 bg-card">
                             <div class="flex flex-col gap-6">
                                 <div class="flex flex-col items-center gap-2 text-center">
@@ -187,22 +187,7 @@ const handleVerifyOtp = async () => {
                             </div>
                         </div>
 
-                        <div class="bg-muted relative hidden md:block">
-                            <img
-                                src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
-                                alt="ZenPortal Abstract Background"
-                                class="absolute inset-0 h-full w-full object-cover dark:brightness-[0.4] grayscale-[0.2]"
-                            />
-                            <div class="absolute inset-0 bg-blue-600/10 mix-blend-multiply"></div>
-                            <div class="absolute bottom-8 left-8 right-8 text-white z-10">
-                                <blockquote class="space-y-2">
-                                    <p class="text-lg font-medium">
-                                        &ldquo;Managing logs has never been this fluid. It's like my freelance career finally found its center.&rdquo;
-                                    </p>
-                                    <footer class="text-sm font-light">Sofia Davis, Freelance VA</footer>
-                                </blockquote>
-                            </div>
-                        </div>
+
                     </CardContent>
                 </Card>
                 

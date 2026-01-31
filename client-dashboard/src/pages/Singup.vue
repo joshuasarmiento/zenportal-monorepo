@@ -87,11 +87,11 @@ const handleVerifySignup = async () => {
 </script>
 
 <template>
-  <div class="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
-    <div class="w-full max-w-sm md:max-w-4xl">
+  <div class="dark bg-background flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
+    <div class="w-full max-w-sm">
       <div class="flex flex-col gap-6">
         <Card class="overflow-hidden p-0 shadow-2xl border-white/5">
-          <CardContent class="grid p-0 md:grid-cols-2">
+          <CardContent class="grid p-0">
             
             <div class="p-6 md:p-8 bg-card">
               <div class="flex flex-col gap-6">
@@ -185,22 +185,7 @@ const handleVerifySignup = async () => {
               </div>
             </div>
 
-            <div class="bg-muted relative hidden md:block">
-              <img
-                src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=2670&auto=format&fit=crop"
-                alt="Workspace Background"
-                class="absolute inset-0 h-full w-full object-cover dark:brightness-[0.4] grayscale-[0.3]"
-              />
-              <div class="absolute inset-0 bg-blue-900/20 mix-blend-multiply"></div>
-              <div class="absolute bottom-8 left-8 right-8 text-white z-10 text-balance">
-                <blockquote class="space-y-2">
-                  <p class="text-lg font-medium leading-relaxed">
-                    &ldquo;Setting up my agency portal took less than two minutes. The automation handles the rest.&rdquo;
-                  </p>
-                  <footer class="text-sm font-light opacity-80">Marcus Chen, Freelance Developer</footer>
-                </blockquote>
-              </div>
-            </div>
+
           </CardContent>
         </Card>
         
