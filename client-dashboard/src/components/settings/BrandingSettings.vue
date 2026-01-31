@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
-import { Lock, Copy, Check, Loader2, Sparkles } from 'lucide-vue-next'
+import { Lock, Copy, Check, Loader2, Sparkles, Paintbrush } from 'lucide-vue-next'
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'vue-sonner' 
 
@@ -30,17 +30,15 @@ const form = ref({
 
 const isPro = computed(() => userStore.isPro)
 
-// --- VISUAL PREVIEW CONFIGURATION ---
 const templates = [
   { 
     id: 'modern', 
     name: 'Zen (Modern)', 
     desc: 'Soft glass, gradients, fluid.', 
     isPro: false,
-    // Preview Styles matching the "Soft Glass" 2026 look
-    containerClass: 'rounded-[16px] border border-zinc-200/50 shadow-sm font-sans bg-zinc-50/50',
-    headerClass: 'h-10 w-full rounded-t-[16px] opacity-20 backdrop-blur-md',
-    avatarClass: 'rounded-[10px] ring-2 ring-white/50 bg-white shadow-sm',
+    containerClass: 'rounded-2xl border border-zinc-200/50 shadow-sm font-sans bg-zinc-50/50',
+    headerClass: 'h-10 w-full rounded-t-2xl opacity-20 backdrop-blur-md',
+    avatarClass: 'rounded-xl ring-2 ring-white/50 bg-white shadow-sm',
     buttonClass: 'rounded-full shadow-sm text-[8px] px-3 font-medium',
     cardBodyClass: 'bg-white/40 backdrop-blur-sm m-2 rounded-xl border border-white/50'
   },
@@ -49,7 +47,6 @@ const templates = [
     name: 'Executive (Editorial)', 
     desc: 'Serif, sharp, minimal.', 
     isPro: true,
-    // Preview Styles matching the "New York Editorial" look
     containerClass: 'rounded-none border border-zinc-200 bg-[#F9F9F9] font-serif',
     headerClass: 'hidden', 
     avatarClass: 'rounded-none border-2 border-white -mb-3 z-10 bg-white shadow-sm',
@@ -61,7 +58,6 @@ const templates = [
     name: 'Pop (Neo-Brutalism)', 
     desc: 'High contrast, bold borders.', 
     isPro: true,
-    // Preview Styles matching the "Neo-Brutalism" look
     containerClass: 'rounded-lg border-2 border-black bg-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] font-mono',
     headerClass: 'h-8 w-full border-b-2 border-black opacity-20',
     avatarClass: 'rounded-md border-2 border-black bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]',
@@ -71,14 +67,13 @@ const templates = [
 ]
 
 const colors = [
-  { name: 'indigo', hex: 'bg-indigo-600', text: 'text-indigo-600', ring: 'ring-indigo-600' },
-  { name: 'blue', hex: 'bg-blue-600', text: 'text-blue-600', ring: 'ring-blue-600' },
-  { name: 'emerald', hex: 'bg-emerald-600', text: 'text-emerald-600', ring: 'ring-emerald-600' },
-  { name: 'rose', hex: 'bg-rose-600', text: 'text-rose-600', ring: 'ring-rose-600' },
-  { name: 'gray', hex: 'bg-zinc-900', text: 'text-zinc-900', ring: 'ring-zinc-900' }
+  { name: 'indigo', hex: 'bg-indigo-600', ring: 'ring-indigo-600' },
+  { name: 'blue', hex: 'bg-blue-600', ring: 'ring-blue-600' },
+  { name: 'emerald', hex: 'bg-emerald-600', ring: 'ring-emerald-600' },
+  { name: 'rose', hex: 'bg-rose-600', ring: 'ring-rose-600' },
+  { name: 'gray', hex: 'bg-zinc-900', ring: 'ring-zinc-900' }
 ]
 
-// Helper to get current color object for the preview
 const activeColor = computed(() => {
     return colors.find(c => c.name === form.value.accentColor) || colors[0]
 })
@@ -101,18 +96,13 @@ onMounted(async () => {
 })
 
 const selectTemplate = (t: typeof templates[0]) => {
-  if (t.isPro && !isPro.value) {
-    // Prevent selection if locked
-    return
-  }
+  if (t.isPro && !isPro.value) return
   form.value.publicTemplate = t.id
 }
 
 const save = async () => {
   saving.value = true
   try {
-    // Better Auth updateUser handles most of these, 
-    // but custom fields need to be handled via your /auth/me PATCH endpoint
     await fetchApi('/user/me', {
       method: 'PATCH',
       body: JSON.stringify(form.value)
@@ -138,8 +128,11 @@ const copyLink = () => {
 const handleUpgrade = async () => {
   upgrading.value = true
   try {
-    const res = await fetchApi('/billing/checkout', { method: 'POST' })
-    if (res.url) window.location.href = res.url
+    const res = await fetchApi('/api/billing/subscribe', { method: 'POST' })
+    const session = res.data
+    if (session?.attributes?.checkout_url) {
+      window.location.href = session.attributes.checkout_url;
+    }
   } catch (err) {
     toast.error('Failed to initiate upgrade.')
   } finally {
@@ -149,19 +142,24 @@ const handleUpgrade = async () => {
 </script>
 
 <template>
-  <Card class="relative overflow-hidden border-zinc-200 dark:border-zinc-800 shadow-sm">
-    <CardHeader class="border-b border-border/40 pb-6">
-      <CardTitle>Profile & Branding</CardTitle>
-      <CardDescription>Customize how clients see your portal.</CardDescription>
+  <Card class="relative overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
+    <CardHeader class="border-b border-zinc-100 dark:border-zinc-800 pb-6">
+      <div class="flex items-center gap-2 mb-1">
+         <div class="p-2 bg-zinc-100 dark:bg-zinc-900 rounded-lg">
+            <Paintbrush class="h-4 w-4 text-zinc-900 dark:text-white" />
+         </div>
+         <CardTitle class="text-lg font-bold text-zinc-900 dark:text-white tracking-tight">Profile & Branding</CardTitle>
+      </div>
+      <CardDescription class="text-zinc-500">Customize how clients see your portal.</CardDescription>
     </CardHeader>
 
     <CardContent class="space-y-10 pt-8">
       
       <div class="space-y-4">
         <div class="flex items-center justify-between">
-            <Label class="text-base font-semibold">Interface Style</Label>
-            <span v-if="!isPro" class="text-xs text-muted-foreground bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded-full">
-                Upgrade to unlock more themes
+            <Label class="text-sm font-bold uppercase tracking-widest text-zinc-500">Interface Style</Label>
+            <span v-if="!isPro" class="text-xs font-medium text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 px-2 py-1 rounded-full border border-indigo-100 dark:border-indigo-800">
+                Upgrade to unlock styles
             </span>
         </div>
         
@@ -174,16 +172,16 @@ const handleUpgrade = async () => {
             :class="[t.isPro && !isPro ? 'cursor-not-allowed opacity-70' : 'cursor-pointer']"
           >
             <div 
-              class="relative w-full h-40 overflow-hidden transition-all duration-300 border-2 bg-zinc-50/50 dark:bg-zinc-900/50"
+              class="relative w-full h-44 overflow-hidden transition-all duration-300 border-2 bg-zinc-50 dark:bg-black"
               :class="[
                 form.publicTemplate === t.id 
-                  ? `ring-2 ring-offset-2 ${activeColor?.ring} border-transparent scale-[1.02]` 
-                  : 'border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:shadow-lg',
+                  ? `ring-2 ring-offset-2 ${activeColor?.ring} border-transparent dark:ring-offset-zinc-950` 
+                  : 'border-zinc-100 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-lg',
                 t.isPro && !isPro ? 'grayscale-[0.5]' : ''
               ]"
               style="border-radius: 16px;" 
             >
-               <div class="absolute inset-0 pointer-events-none p-3 flex flex-col" :class="t.containerClass">
+               <div class="absolute inset-0 pointer-events-none p-4 flex flex-col" :class="t.containerClass">
                   <div v-if="t.id !== 'corporate'" :class="[t.headerClass, activeColor?.hex]"></div>
                   
                   <div class="flex gap-2 items-start relative z-10" :class="t.id === 'corporate' ? 'justify-center mt-2' : '-mt-4 px-2'">
@@ -191,8 +189,8 @@ const handleUpgrade = async () => {
                         A
                       </div>
                       <div v-if="t.id !== 'corporate'" class="space-y-1 pt-5 w-full">
-                          <div class="h-1.5 w-12 bg-zinc-800 rounded-full opacity-20"></div>
-                          <div class="h-1 w-8 bg-zinc-400 rounded-full opacity-20"></div>
+                          <div class="h-1.5 w-12 bg-zinc-800 rounded-full opacity-10"></div>
+                          <div class="h-1 w-8 bg-zinc-400 rounded-full opacity-10"></div>
                       </div>
                   </div>
 
@@ -201,7 +199,7 @@ const handleUpgrade = async () => {
                            <div class="h-1 w-16 bg-zinc-900 rounded-full opacity-80"></div>
                            <div class="h-0.5 w-8 bg-zinc-400 rounded-full opacity-50"></div>
                       </div>
-                      <div class="space-y-1.5 opacity-30">
+                      <div class="space-y-1.5 opacity-20">
                           <div class="h-1 w-full bg-zinc-400 rounded-full"></div>
                           <div class="h-1 w-2/3 bg-zinc-400 rounded-full"></div>
                       </div>
@@ -214,53 +212,53 @@ const handleUpgrade = async () => {
                   </div>
                </div>
 
-               <div v-if="form.publicTemplate === t.id" class="absolute top-3 right-3 z-20 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 rounded-full p-1 shadow-sm">
+               <div v-if="form.publicTemplate === t.id" class="absolute top-3 right-3 z-20 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 rounded-full p-1 shadow-md">
                   <Check class="h-3 w-3" />
                </div>
 
-               <div v-if="t.isPro && !isPro" class="absolute inset-0 z-30 flex items-center justify-center bg-white/40 dark:bg-black/40 backdrop-blur-[1px]">
-                  <div @click.stop="handleUpgrade" class="bg-white dark:bg-zinc-900 text-foreground px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2 text-xs font-bold border hover:scale-105 transition-transform cursor-pointer">
+               <div v-if="t.isPro && !isPro" class="absolute inset-0 z-30 flex items-center justify-center bg-white/40 dark:bg-black/60 backdrop-blur-[2px]">
+                  <div @click.stop="handleUpgrade" class="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white px-3 py-1.5 rounded-full shadow-xl flex items-center gap-2 text-xs font-bold border border-zinc-200 dark:border-zinc-800 hover:scale-105 transition-transform cursor-pointer">
                       <Lock class="h-3 w-3 text-indigo-500" />
-                      <span>PRO</span>
+                      <span>Unlock</span>
                   </div>
                </div>
             </div>
             
-            <div class="space-y-0.5 px-1">
+            <div class="px-1">
                 <div class="flex items-center justify-between">
-                    <h4 class="font-bold text-sm text-foreground flex items-center gap-2">
+                    <h4 class="font-bold text-sm text-zinc-900 dark:text-white flex items-center gap-2">
                         {{ t.name }}
-                        <Sparkles v-if="t.isPro" class="h-3 w-3 text-indigo-500" />
+                        <Sparkles v-if="t.isPro" class="h-3 w-3 text-indigo-500 fill-indigo-500" />
                     </h4>
                 </div>
-                <p class="text-xs text-muted-foreground">{{ t.desc }}</p>
+                <p class="text-xs text-zinc-500">{{ t.desc }}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <Separator />
+      <Separator class="bg-zinc-100 dark:bg-zinc-800" />
 
       <div class="grid gap-8 sm:grid-cols-2">
         <div class="space-y-3">
-          <Label>Portal Link</Label>
+          <Label class="text-sm font-semibold">Portal Link</Label>
           <div class="flex items-center gap-2">
-            <div class="flex flex-1 rounded-md shadow-sm">
-               <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted/50 text-muted-foreground text-sm font-medium">/p/</span>
-              <Input v-model="form.portalSlug" placeholder="agency-name" class="rounded-l-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-background" />
+            <div class="flex flex-1 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 overflow-hidden">
+               <span class="inline-flex items-center px-3 border-r border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 text-sm font-mono">/p/</span>
+              <Input v-model="form.portalSlug" placeholder="agency-name" class="rounded-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent h-10 font-medium" />
             </div>
-            <Button variant="outline" size="icon" @click="copyLink" :title="copied ? 'Copied' : 'Copy'">
+            <Button variant="outline" size="icon" @click="copyLink" :title="copied ? 'Copied' : 'Copy'" class="rounded-lg border-zinc-200 dark:border-zinc-800">
               <Check v-if="copied" class="h-4 w-4 text-green-600" />
-              <Copy v-else class="h-4 w-4" />
+              <Copy v-else class="h-4 w-4 text-zinc-500" />
             </Button>
           </div>
-          <p class="text-[11px] text-muted-foreground">This is the unique URL your clients will visit.</p>
+          <p class="text-[11px] text-zinc-500">This is the unique URL your clients will visit.</p>
         </div>
 
         <div class="space-y-3 relative">
           <div class="flex items-center justify-between">
-            <Label :class="{'text-muted-foreground': !isPro}">Accent Color</Label>
-            <span v-if="!isPro" class="text-[10px] font-bold bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+            <Label class="text-sm font-semibold" :class="{'text-zinc-400': !isPro}">Accent Color</Label>
+            <span v-if="!isPro" class="text-[10px] font-bold bg-zinc-100 text-zinc-500 px-2 py-0.5 rounded-full flex items-center gap-1 border border-zinc-200">
                 <Lock class="h-2.5 w-2.5" /> PRO
             </span>
           </div>
@@ -268,12 +266,12 @@ const handleUpgrade = async () => {
           <div class="flex gap-3 transition-opacity" :class="{ 'opacity-40 pointer-events-none select-none': !isPro }">
             <button v-for="color in colors" :key="color.name" 
               @click="form.accentColor = color.name" 
-              class="w-9 h-9 rounded-full cursor-pointer hover:scale-110 transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2"
-              :class="[color.hex, form.accentColor === color.name ? `ring-2 ring-offset-2 ${color.ring}` : 'ring-1 ring-black/5']"
+              class="w-10 h-10 rounded-full cursor-pointer hover:scale-110 transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-zinc-950 shadow-sm border border-black/5 dark:border-white/10"
+              :class="[color.hex, form.accentColor === color.name ? `ring-2 ring-offset-2 ${color.ring}` : '']"
             ></button>
           </div>
 
-          <div v-if="!isPro" class="mt-2 text-[11px] text-muted-foreground">
+          <div v-if="!isPro" class="mt-2 text-[11px] text-zinc-500">
               <span class="cursor-pointer font-medium text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1" @click="handleUpgrade">
                  <Loader2 v-if="upgrading" class="h-2.5 w-2.5 animate-spin" />
                  Upgrade to unlock branding
@@ -282,31 +280,31 @@ const handleUpgrade = async () => {
         </div>
       </div>
 
-      <Separator />
+      <Separator class="bg-zinc-100 dark:bg-zinc-800" />
 
-      <div class="space-y-5">
+      <div class="space-y-6">
         <div class="space-y-2">
-          <Label>Headline</Label>
-          <Input v-model="form.headline" placeholder="e.g. Senior Full Stack Developer" class="bg-background" />
+          <Label class="text-sm font-semibold">Headline</Label>
+          <Input v-model="form.headline" placeholder="e.g. Senior Full Stack Developer" class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-lg h-10" />
         </div>
         <div class="space-y-2">
-          <Label>About / Bio</Label>
-          <Textarea v-model="form.bio" placeholder="Tell your clients a bit about yourself..." rows="4" class="resize-none bg-background" />
+          <Label class="text-sm font-semibold">About / Bio</Label>
+          <Textarea v-model="form.bio" placeholder="Tell your clients a bit about yourself..." rows="4" class="resize-none bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-lg" />
         </div>
-        <div class="grid gap-5 sm:grid-cols-3">
-            <div class="space-y-2"><Label>Website</Label><Input v-model="form.websiteUrl" placeholder="https://" class="bg-background" /></div>
-            <div class="space-y-2"><Label>LinkedIn</Label><Input v-model="form.linkedinUrl" placeholder="https://" class="bg-background" /></div>
-            <div class="space-y-2"><Label>Twitter</Label><Input v-model="form.twitterUrl" placeholder="https://" class="bg-background" /></div>
+        <div class="grid gap-6 sm:grid-cols-3">
+            <div class="space-y-2"><Label class="text-sm font-semibold">Website</Label><Input v-model="form.websiteUrl" placeholder="https://" class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-lg" /></div>
+            <div class="space-y-2"><Label class="text-sm font-semibold">LinkedIn</Label><Input v-model="form.linkedinUrl" placeholder="https://" class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-lg" /></div>
+            <div class="space-y-2"><Label class="text-sm font-semibold">Twitter</Label><Input v-model="form.twitterUrl" placeholder="https://" class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-lg" /></div>
         </div>
       </div>
 
     </CardContent>
 
-    <CardFooter class="border-t border-border/40 pt-6 flex justify-between bg-zinc-50/50 dark:bg-zinc-900/50">
-      <div class="text-xs text-muted-foreground">
-        Changes reflect immediately on your public portal.
+    <CardFooter class="border-t border-zinc-100 dark:border-zinc-800 pt-6 flex justify-between bg-zinc-50/50 dark:bg-zinc-900/50">
+      <div class="text-xs text-zinc-500 font-medium">
+        Changes reflect immediately.
       </div>
-      <Button @click="save" :disabled="saving">
+      <Button @click="save" :disabled="saving" class="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 rounded-full px-6 font-bold shadow-sm">
         <Loader2 v-if="saving" class="mr-2 h-4 w-4 animate-spin" />
         {{ saving ? 'Saving...' : 'Save Changes' }}
       </Button>

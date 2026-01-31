@@ -2,42 +2,62 @@
 import { useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  DollarSign,
-} from 'lucide-vue-next'
+import { TrendingUp, Mail } from 'lucide-vue-next'
 
 const router = useRouter()
 </script>
+
 <template>
-    <div class="grid md:grid-cols-2 gap-12">
-        <div>
-            <h2 class="text-2xl font-bold mb-4 text-foreground">Tracking Your Revenue</h2>
-            <div class="prose dark:prose-invert text-muted-foreground">
-            <p>
-                ZenPortal tracks your <strong>estimated earnings</strong> based on the hourly rate you assigned to each client.
-            </p>
-            <ul class="mt-4 space-y-2">
-                <li><strong>Monthly Goal:</strong> We set a default goal of $2,000/mo. The progress bar shows how close you are.</li>
-                <li><strong>Pending Payments:</strong> This metric is calculated based on hours logged that haven't been marked as "Paid".</li>
-            </ul>
+    <div class="space-y-8">
+        <div class="flex items-center gap-4">
+            <div class="h-12 w-12 rounded-xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center border border-green-100 dark:border-green-900">
+                <TrendingUp class="h-6 w-6 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">Tracking Your Revenue</h2>
+                <p class="text-zinc-500 dark:text-zinc-400 text-sm">Understand your financial health.</p>
             </div>
         </div>
-        
-        <Card class="bg-slate-900 text-white border-slate-800 dark:bg-slate-950">
-            <CardHeader>
-            <CardTitle class="flex items-center gap-2">
-                <DollarSign class="h-5 w-5 text-green-400" />
-                Weekly Recap
-            </CardTitle>
-            </CardHeader>
-            <CardContent>
-            <p class="text-slate-300 mb-4">
-                Every Sunday, ZenPortal sends you an email summary of your total hours and earnings for the week.
-            </p>
-            <Button variant="secondary" size="sm" class="w-full" @click="router.push('/settings/notifications')">
-                Check Email Settings
-            </Button>
-            </CardContent>
-        </Card>
+
+        <div class="grid md:grid-cols-2 gap-8 items-start">
+            <div class="text-zinc-600 dark:text-zinc-400 leading-relaxed space-y-4">
+                <p>
+                    ZenPortal tracks your <strong>estimated earnings</strong> based on the hourly rate you assigned to each client profile.
+                </p>
+                <ul class="space-y-4 mt-4">
+                    <li class="flex gap-3">
+                        <div class="h-6 w-6 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 text-zinc-900 dark:text-white font-bold text-xs">1</div>
+                        <div>
+                            <strong class="text-zinc-900 dark:text-white">Monthly Goal:</strong> We set a default goal of $2,000/mo. The progress bar on the Dashboard shows how close you are to this target.
+                        </div>
+                    </li>
+                    <li class="flex gap-3">
+                        <div class="h-6 w-6 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 text-zinc-900 dark:text-white font-bold text-xs">2</div>
+                        <div>
+                            <strong class="text-zinc-900 dark:text-white">Pending Revenue:</strong> This metric is calculated based on hours logged that haven't been invoiced or paid yet.
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            
+            <Card class="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-none shadow-xl overflow-hidden relative">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-green-500/20 blur-[50px] rounded-full"></div>
+
+                <CardHeader>
+                    <CardTitle class="flex items-center gap-2 text-lg font-bold tracking-tight">
+                        <Mail class="h-5 w-5" />
+                        Weekly Recap
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p class="text-zinc-400 dark:text-zinc-600 mb-6 text-sm leading-relaxed">
+                        Every Sunday, ZenPortal sends you an automated email summary of your total hours, top clients, and earnings for the week.
+                    </p>
+                    <Button variant="secondary" size="sm" class="w-full rounded-full font-bold bg-white text-zinc-900 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800 border-0" @click="router.push('/settings/notifications')">
+                        Check Email Settings
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
     </div>
 </template>

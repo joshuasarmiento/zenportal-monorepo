@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import LoomPlayer from '@/components/video/VideoPlayer.vue' // Ensure this path is correct
+import LoomPlayer from '@/components/video/VideoPlayer.vue' 
 import ModeToggle from '@/components/ModeToggle.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -16,7 +16,9 @@ import {
   Clock, 
   Paperclip, 
   CalendarDays,
-  Link
+  Link,
+  Zap,
+  ArrowUpRight
 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
@@ -123,34 +125,42 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="loading" class="h-screen flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+  <div v-if="loading" class="h-screen flex flex-col items-center justify-center bg-white dark:bg-zinc-950">
     <div class="relative">
-      <div class="h-16 w-16 rounded-2xl bg-white dark:bg-zinc-900 shadow-xl flex items-center justify-center animate-pulse">
+      <div class="h-16 w-16 rounded-2xl bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center animate-pulse">
         <Loader2 class="h-6 w-6 animate-spin text-zinc-400" />
       </div>
     </div>
-    <p class="mt-4 text-sm font-medium text-zinc-400 animate-pulse">Loading secure portal...</p>
+    <p class="mt-4 text-sm font-medium text-zinc-400 animate-pulse tracking-tight">Loading secure portal...</p>
   </div>
 
-  <div v-else-if="error" class="h-screen flex items-center justify-center p-4 bg-zinc-50 dark:bg-zinc-950">
-    <Card class="max-w-md w-full border-none shadow-2xl shadow-zinc-200/50 dark:shadow-none dark:bg-zinc-900">
+  <div v-else-if="error" class="h-screen flex items-center justify-center p-4 bg-white dark:bg-zinc-950 relative overflow-hidden">
+     <div class="fixed inset-0 z-0 pointer-events-none">
+       <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+    </div>
+
+    <Card class="max-w-md w-full border border-zinc-200 dark:border-zinc-800 shadow-2xl bg-white dark:bg-zinc-900 relative z-10">
       <CardContent class="p-10 flex flex-col items-center text-center">
          <div class="h-16 w-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-6 ring-8 ring-red-50/50 dark:ring-red-900/10">
             <Frown class="h-8 w-8 text-red-500" />
         </div>
-        <h1 class="text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">Access Denied</h1>
+        <h1 class="text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-2 tracking-tight">Access Denied</h1>
         <p class="text-zinc-500 dark:text-zinc-400 leading-relaxed">{{ error }}</p>
       </CardContent>
     </Card>
   </div>
 
-  <div v-else-if="data" class="min-h-screen bg-[#FBFBFB] dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-100 selection:bg-zinc-900 dark:selection:bg-zinc-100 selection:text-white dark:selection:text-zinc-900 pb-32 transition-colors duration-300">
+  <div v-else-if="data" class="min-h-screen bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 selection:bg-zinc-900 dark:selection:bg-zinc-100 selection:text-white dark:selection:text-zinc-900 pb-32 transition-colors duration-300 relative overflow-hidden">
     
+    <div class="fixed inset-0 z-0 pointer-events-none">
+       <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+    </div>
+
     <div class="fixed top-6 left-0 right-0 z-50 px-4 md:px-0 pointer-events-none">
-      <div class="max-w-3xl mx-auto flex justify-between items-center bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-white/20 dark:border-white/5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-none rounded-full p-2 pl-2 pr-2 pointer-events-auto transition-all hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
+      <div class="max-w-4xl mx-auto flex justify-between items-center bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 shadow-lg rounded-full p-1.5 pl-2 pr-2 pointer-events-auto">
         
         <div class="flex items-center gap-3 pl-1">
-          <Avatar class="h-9 w-9 border-2 border-white dark:border-zinc-800 shadow-sm cursor-default">
+          <Avatar class="h-8 w-8 border border-zinc-200 dark:border-zinc-800">
             <AvatarImage 
               v-if="data.client.owner.image"
               :src="data.client.owner.image" 
@@ -161,18 +171,18 @@ onMounted(async () => {
             </AvatarFallback>
           </Avatar>
           <div class="hidden sm:block text-sm">
-             <span class="font-semibold text-zinc-800 dark:text-zinc-200">{{ data.client.owner.name }}</span>
-             <span class="text-zinc-400 mx-1.5">/</span>
-             <span class="text-zinc-500">{{ data.client.companyName }}</span>
+             <span class="font-bold text-zinc-900 dark:text-white tracking-tight">{{ data.client.owner.name }}</span>
+             <span class="text-zinc-400 mx-2 font-light">/</span>
+             <span class="text-zinc-600 dark:text-zinc-400">{{ data.client.companyName }}</span>
           </div>
         </div>
 
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-2">
            <ModeToggle />
-           <Button variant="ghost" size="icon" class="rounded-full h-9 w-9 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800" @click="copyLink">
+           <Button variant="ghost" size="icon" class="rounded-full h-8 w-8 text-zinc-500 hover:text-zinc-900 dark:hover:text-white" @click="copyLink">
             <Link class="h-4 w-4" />
           </Button>
-          <Button size="sm" class="rounded-full px-5 font-medium shadow-lg shadow-zinc-500/10 dark:shadow-none text-xs sm:text-sm text-white h-9" :class="accentSolid" as-child>
+          <Button size="sm" class="rounded-full px-4 font-bold text-xs h-8 text-white shadow-md hover:opacity-90 transition-opacity" :class="accentSolid" as-child>
              <a :href="`mailto:${data.client.owner.email}`">
                Contact
              </a>
@@ -181,45 +191,48 @@ onMounted(async () => {
       </div>
     </div>
 
-    <header class="max-w-3xl mx-auto px-6 pt-32 pb-12">
-       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div class="space-y-1">
-            <p class="text-zinc-400 font-medium text-sm mb-2 flex items-center gap-2">
-              <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-              Secure Client Portal
-            </p>
-            <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-              {{ timeGreeting }}, {{ data.client.clientName || 'Partner' }}.
+    <header class="max-w-4xl mx-auto px-6 pt-32 pb-16 relative z-10">
+       <div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div class="space-y-4">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-bold uppercase tracking-wider text-zinc-500">
+               <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+               </span>
+               Secure Client Portal
+            </div>
+            <h1 class="text-4xl md:text-5xl font-black tracking-tighter text-zinc-900 dark:text-white text-balance">
+              {{ timeGreeting }}, <br class="md:hidden"/> {{ data.client.clientName || 'Partner' }}.
             </h1>
-            <p class="text-zinc-500 dark:text-zinc-400 text-lg">
-              Here is the latest progress report for <span class="font-medium text-zinc-900 dark:text-zinc-200">{{ data.client.companyName }}</span>.
+            <p class="text-xl text-zinc-500 dark:text-zinc-400 max-w-lg leading-relaxed">
+              Here is the latest progress report for <span class="font-semibold text-zinc-900 dark:text-white">{{ data.client.companyName }}</span>.
             </p>
           </div>
 
-          <div class="bg-white dark:bg-zinc-900 px-5 py-4 rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] dark:shadow-none border border-zinc-100 dark:border-zinc-800 min-w-40">
-             <div class="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Total Hours Logged</div>
-             <div class="text-2xl font-bold font-mono tracking-tight">{{ totalHours.toFixed(1) }}h</div>
+          <div class="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm px-6 py-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 min-w-[180px]">
+             <div class="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-2">Total Hours Logged</div>
+             <div class="text-4xl font-black tracking-tighter text-zinc-900 dark:text-white">{{ totalHours.toFixed(1) }}<span class="text-lg text-zinc-400 font-medium ml-1">hrs</span></div>
           </div>
        </div>
     </header>
 
-    <main class="max-w-3xl mx-auto px-6">
+    <main class="max-w-4xl mx-auto px-6 relative z-10">
       
       <div v-if="sortedLogs.length === 0" class="py-20 text-center">
-        <div class="bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 h-32 w-full rounded-2xl flex items-center justify-center mb-6 shadow-sm border-dashed">
+        <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 h-32 w-full rounded-2xl flex items-center justify-center mb-6 shadow-sm border-dashed">
             <CalendarDays class="h-8 w-8 text-zinc-300 dark:text-zinc-700" />
         </div>
-        <h3 class="text-lg font-medium text-zinc-900 dark:text-zinc-100">No updates posted yet</h3>
+        <h3 class="text-lg font-bold text-zinc-900 dark:text-white">No updates posted yet</h3>
         <p class="text-zinc-500 dark:text-zinc-400">Wait for the first log to appear here.</p>
       </div>
 
       <div v-else class="relative space-y-12">
-        <div class="absolute left-4.75 top-4 bottom-10 w-0.5 bg-zinc-100 dark:bg-zinc-800 -z-10 hidden sm:block"></div>
+        <div class="absolute left-[27px] top-4 bottom-0 w-px bg-zinc-200 dark:bg-zinc-800 -z-10 hidden sm:block"></div>
 
-        <article v-for="(log, index) in sortedLogs" :key="log.id" class="group relative sm:pl-16">
+        <article v-for="(log, index) in sortedLogs" :key="log.id" class="group relative sm:pl-20">
             
             <div 
-              class="absolute left-0 top-1.5 h-10 w-10 rounded-full bg-white dark:bg-zinc-900 border-[3px] border-[#FBFBFB] dark:border-zinc-950 shadow-sm z-10 hidden sm:flex items-center justify-center font-bold text-xs text-zinc-500 dark:text-zinc-400"
+              class="absolute left-3 top-2 h-8 w-8 rounded-full bg-white dark:bg-zinc-900 border-4 border-white dark:border-zinc-950 shadow-sm z-10 hidden sm:flex items-center justify-center font-bold text-[10px] text-zinc-500 dark:text-zinc-400 ring-1 ring-zinc-200 dark:ring-zinc-800"
               :class="index === 0 ? `ring-2 ${accentRing}` : ''"
             >
               {{ formatDate(log.date).day }}
@@ -230,46 +243,48 @@ onMounted(async () => {
                  {{ formatDate(log.date).full }}
                </div>
                <div class="hidden sm:block">
-                 <h2 class="text-lg font-bold text-zinc-900 dark:text-zinc-100">{{ formatDate(log.date).weekday }}</h2>
-                 <p class="text-xs text-zinc-400 font-medium uppercase tracking-wide">{{ formatDate(log.date).month }} {{ formatDate(log.date).day }}</p>
+                 <h2 class="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">{{ formatDate(log.date).weekday }}</h2>
+                 <p class="text-xs text-zinc-400 font-bold uppercase tracking-widest">{{ formatDate(log.date).month }} {{ formatDate(log.date).day }}</p>
                </div>
                
                <div v-if="log.isBlocked">
-                  <Badge variant="destructive" class="rounded-full px-3 py-1 shadow-sm">
+                  <Badge variant="destructive" class="rounded-full px-3 py-1 shadow-sm font-bold uppercase tracking-wider text-[10px]">
                     <AlertTriangle class="h-3 w-3 mr-1.5" /> Blocked
                   </Badge>
                </div>
                <div v-else>
-                 <Badge variant="secondary" class="rounded-full bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-500/20 px-3 py-1 border border-green-200/50 dark:border-green-500/20">
-                    <CheckCircle2 class="h-3 w-3 mr-1.5" /> Completed
+                 <Badge variant="secondary" class="rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 px-3 py-1 font-bold uppercase tracking-wider text-[10px] border border-zinc-200 dark:border-zinc-700">
+                    <CheckCircle2 class="h-3 w-3 mr-1.5 text-green-500" /> Completed
                  </Badge>
                </div>
             </div>
 
-            <Card class="border-none shadow-[0_2px_20px_-2px_rgba(0,0,0,0.06)] dark:shadow-none overflow-hidden bg-white dark:bg-zinc-900 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.08)] dark:hover:bg-zinc-900/80 transition-all duration-500 rounded-2xl group-hover:-translate-y-1 ring-1 ring-zinc-100 dark:ring-zinc-800">
+            <Card class="overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-xl transition-all duration-300 rounded-3xl group-hover:border-zinc-300 dark:group-hover:border-zinc-700">
                 
-                <div v-if="log.videoUrl" class="bg-zinc-900 relative">
+                <div v-if="log.videoUrl" class="bg-black relative border-b border-zinc-100 dark:border-zinc-800">
                    <div class="aspect-video w-full">
                       <LoomPlayer :url="log.videoUrl" />
                    </div>
                 </div>
 
                 <CardContent class="p-6 md:p-8">
-                    <div v-if="log.isBlocked" class="bg-red-50/50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-xl p-4 mb-6 text-sm text-red-900 dark:text-red-200 flex gap-3">
-                       <AlertTriangle class="h-5 w-5 text-red-600 dark:text-red-400 shrink-0" />
+                    <div v-if="log.isBlocked" class="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-2xl p-4 mb-6 text-sm text-red-900 dark:text-red-200 flex gap-4 items-start">
+                       <div class="bg-red-100 dark:bg-red-900/30 p-2 rounded-lg shrink-0 text-red-600 dark:text-red-400">
+                         <AlertTriangle class="h-5 w-5" />
+                       </div>
                        <div>
-                         <span class="font-bold block text-red-700 dark:text-red-300">Action Required</span>
+                         <span class="font-bold block text-red-700 dark:text-red-300 text-base mb-1">Action Required</span>
                          {{ log.blockerDetails }}
                        </div>
                     </div>
 
-                    <div class="space-y-6">
+                    <div class="space-y-8">
                         <div>
-                           <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-4">Daily Output</h3>
-                           <ul class="space-y-3">
+                           <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-4">Daily Output</h3>
+                           <ul class="space-y-4">
                               <li v-for="(line, i) in formatSummary(log.summary)" :key="i" class="flex gap-4 items-start group/item">
-                                  <div class="mt-1.5 h-1.5 w-1.5 rounded-full shrink-0 transition-transform group-hover/item:scale-150" :class="accentSolid"></div>
-                                  <span class="text-zinc-600 dark:text-zinc-300 leading-relaxed text-[15px]">{{ line }}</span>
+                                  <div class="mt-2 h-1.5 w-1.5 rounded-full shrink-0 transition-all group-hover/item:scale-150" :class="accentSolid"></div>
+                                  <span class="text-zinc-700 dark:text-zinc-300 leading-relaxed text-[15px] font-medium">{{ line }}</span>
                               </li>
                            </ul>
                         </div>
@@ -277,20 +292,21 @@ onMounted(async () => {
                         <Separator class="bg-zinc-100 dark:bg-zinc-800" />
 
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div class="flex items-center gap-2 text-sm text-zinc-500 bg-zinc-50 dark:bg-zinc-800/50 px-3 py-1.5 rounded-lg w-fit">
+                            <div class="flex items-center gap-2 text-sm text-zinc-500 font-medium bg-zinc-50 dark:bg-zinc-800/50 px-3 py-1.5 rounded-full w-fit border border-zinc-100 dark:border-zinc-800">
                                <Clock class="h-4 w-4 text-zinc-400" />
-                               <span>Logged: <span class="font-semibold text-zinc-900 dark:text-zinc-100">{{ log.hoursWorked }} hrs</span></span>
+                               <span>Logged: <span class="font-bold text-zinc-900 dark:text-white">{{ log.hoursWorked }} hrs</span></span>
                             </div>
 
                             <div v-if="log.attachmentUrl">
                                <a 
                                   :href="log.attachmentUrl" 
                                   target="_blank"
-                                  class="flex items-center gap-2 text-sm font-medium hover:underline decoration-2 underline-offset-4 transition-colors"
+                                  class="flex items-center gap-2 text-sm font-bold hover:underline decoration-2 underline-offset-4 transition-colors group/link"
                                   :class="accentText"
                                 >
                                   <Paperclip class="h-4 w-4" />
                                   Download Attachment
+                                  <ArrowUpRight class="h-3 w-3 opacity-50 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
                                </a>
                             </div>
                         </div>
@@ -302,17 +318,20 @@ onMounted(async () => {
       </div>
     </main>
 
-    <footer class="text-center py-12 mt-12 border-t border-zinc-100 dark:border-zinc-800">
+    <footer class="text-center py-20 mt-12 border-t border-zinc-100 dark:border-zinc-800 relative z-10">
       <div v-if="!data.client.owner.tier || data.client.owner.tier === 'free'" class="flex justify-center items-center gap-2">
-         <p class="text-zinc-400 text-xs uppercase tracking-widest font-medium">Powered by</p>
-         <a href="/" class="flex items-center gap-1.5 text-zinc-900 dark:text-zinc-100 font-bold text-lg hover:opacity-70 transition-opacity">
-           <span :class="accentText">⚡</span> ZenPortal
+         <p class="text-zinc-400 text-xs uppercase tracking-widest font-bold">Powered by</p>
+         <a href="/" class="flex items-center gap-1.5 text-zinc-900 dark:text-white font-bold text-lg hover:opacity-70 transition-opacity">
+           <div class="bg-zinc-900 dark:bg-white text-white dark:text-black p-1 rounded-md">
+             <Zap class="w-3 h-3 fill-current" />
+           </div>
+           ZenPortal
          </a>
       </div>
       <div v-else>
-         <p class="text-zinc-300 dark:text-zinc-600 text-xs">&copy; {{ new Date().getFullYear() }} {{ data.client.owner.fullName }}</p>
+         <p class="text-zinc-400 text-xs font-medium">&copy; {{ new Date().getFullYear() }} {{ data.client.owner.fullName }}</p>
       </div>
     </footer>
 
   </div>
-</template>>
+</template>

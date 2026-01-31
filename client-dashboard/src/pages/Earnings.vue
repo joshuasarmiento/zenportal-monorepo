@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { defineAsyncComponent, ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useApi } from '../lib/api'
-// Removed: import { useAuth } from '@clerk/vue' 
 import { useUserStore } from '@/stores/userStore'
 import { toast } from 'vue-sonner' 
 import { env } from '@/env'
@@ -11,9 +10,10 @@ import { env } from '@/env'
 import AppSidebar from '@/components/AppSidebar.vue'
 import EarningsHeader from '@/components/earnings/EarningsHeader.vue'
 import EarningsStats from '@/components/earnings/EarningsStats.vue'
-import RevenueChart from '@/components/earnings/RevenueChart.vue'
-import TopClients from '@/components/earnings/TopClients.vue'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+
+const RevenueChart = defineAsyncComponent(() => import('@/components/earnings/RevenueChart.vue'))
+const TopClients = defineAsyncComponent(() => import('@/components/earnings/TopClients.vue'))
 
 // --- Types ---
 interface RevenueItem { period: string; amount: number; rawDate: string }
@@ -31,7 +31,6 @@ interface StatsData {
 // Logic / State
 const router = useRouter()
 const { fetchApi } = useApi()
-// Removed: const { getToken } = useAuth()
 const userStore = useUserStore()
 
 const loading = ref(true)
@@ -48,7 +47,6 @@ const stats = ref<StatsData>({
   topClients: [] 
 })
 
-// Ensure proper typing for tier if not yet updated in store types
 const isPro = computed(() => (userStore.user as any)?.tier === 'pro')
 
 const ranges = computed(() => [
@@ -72,45 +70,35 @@ const loadStats = async () => {
   }
 }
 
-// Handler for Non-Pro clicks
 const handleUpgrade = () => {
   toast('Upgrade to Pro', {
     description: 'Exporting data is available on the Agency Pro plan.',
     action: {
       label: 'Upgrade',
-      onClick: () => router.push('/settings/billing') // Updated path to billing settings
+      onClick: () => router.push('/settings/billing')
     },
   })
 }
 
-// 1. Export PDF Logic
+// Export Logic
 const exportPDF = () => {
   if (!isPro.value) return handleUpgrade()
   window.print()
 }
 
-// 2. Export CSV Logic
 const exportCSV = async () => {
   if (!isPro.value) return handleUpgrade()
 
   exporting.value = true
   try {
-    // UPDATED: No need to get token manually. 
-    // We rely on the browser sending the HTTP-only cookie via credentials: 'include'
-    
     const apiUrl = import.meta.env.VITE_API_URL || env.VITE_API_URL;
     const response = await fetch(`${apiUrl}/stats/export?range=${selectedRange.value}`, {
       method: 'GET',
-      credentials: 'include', // <--- Important for Better Auth
-      // Removed: headers with Authorization
+      credentials: 'include',
     })
     
-    if (response.status === 403) {
-      throw new Error('Upgrade required')
-    }
-    if (response.status === 401) {
-       throw new Error('Unauthorized')
-    }
+    if (response.status === 403) throw new Error('Upgrade required')
+    if (response.status === 401) throw new Error('Unauthorized')
     if (!response.ok) throw new Error('Export failed')
     
     const blob = await response.blob()
@@ -147,7 +135,7 @@ watch(selectedRange, () => loadStats())
 <template>
   <SidebarProvider>
     <AppSidebar />
-    <SidebarInset>
+    <SidebarInset class="bg-zinc-50 dark:bg-black">
       
       <EarningsHeader 
         :loading="loading" 
@@ -158,28 +146,32 @@ watch(selectedRange, () => loadStats())
         @upgrade="handleUpgrade"
       />
 
-      <div class="flex flex-1 flex-col p-4 md:p-8 bg-muted/40 overflow-y-auto">
-        <div class="max-w-6xl w-full mx-auto space-y-6">
+      <div class="flex flex-1 flex-col p-6 md:p-10 overflow-y-auto">
+        <div class="max-w-7xl w-full mx-auto space-y-8">
           
           <EarningsStats 
             :loading="loading"
             :stats="stats"
           />
 
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <RevenueChart 
-              v-model:selected-range="selectedRange"
-              :loading="loading"
-              :revenue-history="stats.revenueHistory"
-              :ranges="ranges"
-              :is-pro="isPro"
-            />
+            <div class="lg:col-span-2">
+               <RevenueChart 
+                v-model:selected-range="selectedRange"
+                :loading="loading"
+                :revenue-history="stats.revenueHistory"
+                :ranges="ranges"
+                :is-pro="isPro"
+              />
+            </div>
 
-            <TopClients 
-              :loading="loading"
-              :clients="stats.topClients"
-            />
+            <div class="lg:col-span-1">
+               <TopClients 
+                :loading="loading"
+                :clients="stats.topClients"
+              />
+            </div>
             
           </div>
         </div>
@@ -189,15 +181,13 @@ watch(selectedRange, () => loadStats())
 </template>
 
 <style>
-/* Clean up the PDF output by hiding sidebar and navigation */
 @media print {
-  aside, header, .sidebar-trigger { display: none !important; }
+  aside, header, .sidebar-trigger, .no-print { display: none !important; }
   main, .group\/sidebar-wrapper { 
     margin: 0 !important; 
     padding: 0 !important; 
     width: 100% !important; 
   }
-  .bg-muted\/40 { background-color: white !important; }
-  .recharts-wrapper { width: 100% !important; }
+  .bg-zinc-50, .dark\:bg-black { background-color: white !important; }
 }
 </style>

@@ -45,8 +45,7 @@ const handleSignup = async () => {
         })
         
         if (error) {
-            // Handle Compromised Password Error
-            if (error.code === "PASSWORD_COMPROMISED") { //
+            if (error.code === "PASSWORD_COMPROMISED") { 
                 return toast.error(error.message || "This password is insecure. Please use a different one.")
             }
             return toast.error(error.message || "Signup failed")
@@ -87,52 +86,57 @@ const handleVerifySignup = async () => {
 </script>
 
 <template>
-  <div class="dark bg-background flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
-    <div class="w-full max-w-sm">
+  <div class="min-h-screen flex flex-col items-center justify-center p-6 md:p-10 bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 relative overflow-hidden">
+    
+    <div class="fixed inset-0 z-0 pointer-events-none">
+       <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+    </div>
+
+    <div class="w-full max-w-sm relative z-10">
       <div class="flex flex-col gap-6">
-        <Card class="overflow-hidden p-0 shadow-2xl border-white/5">
+        <Card class="overflow-hidden border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl shadow-zinc-200/50 dark:shadow-black/50">
           <CardContent class="grid p-0">
             
-            <div class="p-6 md:p-8 bg-card">
+            <div class="p-8 md:p-10">
               <div class="flex flex-col gap-6">
                 <div class="flex flex-col items-center gap-2 text-center">
-                  <div class="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center mb-2">
-                    <Zap class="text-white h-5 w-5 fill-white" />
+                  <div class="h-10 w-10 bg-zinc-900 dark:bg-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-zinc-500/20 dark:shadow-white/20">
+                    <Zap class="h-5 w-5 text-white dark:text-zinc-900 fill-current" />
                   </div>
-                  <h1 class="text-2xl font-bold tracking-tight">
+                  <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
                     {{ isOtpStep ? 'Security Check' : 'Create Account' }}
                   </h1>
-                  <p class="text-muted-foreground text-sm">
+                  <p class="text-zinc-500 dark:text-zinc-400 text-sm">
                     {{ isOtpStep ? `Confirm the code sent to ${form.email}` : 'Join ZenPortal to manage your freelance agency' }}
                   </p>
                 </div>
 
                 <form v-if="!isOtpStep" @submit.prevent="handleSignup" class="grid gap-4">
                   <div class="grid gap-2">
-                    <Label for="name">Full Name</Label>
-                    <Input id="name" v-model="form.name" placeholder="John Doe" required />
+                    <Label for="name" class="font-medium">Full Name</Label>
+                    <Input id="name" v-model="form.name" placeholder="John Doe" required class="bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800" />
                   </div>
 
                   <div class="grid gap-2">
-                    <Label for="email">Email</Label>
-                    <Input id="email" v-model="form.email" type="email" placeholder="john@agency.com" required />
+                    <Label for="email" class="font-medium">Email</Label>
+                    <Input id="email" v-model="form.email" type="email" placeholder="john@agency.com" required class="bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800" />
                   </div>
 
                   <div class="grid gap-2">
-                    <Label for="password">Password</Label>
-                    <Input id="password" v-model="form.password" type="password" required />
+                    <Label for="password" class="font-medium">Password</Label>
+                    <Input id="password" v-model="form.password" type="password" required class="bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800" />
                     
-                    <div class="grid grid-cols-3 gap-2 mt-1 px-1">
-                        <div class="h-1 rounded-full transition-colors" :class="passRules.length ? 'bg-blue-500' : 'bg-muted'"></div>
-                        <div class="h-1 rounded-full transition-colors" :class="passRules.capitals ? 'bg-blue-500' : 'bg-muted'"></div>
-                        <div class="h-1 rounded-full transition-colors" :class="passRules.number ? 'bg-blue-500' : 'bg-muted'"></div>
+                    <div class="grid grid-cols-3 gap-2 mt-1 px-0.5">
+                        <div class="h-1 rounded-full transition-colors duration-300" :class="passRules.length ? 'bg-blue-600 dark:bg-blue-500' : 'bg-zinc-100 dark:bg-zinc-800'"></div>
+                        <div class="h-1 rounded-full transition-colors duration-300" :class="passRules.capitals ? 'bg-blue-600 dark:bg-blue-500' : 'bg-zinc-100 dark:bg-zinc-800'"></div>
+                        <div class="h-1 rounded-full transition-colors duration-300" :class="passRules.number ? 'bg-blue-600 dark:bg-blue-500' : 'bg-zinc-100 dark:bg-zinc-800'"></div>
                     </div>
-                    <p class="text-[10px] text-muted-foreground flex items-center gap-1 mt-1">
+                    <p class="text-[10px] text-zinc-500 flex items-center gap-1.5 mt-1 font-medium">
                         <ShieldAlert class="h-3 w-3" /> 8+ chars, 2 capitals, 1 number required.
                     </p>
                   </div>
 
-                  <Button type="submit" class="w-full mt-2" :disabled="isLoading">
+                  <Button type="submit" class="w-full mt-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 font-bold" :disabled="isLoading">
                     <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
                     <span v-else class="flex items-center">Get Started <UserPlus class="ml-2 h-4 w-4" /></span>
                   </Button>
@@ -140,35 +144,35 @@ const handleVerifySignup = async () => {
 
                 <form v-else @submit.prevent="handleVerifySignup" class="grid gap-6">
                   <div class="grid gap-2">
-                    <Label for="otp" class="text-center font-bold tracking-widest text-xs uppercase">Verification Code</Label>
+                    <Label for="otp" class="text-center font-bold tracking-widest text-xs uppercase text-zinc-500">Verification Code</Label>
                     <Input
                       id="otp"
                       v-model="otp"
                       maxlength="6"
                       placeholder="000000"
-                      class="text-center text-3xl h-16 tracking-[0.3em] font-mono rounded-2xl"
+                      class="text-center text-3xl h-16 tracking-[0.3em] font-mono rounded-2xl bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800"
                       required
                     />
                   </div>
-                  <Button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 h-11" :disabled="isLoading">
+                  <Button type="submit" class="w-full h-11 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 font-bold" :disabled="isLoading">
                     <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
                     <span v-else class="flex items-center justify-center">
                       <ShieldCheck class="mr-2 h-4 w-4" /> Complete Signup
                     </span>
                   </Button>
-                  <button type="button" @click="isOtpStep = false" class="text-xs text-muted-foreground underline underline-offset-4">
+                  <button type="button" @click="isOtpStep = false" class="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-white underline underline-offset-4 transition-colors">
                     Wait, that's the wrong email
                   </button>
                 </form>
 
                 <template v-if="!isOtpStep">
-                  <div class="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-                    <span class="relative z-10 bg-card px-2 text-muted-foreground uppercase text-[10px] font-bold tracking-widest">
+                  <div class="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-zinc-200 dark:after:border-zinc-800">
+                    <span class="relative z-10 bg-white dark:bg-zinc-900 px-2 text-zinc-400 uppercase text-[10px] font-bold tracking-widest">
                       Or join with
                     </span>
                   </div>
 
-                  <Button variant="outline" type="button" class="w-full" @click="loginWithGoogle">
+                  <Button variant="outline" type="button" class="w-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 h-10 font-medium" @click="loginWithGoogle">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="mr-2 h-4 w-4">
                       <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" fill="currentColor" />
                     </svg>
@@ -176,22 +180,21 @@ const handleVerifySignup = async () => {
                   </Button>
                 </template>
 
-                <div v-if="!isOtpStep" class="text-center text-sm">
+                <div v-if="!isOtpStep" class="text-center text-sm text-zinc-500">
                   Already have a portal?
-                  <router-link to="/login" class="underline underline-offset-4 font-medium">
+                  <router-link to="/login" class="underline underline-offset-4 text-zinc-900 dark:text-white font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                     Log in
                   </router-link>
                 </div>
               </div>
             </div>
 
-
           </CardContent>
         </Card>
         
-        <p class="px-6 text-center text-xs text-muted-foreground text-balance">
-          By creating an account, you agree to our <a href="#" class="underline">Terms</a>
-          and <a href="#" class="underline">Privacy Policy</a>.
+        <p class="px-6 text-center text-xs text-zinc-500 text-balance">
+          By creating an account, you agree to our <router-link to="/terms" class="underline hover:text-zinc-900 dark:hover:text-white">Terms</router-link>
+          and <router-link to="/privacy-policy" class="underline hover:text-zinc-900 dark:hover:text-white">Privacy Policy</router-link>.
         </p>
       </div>
     </div>

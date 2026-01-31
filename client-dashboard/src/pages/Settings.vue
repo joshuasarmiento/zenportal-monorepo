@@ -8,21 +8,23 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/co
 <template>
   <SidebarProvider>
     <AppSidebar />
-    <SidebarInset>
-       <header class="flex h-16 shrink-0 items-center gap-2 border-b border-border bg-background px-4 sticky top-0 z-10">
+    <SidebarInset class="bg-zinc-50 dark:bg-black">
+       <header class="flex h-16 shrink-0 items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-6 sticky top-0 z-10">
         <div class="flex items-center gap-2">
           <SidebarTrigger class="-ml-1" />
           <Separator orientation="vertical" class="mr-2 h-4" />
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbPage>Settings</BreadcrumbPage></BreadcrumbItem>
+              <BreadcrumbItem>
+                 <BreadcrumbPage class="font-semibold text-zinc-900 dark:text-white tracking-tight">Settings</BreadcrumbPage>
+              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
       </header>
 
-      <div class="flex flex-1 flex-col p-4 md:p-8 bg-muted/40 overflow-y-auto">
-         <div class="max-w-5xl mx-auto w-full">
+      <div class="flex flex-1 flex-col p-6 md:p-10 overflow-y-auto">
+         <div class="max-w-4xl mx-auto w-full">
             <router-view />
          </div>
       </div>

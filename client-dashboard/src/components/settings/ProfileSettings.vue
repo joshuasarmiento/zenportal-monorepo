@@ -24,23 +24,19 @@ const isLoadingProfile = ref(false)
 const isLoadingPassword = ref(false)
 const isDeleting = ref(false)
 
-// Profile Form State
 const form = ref({
     name: '',
     image: '',
     email: ''
 })
 
-// Password Form State
 const passForm = ref({
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
 })
 
-// Check if user has a password (credential account) or is Google-only
 const hasPassword = computed(() => {
-    // Better Auth accounts are usually accessible via the user/session object
     const accounts = (userStore.user as any)?.accounts || []
     return accounts.some((acc: any) => acc.type === 'credential' || acc.providerId === 'email')
 })
@@ -76,7 +72,6 @@ const handleUpdateProfile = async () => {
     }
 }
 
-// Correct usage in your script
 const handleRequestSetPassword = async () => {
     isLoadingPassword.value = true
     try {
@@ -121,43 +116,48 @@ const handleDeleteAccount = async () => {
 
 <template>
     <div class="space-y-8 max-w-4xl mx-auto pb-20">
-        <Card>
-            <CardHeader>
-                <CardTitle class="flex items-center gap-2">
-                    <User class="h-5 w-5 text-blue-500" /> 
-                    Personal Information
-                </CardTitle>
-                <CardDescription>Update your public identity on the portal.</CardDescription>
+        
+        <Card class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
+            <CardHeader class="border-b border-zinc-100 dark:border-zinc-800 pb-6">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="p-2 bg-zinc-100 dark:bg-zinc-900 rounded-lg">
+                        <User class="h-4 w-4 text-zinc-900 dark:text-white" />
+                    </div>
+                    <CardTitle class="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">Personal Information</CardTitle>
+                </div>
+                <CardDescription class="text-zinc-500">Update your public identity on the portal.</CardDescription>
             </CardHeader>
-            <CardContent>
-                <form @submit.prevent="handleUpdateProfile" class="space-y-6">
-                    <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
-                        <Avatar class="h-20 w-20 border-2 border-muted">
-                            <AvatarImage :src="form.image" />
-                            <AvatarFallback class="text-xl font-bold bg-blue-50 text-blue-600">
-                                {{ userStore.initials }}
-                            </AvatarFallback>
-                        </Avatar>
+            <CardContent class="pt-8">
+                <form @submit.prevent="handleUpdateProfile" class="space-y-8">
+                    <div class="flex flex-col md:flex-row items-start md:items-center gap-8">
+                        <div class="relative group">
+                            <Avatar class="h-24 w-24 border-4 border-zinc-50 dark:border-zinc-900 shadow-lg">
+                                <AvatarImage :src="form.image" class="object-cover" />
+                                <AvatarFallback class="text-2xl font-bold bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                                    {{ userStore.initials }}
+                                </AvatarFallback>
+                            </Avatar>
+                        </div>
                         <div class="flex-1 w-full space-y-2">
-                            <Label for="avatar">Avatar Image URL</Label>
-                            <Input id="avatar" v-model="form.image" placeholder="https://example.com/photo.jpg" />
-                            <p class="text-[11px] text-muted-foreground italic">We recommend a square image for best results.</p>
+                            <Label for="avatar" class="text-sm font-semibold">Avatar Image URL</Label>
+                            <Input id="avatar" v-model="form.image" placeholder="https://example.com/photo.jpg" class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 h-10" />
+                            <p class="text-[11px] text-zinc-400 font-medium">Paste a direct link to an image (square format recommended).</p>
                         </div>
                     </div>
 
-                    <div class="grid md:grid-cols-2 gap-4">
+                    <div class="grid md:grid-cols-2 gap-6">
                         <div class="grid gap-2">
-                            <Label for="name">Display Name</Label>
-                            <Input id="name" v-model="form.name" />
+                            <Label for="name" class="text-sm font-semibold">Display Name</Label>
+                            <Input id="name" v-model="form.name" class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 h-10" />
                         </div>
                         <div class="grid gap-2">
-                            <Label for="email">Email Address</Label>
-                            <Input id="email" v-model="form.email" disabled class="bg-muted/50 cursor-not-allowed" />
+                            <Label for="email" class="text-sm font-semibold">Email Address</Label>
+                            <Input id="email" v-model="form.email" disabled class="bg-zinc-100 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 h-10 text-zinc-500 cursor-not-allowed" />
                         </div>
                     </div>
 
-                    <div class="flex justify-end">
-                        <Button type="submit" :disabled="isLoadingProfile" class="rounded-xl px-8">
+                    <div class="flex justify-end pt-2">
+                        <Button type="submit" :disabled="isLoadingProfile" class="rounded-full px-8 font-bold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-sm">
                             <Loader2 v-if="isLoadingProfile" class="mr-2 h-4 w-4 animate-spin" />
                             <Save v-else class="mr-2 h-4 w-4" />
                             Save Profile
@@ -167,45 +167,47 @@ const handleDeleteAccount = async () => {
             </CardContent>
         </Card>
 
-        <Card>
-            <CardHeader>
-                <CardTitle class="flex items-center gap-2">
-                    <Lock class="h-5 w-5 text-blue-500" /> 
-                    Account Security
-                </CardTitle>
-                <CardDescription>
+        <Card class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
+            <CardHeader class="border-b border-zinc-100 dark:border-zinc-800 pb-6">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="p-2 bg-zinc-100 dark:bg-zinc-900 rounded-lg">
+                        <Lock class="h-4 w-4 text-zinc-900 dark:text-white" />
+                    </div>
+                    <CardTitle class="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">Account Security</CardTitle>
+                </div>
+                <CardDescription class="text-zinc-500">
                     {{ hasPassword ? 'Regularly update your password to keep your account safe.' : 'You currently log in via Google. Set a password to enable email login.' }}
                 </CardDescription>
             </CardHeader>
-            <CardContent>
-                <div v-if="!hasPassword" class="mb-6">
-                    <Alert class="bg-blue-50/50 border-blue-200 dark:bg-blue-900/10 dark:border-blue-800">
-                        <KeyRound class="h-4 w-4 text-blue-600" />
-                        <AlertTitle class="text-blue-700 dark:text-blue-400">Google Authentication Active</AlertTitle>
-                        <AlertDescription class="text-blue-600/80">
+            <CardContent class="pt-8">
+                <div v-if="!hasPassword" class="mb-8">
+                    <Alert class="bg-blue-50/50 border-blue-200 dark:bg-blue-900/10 dark:border-blue-800 dark:text-blue-200">
+                        <KeyRound class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        <AlertTitle class="text-blue-700 dark:text-blue-400 font-bold">Google Authentication Active</AlertTitle>
+                        <AlertDescription class="text-blue-600/80 dark:text-blue-300/80 text-sm">
                             Setting a password allows you to access your account if you lose access to your Google account.
                         </AlertDescription>
                     </Alert>
                 </div>
 
-                <form @submit.prevent="handleRequestSetPassword" class="space-y-4 max-w-md">
+                <form @submit.prevent="handleRequestSetPassword" class="space-y-6 max-w-md">
                     <div v-if="hasPassword" class="grid gap-2">
-                        <Label for="current-pass">Current Password</Label>
-                        <Input id="current-pass" type="password" v-model="passForm.currentPassword" required />
+                        <Label for="current-pass" class="text-sm font-semibold">Current Password</Label>
+                        <Input id="current-pass" type="password" v-model="passForm.currentPassword" required class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 h-10" />
                     </div>
                     
                     <div class="grid gap-2">
-                        <Label for="new-pass">{{ hasPassword ? 'New Password' : 'Create Password' }}</Label>
-                        <Input id="new-pass" type="password" v-model="passForm.newPassword" required />
+                        <Label for="new-pass" class="text-sm font-semibold">{{ hasPassword ? 'New Password' : 'Create Password' }}</Label>
+                        <Input id="new-pass" type="password" v-model="passForm.newPassword" required class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 h-10" />
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="confirm-pass">Confirm Password</Label>
-                        <Input id="confirm-pass" type="password" v-model="passForm.confirmPassword" required />
+                        <Label for="confirm-pass" class="text-sm font-semibold">Confirm Password</Label>
+                        <Input id="confirm-pass" type="password" v-model="passForm.confirmPassword" required class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 h-10" />
                     </div>
 
-                    <div class="pt-2">
-                        <Button type="submit" variant="secondary" :disabled="isLoadingPassword" class="rounded-xl">
+                    <div class="pt-4">
+                        <Button type="submit" variant="secondary" :disabled="isLoadingPassword" class="rounded-full font-medium bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-700">
                             <Loader2 v-if="isLoadingPassword" class="mr-2 h-4 w-4 animate-spin" />
                             {{ hasPassword ? 'Change Password' : 'Set Account Password' }}
                         </Button>
@@ -214,25 +216,25 @@ const handleDeleteAccount = async () => {
             </CardContent>
         </Card>
 
-        <Card class="border-red-200 bg-red-50/30 dark:bg-red-950/10 dark:border-red-900/50">
+        <Card class="border border-red-100 bg-red-50/30 dark:bg-red-950/5 dark:border-red-900/30 shadow-none">
             <CardHeader>
-                <CardTitle class="text-red-600 flex items-center gap-2">
+                <CardTitle class="text-red-700 dark:text-red-400 flex items-center gap-2 text-lg font-bold tracking-tight">
                     <Trash2 class="h-5 w-5" /> 
                     Danger Zone
                 </CardTitle>
-                <CardDescription class="text-red-500/80">These actions are permanent and cannot be reversed.</CardDescription>
+                <CardDescription class="text-red-600/70 dark:text-red-400/60">These actions are permanent and cannot be reversed.</CardDescription>
             </CardHeader>
             <CardContent class="space-y-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="space-y-1">
-                        <p class="text-sm font-bold text-red-700 dark:text-red-400">Delete Account</p>
-                        <p class="text-xs text-red-600/70">Permanently delete your profile, work logs, and all agency data.</p>
+                        <p class="text-sm font-bold text-red-900 dark:text-red-200">Delete Account</p>
+                        <p class="text-xs text-red-700/60 dark:text-red-400/60">Permanently delete your profile, work logs, and all agency data.</p>
                     </div>
                     <Button 
                         variant="destructive" 
                         @click="handleDeleteAccount" 
                         :disabled="isDeleting"
-                        class="rounded-xl shadow-lg shadow-red-500/20"
+                        class="rounded-full shadow-sm bg-red-600 hover:bg-red-700 text-white font-bold"
                     >
                         <Loader2 v-if="isDeleting" class="mr-2 h-4 w-4 animate-spin" />
                         Delete Account

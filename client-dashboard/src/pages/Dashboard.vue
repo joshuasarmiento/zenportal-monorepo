@@ -19,24 +19,24 @@ const userStore = useUserStore()
 
 const logs = ref<any[]>([])
 const stats = ref({ hoursThisMonth: 0, activeClients: 0, pendingBlockersCount: 0, logCount: 0 }) 
-const clients = ref<any[]>([]) // Add clients ref
+const clients = ref<any[]>([])
 const loading = ref(true)
 
 const isPro = computed(() => userStore.user?.tier === 'pro')
 const LOG_LIMIT = 100 
-const hasClients = computed(() => clients.value.length > 0) // Add hasClients computed property
+const hasClients = computed(() => clients.value.length > 0)
 
 onMounted(async () => {
   if (!userStore.user) await userStore.fetchUser()
   try {
-    const [logsRes, statsRes, clientsRes] = await Promise.all([ // Fetch clients as well
+    const [logsRes, statsRes, clientsRes] = await Promise.all([
       fetchApi('/logs'), 
       fetchApi('/stats'),
       fetchApi('/clients')
     ])
     logs.value = logsRes
     stats.value = { ...stats.value, ...statsRes } 
-    clients.value = clientsRes // Assign fetched clients
+    clients.value = clientsRes
   } catch (err) { 
     console.error(err) 
   } finally { 
@@ -46,7 +46,7 @@ onMounted(async () => {
 
 // Actions
 const navigateToLog = () => {
-  if (!hasClients.value) { // Check if clients exist
+  if (!hasClients.value) {
     toast.error('Please add a client first!', {
       description: 'You need at least one client to log work against.',
       action: {
@@ -84,7 +84,7 @@ const goToUpgrade = async () => {
 <template>
   <SidebarProvider>
     <AppSidebar />
-    <SidebarInset>
+    <SidebarInset class="bg-zinc-50 dark:bg-black">
       
       <DashboardHeader 
         :loading="loading"
@@ -95,15 +95,17 @@ const goToUpgrade = async () => {
         @upgrade="goToUpgrade"
       />
 
-      <div class="flex flex-1 flex-col gap-4 p-4 md:p-8 pt-4 bg-muted/40">
+      <div class="flex flex-1 flex-col gap-8 p-6 md:p-10 max-w-7xl mx-auto w-full">
         
         <DashboardStats :stats="stats" />
 
-        <RecentLogsTable 
-          :loading="loading" 
-          :logs="logs" 
-          @view="viewLog" 
-        />
+        <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden shadow-sm">
+           <RecentLogsTable 
+             :loading="loading" 
+             :logs="logs" 
+             @view="viewLog" 
+           />
+        </div>
         
       </div>
     </SidebarInset>

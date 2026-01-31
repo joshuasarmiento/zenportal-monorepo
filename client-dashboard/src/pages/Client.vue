@@ -87,7 +87,7 @@ const goToUpgrade = async () => {
 <template>
   <SidebarProvider>
     <AppSidebar />
-    <SidebarInset>
+    <SidebarInset class="bg-zinc-50 dark:bg-black">
       
       <ClientsHeader 
         :loading="loading"
@@ -98,7 +98,7 @@ const goToUpgrade = async () => {
         @upgrade="goToUpgrade"
       />
 
-      <div class="flex flex-1 flex-col p-4 md:p-8 bg-muted/40 overflow-y-auto">
+      <div class="flex flex-1 flex-col gap-6 p-6 md:p-10 max-w-7xl mx-auto w-full">
         
         <ClientsToolbar 
           v-model:search="searchQuery"

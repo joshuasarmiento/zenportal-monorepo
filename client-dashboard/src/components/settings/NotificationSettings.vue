@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
-import { Loader2, Eye, Calendar, Megaphone, BellRing } from 'lucide-vue-next'
+import { Loader2, Eye, Calendar, Megaphone, BellRing, Mail } from 'lucide-vue-next'
 import { toast } from 'vue-sonner' 
 
 const { fetchApi } = useApi()
@@ -23,7 +23,6 @@ const settings = ref({
 const syncSettings = () => {
     if (userStore.user) {
     const u = userStore.user as any
-    // Map with explicit checks
     settings.value = {
         notifyClientView: !!(u.notifyClientView ?? true),
         notifyClientOnLog: !!(u.notifyClientOnLog ?? true),
@@ -37,13 +36,11 @@ watch(() => userStore.user, syncSettings, { immediate: true })
 
 onMounted(async () => {
   if (!userStore.user) await userStore.fetchUser()
-  // syncSettings will be called by watch when userStore.user changes
 })
 
 const save = async () => {
   saving.value = true
   try {
-    // Updated endpoint to /user/me to match your userRouter
     await fetchApi('/user/me', {
       method: 'PATCH',
       body: JSON.stringify(settings.value)
@@ -59,27 +56,29 @@ const save = async () => {
 </script>
 
 <template>
-  <Card>
-    <CardHeader class="border-b border-border pb-6">
-      <div class="flex items-center gap-2">
-        <BellRing class="h-5 w-5 text-primary" />
-        <CardTitle>Email Alerts</CardTitle>
+  <Card class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
+    <CardHeader class="border-b border-zinc-100 dark:border-zinc-800 pb-6">
+      <div class="flex items-center gap-2 mb-1">
+        <div class="p-2 bg-zinc-100 dark:bg-zinc-900 rounded-lg">
+           <BellRing class="h-4 w-4 text-zinc-900 dark:text-white" />
+        </div>
+        <CardTitle class="text-lg font-bold text-zinc-900 dark:text-white tracking-tight">Email Alerts</CardTitle>
       </div>
-      <CardDescription>Control when ZenPortal sends you emails.</CardDescription>
+      <CardDescription class="text-zinc-500">Control when ZenPortal sends you emails.</CardDescription>
     </CardHeader>
 
-    <CardContent class="space-y-6 pt-6">
+    <CardContent class="space-y-8 pt-8">
       
       <div class="flex items-start justify-between space-x-4">
-        <div class="flex gap-3 items-center">
-          <div class="mt-1 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg text-blue-600 dark:text-blue-400">
+        <div class="flex gap-4 items-start">
+          <div class="mt-0.5 bg-blue-50 dark:bg-blue-900/20 p-2.5 rounded-xl text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
             <Eye class="h-5 w-5" />
           </div>
-          <div class="space-y-0.5">
-            <Label class="text-base font-semibold">Client Views Report</Label>
-            <p class="text-sm text-muted-foreground">
-              Get an email notification the moment a client opens their magic link.
-              <span class="text-xs text-muted-foreground/70 block mt-1">(Includes a 6-hour cooldown to prevent spam)</span>
+          <div class="space-y-1">
+            <Label class="text-base font-semibold text-zinc-900 dark:text-white">Client Views Report</Label>
+            <p class="text-sm text-zinc-500 max-w-sm leading-relaxed">
+              Get notified when a client opens their magic link.
+              <span class="text-xs text-zinc-400 block mt-1">(Includes a 6-hour cooldown to prevent spam)</span>
             </p>
           </div>
         </div>
@@ -87,14 +86,14 @@ const save = async () => {
       </div>
 
       <div class="flex items-start justify-between space-x-4">
-        <div class="flex gap-3 items-center">
-          <div class="mt-1 bg-violet-50 dark:bg-violet-900/20 p-2 rounded-lg text-violet-600 dark:text-violet-400">
-            <Megaphone class="h-5 w-5" />
+        <div class="flex gap-4 items-start">
+          <div class="mt-0.5 bg-violet-50 dark:bg-violet-900/20 p-2.5 rounded-xl text-violet-600 dark:text-violet-400 border border-violet-100 dark:border-violet-800">
+            <Mail class="h-5 w-5" />
           </div>
-          <div class="space-y-0.5">
-            <Label class="text-base font-semibold">Email Clients on Log</Label>
-            <p class="text-sm text-muted-foreground">
-              Automatically send an email to clients when you add a new work log.
+          <div class="space-y-1">
+            <Label class="text-base font-semibold text-zinc-900 dark:text-white">Email Clients on Log</Label>
+            <p class="text-sm text-zinc-500 max-w-sm leading-relaxed">
+              Automatically send an email summary to clients when you add a new work log.
             </p>
           </div>
         </div>
@@ -102,13 +101,13 @@ const save = async () => {
       </div>
 
       <div class="flex items-start justify-between space-x-4">
-        <div class="flex gap-3 items-center">
-          <div class="mt-1 bg-green-50 dark:bg-green-900/20 p-2 rounded-lg text-green-600 dark:text-green-400">
+        <div class="flex gap-4 items-start">
+          <div class="mt-0.5 bg-green-50 dark:bg-green-900/20 p-2.5 rounded-xl text-green-600 dark:text-green-400 border border-green-100 dark:border-green-800">
             <Calendar class="h-5 w-5" />
           </div>
-          <div class="space-y-0.5">
-            <Label class="text-base font-semibold">Weekly Earnings Recap</Label>
-            <p class="text-sm text-muted-foreground">
+          <div class="space-y-1">
+            <Label class="text-base font-semibold text-zinc-900 dark:text-white">Weekly Earnings Recap</Label>
+            <p class="text-sm text-zinc-500 max-w-sm leading-relaxed">
               Receive a summary of hours logged and total earnings every Sunday.
             </p>
           </div>
@@ -117,13 +116,13 @@ const save = async () => {
       </div>
 
       <div class="flex items-start justify-between space-x-4">
-        <div class="flex gap-3 items-center">
-          <div class="mt-1 bg-orange-50 dark:bg-orange-900/20 p-2 rounded-lg text-orange-600 dark:text-orange-400">
+        <div class="flex gap-4 items-start">
+          <div class="mt-0.5 bg-orange-50 dark:bg-orange-900/20 p-2.5 rounded-xl text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-800">
             <Megaphone class="h-5 w-5" />
           </div>
-          <div class="space-y-0.5">
-            <Label class="text-base font-semibold">Marketing & Tips</Label>
-            <p class="text-sm text-muted-foreground">
+          <div class="space-y-1">
+            <Label class="text-base font-semibold text-zinc-900 dark:text-white">Marketing & Tips</Label>
+            <p class="text-sm text-zinc-500 max-w-sm leading-relaxed">
               Occasional news about new features and freelance tips.
             </p>
           </div>
@@ -133,8 +132,8 @@ const save = async () => {
 
     </CardContent>
     
-    <CardFooter class="border-t border-border pt-6 flex justify-end">
-      <Button variant="default" @click="save" :disabled="saving">
+    <CardFooter class="border-t border-zinc-100 dark:border-zinc-800 pt-6 flex justify-end bg-zinc-50/50 dark:bg-zinc-900/50">
+      <Button variant="default" @click="save" :disabled="saving" class="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 rounded-full px-6 font-bold shadow-sm">
         <Loader2 v-if="saving" class="mr-2 h-4 w-4 animate-spin" />
         {{ saving ? 'Saving Preferences...' : 'Save Changes' }}
       </Button>
