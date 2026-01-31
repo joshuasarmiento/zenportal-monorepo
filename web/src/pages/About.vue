@@ -5,7 +5,7 @@ import { MapPin, Zap, HeartHandshake, ArrowRight } from 'lucide-vue-next'
 </script>
 
 <template>
-  <div class="min-h-screen bg-background font-sans text-foreground selection:bg-purple-500/30">
+  <div class="mt-40 min-h-screen bg-background font-sans text-foreground selection:bg-purple-500/30">
     
     <!-- <div class="fixed inset-0 -z-10 bg-background">
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-200 w-200 bg-blue-500/5 rounded-full blur-[120px]"></div>

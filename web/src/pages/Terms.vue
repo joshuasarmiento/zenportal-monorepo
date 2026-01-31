@@ -7,7 +7,7 @@ const lastUpdated = 'January 25, 2026'
 </script>
 
 <template>
-  <div class="min-h-screen bg-background font-sans text-foreground selection:bg-indigo-500/30">
+  <div class="min-h-screen bg-background font-sans text-foreground selection:bg-indigo-500/30 mt-40">
     
     <div class="max-w-4xl mx-auto px-6">
 
@@ -114,7 +114,7 @@ const lastUpdated = 'January 25, 2026'
         <section class="text-center pb-8">
           <p class="text-muted-foreground mb-4">Questions about the Terms?</p>
           <Button variant="outline" as-child>
-            <a href="mailto:support@zenportal.io">Contact Support</a>
+            <a href="mailto:support@zenportal.com.ph">Contact Support</a>
           </Button>
         </section>
 

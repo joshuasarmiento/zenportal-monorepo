@@ -7,7 +7,7 @@ const lastUpdated = 'January 25, 2026'
 </script>
 
 <template>
-  <div class="min-h-screen bg-background font-sans text-foreground selection:bg-indigo-500/30 pb-20">
+  <div class="min-h-screen bg-background font-sans text-foreground selection:bg-indigo-500/30 pb-20 mt-40">
     
     <div class="max-w-4xl mx-auto px-6">
       <div class="space-y-4 mb-12 pt-12">
@@ -101,7 +101,7 @@ const lastUpdated = 'January 25, 2026'
           <section class="space-y-4">
             <h2 class="text-2xl font-bold">6. Contact</h2>
             <p class="text-muted-foreground">
-              Privacy Officer: <a href="mailto:privacy@zenportal.io" class="text-indigo-600 hover:underline">privacy@zenportal.io</a>
+              <a href="mailto:support@zenportal.com.ph" class="text-indigo-600 hover:underline">support@zenportal.com.ph</a>
             </p>
           </section>
 

@@ -81,7 +81,7 @@ const faqs = [
 
 <template>
   <div
-    class="bg-white dark:bg-zinc-950 min-h-screen font-sans text-zinc-900 dark:text-zinc-100 selection:bg-blue-500/30 overflow-x-hidden transition-colors duration-300">
+    class="bg-white dark:bg-zinc-950 min-h-screen font-sans text-zinc-900 dark:text-zinc-100 selection:bg-blue-500/30 overflow-x-hidden transition-colors duration-300 mt-40">
     <section class="relative pb-20">
       <div class="max-w-7xl mx-auto px-6 text-center relative z-10">
 

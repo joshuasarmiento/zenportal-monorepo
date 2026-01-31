@@ -19,8 +19,7 @@ const handleSignUp = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-background font-sans text-foreground selection:bg-blue-500/30">
-
+  <div class="min-h-screen bg-background font-sans text-foreground selection:bg-blue-500/30 mt-40">
     <section class="max-w-7xl mx-auto px-6 text-center mb-24">
       <Badge variant="outline" class="mb-6 border-blue-500/30 bg-blue-500/5 text-blue-600 dark:text-blue-400">
         Product Tour
