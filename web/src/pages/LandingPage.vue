@@ -22,6 +22,9 @@ import {
   Lock,
   Paperclip,
   ShieldCheck,
+  Clock,
+  Briefcase,
+  AlertTriangle,
   // Dashboard Preview Icons
   LayoutDashboard,
   Users,
@@ -63,6 +66,13 @@ const features = [
     class: 'md:col-span-2 bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/50',
     iconClass: 'text-blue-600 dark:text-blue-400'
   },
+  {
+    icon: Zap,
+    title: 'Tatak "Pro" Agency',
+    desc: 'Customize with your own Logo & Colors. Remove our branding so you look like a legitimate software-powered agency.',
+    class: 'md:col-span-1 bg-purple-50 dark:bg-purple-900/20 border-purple-100 dark:border-purple-900/50',
+    iconClass: 'text-purple-600 dark:text-purple-400'
+  }
 ]
 
 // FAQS
@@ -151,237 +161,203 @@ const faqs = [
         <div class="relative w-full max-w-5xl mx-auto perspective-1000 group">
           <div class="absolute -inset-4 bg-gradient-to-t from-blue-500/10 via-purple-500/10 to-transparent rounded-[2rem] blur-3xl opacity-0 group-hover:opacity-100 transition duration-1000"></div>
 
-          <div class="relative rounded-xl border border-zinc-200/60 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-2xl overflow-hidden transform transition-all duration-700 hover:rotate-x-2 origin-center ring-1 ring-black/5 dark:ring-white/5">
+          <div class="relative rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-2xl overflow-hidden transform transition-all duration-700 hover:rotate-x-2 origin-center ring-1 ring-black/5 dark:ring-white/10">
             
-            <div class="h-10 border-b border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-white/5 px-4 flex items-center justify-between backdrop-blur-md">
-               <div class="flex gap-1.5">
+            <div class="h-10 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900/80 px-4 flex items-center justify-between backdrop-blur-md">
+              <div class="flex gap-1.5">
                   <div class="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700"></div>
                   <div class="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700"></div>
                   <div class="w-2.5 h-2.5 rounded-full bg-zinc-300 dark:bg-zinc-700"></div>
-               </div>
-               <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 text-[10px] font-mono text-zinc-400">
+              </div>
+              <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 text-[10px] font-mono text-zinc-400">
                   <Lock class="w-2.5 h-2.5" /> app.zenportal.com.ph
-               </div>
-               <div class="w-10"></div>
+              </div>
+              <div class="w-10"></div>
             </div>
 
-            <div class="flex h-150 md:h-125 overflow-hidden">
-
-              <div
-                class="hidden md:flex w-64 flex-col border-r border-zinc-200 dark:border-white/5 bg-white dark:bg-zinc-900/50">
+            <div class="flex h-150 md:h-125 overflow-hidden bg-zinc-50 dark:bg-black">
+              
+              <div class="hidden md:flex w-64 flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                 <div class="p-4">
-                  <div
-                    class="flex items-center gap-3 p-2 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg cursor-pointer transition-colors">
-                    <div class="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shrink-0">
-                      <Zap class="w-4 h-4" />
-                    </div>
-                    <div class="grid flex-1 text-left text-sm leading-tight">
-                      <span class="truncate font-bold text-blue-600 dark:text-blue-400">ZenPortal</span>
-                      <span class="truncate text-xs text-zinc-500">Agency Admin</span>
-                    </div>
+                  <div class="flex items-center gap-2 p-2 rounded-lg transition-colors group/brand cursor-pointer">
+                      <div class="h-8 w-8 bg-zinc-900 dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-zinc-900 shrink-0 shadow-sm transition-transform group-hover/brand:scale-105">
+                        <Zap class="w-4 h-4 fill-current" />
+                      </div>
+                      <div class="grid flex-1 text-left text-sm leading-tight">
+                        <span class="truncate font-bold text-zinc-900 dark:text-white tracking-tight">ZenPortal</span>
+                        <span class="truncate text-xs text-zinc-500 font-medium">Agency Admin</span>
+                      </div>
                   </div>
                 </div>
 
-                <div class="flex-1 px-2 py-2 space-y-6 overflow-y-auto">
-                  <div class="space-y-1">
-                    <div class="px-4 text-xs text-start font-semibold text-zinc-500 mb-2">Platform</div>
-                    <div
-                      class="flex items-center gap-2 px-4 py-2 bg-zinc-100 dark:bg-white/10 text-zinc-900 dark:text-white rounded-md text-sm font-medium cursor-pointer">
+                <div class="flex-1 px-3 py-2 space-y-6 overflow-y-auto">
+                  <div class="space-y-0.5">
+                    <div class="px-3 text-[10px] text-start uppercase tracking-widest font-bold text-zinc-400 mb-2">Platform</div>
+                    <div class="flex items-center gap-2 px-3 py-2 bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white rounded-md text-sm font-medium cursor-pointer">
                       <LayoutDashboard class="w-4 h-4" />
                       <span>Dashboard</span>
                     </div>
-                    <div
-                      class="flex items-center gap-2 px-4 py-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-md text-sm transition-colors cursor-pointer">
+                    <div class="flex items-center gap-2 px-3 py-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-md text-sm font-medium transition-colors cursor-pointer">
                       <Users class="w-4 h-4" />
                       <span>Clients</span>
                     </div>
-                    <div
-                      class="flex items-center gap-2 px-4 py-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-md text-sm transition-colors cursor-pointer">
+                    <div class="flex items-center gap-2 px-3 py-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-md text-sm font-medium transition-colors cursor-pointer">
                       <BarChart3 class="w-4 h-4" />
                       <span>Earnings</span>
                     </div>
                   </div>
 
-                  <div class="space-y-1">
-                    <div class="px-4 text-xs text-start font-semibold text-zinc-500 mb-2">Settings</div>
-                    <div
-                      class="flex items-center gap-2 px-4 py-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-md text-sm transition-colors cursor-pointer">
+                  <div class="space-y-0.5">
+                    <div class="px-3 text-start text-[10px] uppercase tracking-widest font-bold text-zinc-400 mb-2">Configurations</div>
+                    <div class="flex items-center gap-2 px-3 py-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-md text-sm font-medium transition-colors cursor-pointer">
                       <BookOpen class="w-4 h-4" />
                       <span>User Guide</span>
                     </div>
-                    <div
-                      class="flex items-center gap-2 px-4 py-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-md text-sm transition-colors cursor-pointer">
+                    <div class="flex items-center gap-2 px-3 py-2 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-md text-sm font-medium transition-colors cursor-pointer">
                       <Settings class="w-4 h-4" />
                       <span>Settings</span>
                     </div>
                   </div>
                 </div>
 
-                <div class="p-4 mt-auto">
-                  <div
-                    class="flex items-center gap-3 p-2 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg cursor-pointer transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-white/10">
-                    <Avatar class="h-8 w-8 rounded-lg border border-zinc-200 dark:border-white/10">
-                      <AvatarFallback
-                        class="rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-200 font-bold text-xs">
-                        JS</AvatarFallback>
-                    </Avatar>
-                    <div class="grid flex-1 text-left text-sm leading-tight">
-                      <span class="truncate font-semibold text-zinc-900 dark:text-white">Joshua S.</span>
-                      <span class="truncate text-xs text-zinc-500">joshua@dev.com</span>
-                    </div>
-                    <ChevronsUpDown class="ml-auto size-4 text-zinc-400" />
+                <div class="p-4 mt-auto border-t border-zinc-100 dark:border-zinc-900">
+                  <div class="flex items-center gap-3 p-2 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-lg cursor-pointer transition-colors">
+                      <Avatar class="h-8 w-8 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                        <AvatarImage src="https://i.pravatar.cc/150?img=11" />
+                        <AvatarFallback class="rounded-lg bg-zinc-100 text-zinc-900 font-bold text-xs">JS</AvatarFallback>
+                      </Avatar>
+                      <div class="grid flex-1 text-left text-sm leading-tight">
+                        <span class="truncate font-semibold text-zinc-900 dark:text-white">Edward S.</span>
+                        <span class="truncate text-xs text-zinc-500">edward@company.com</span>
+                      </div>
+                      <ChevronsUpDown class="ml-auto size-3 text-zinc-400" />
                   </div>
                 </div>
               </div>
 
-              <div class="flex-1 flex flex-col bg-zinc-50/50 dark:bg-black/20 overflow-hidden">
-                <header
-                  class="h-16 border-b border-zinc-200 dark:border-white/5 bg-white dark:bg-zinc-900/50 flex items-center justify-between px-6">
-                  <div class="flex items-center text-sm text-zinc-500">
-                    <span>Platform</span>
-                    <span class="mx-2">/</span>
-                    <span class="font-medium text-zinc-900 dark:text-white">Dashboard</span>
+              <div class="flex-1 flex flex-col overflow-hidden">
+                <header class="h-16 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex items-center justify-between px-6 md:px-8">
+                  <div class="flex items-center text-sm gap-2">
+                    <span class="text-zinc-500 hover:text-zinc-900 transition-colors cursor-pointer">Platform</span>
+                    <span class="text-zinc-300">/</span>
+                    <span class="font-semibold text-zinc-900 dark:text-white tracking-tight">Dashboard</span>
                   </div>
                   <div class="flex items-center gap-4">
-                    <Button size="sm"
-                      class="h-8 gap-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-none">
-                      <div class="h-4 w-4 flex items-center justify-center rounded-full border border-current">
-                        <span class="text-[10px]">+</span>
+                    <Button size="sm" class="h-9 gap-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-sm rounded-full px-4 font-medium transition-transform active:scale-95">
+                      <div class="h-4 w-4 flex items-center justify-center rounded-full border border-current opacity-60">
+                        <span class="text-[9px] font-bold leading-none mb-px">+</span>
                       </div>
                       Log Work
                     </Button>
                   </div>
                 </header>
 
-                <div class="p-6 space-y-6 overflow-hidden">
-                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div
-                      class="bg-white dark:bg-zinc-900/50 p-4 rounded-xl border border-zinc-200 dark:border-white/5 shadow-sm">
-                      <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-medium text-zinc-500">Total Hours</span>
-                        <div class="h-4 w-4 text-blue-500"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" class="w-4 h-4">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                          </svg></div>
+                <div class="p-6 md:p-8 space-y-8 overflow-y-auto bg-zinc-50 dark:bg-black">
+                  
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                      <div class="bg-white dark:bg-zinc-950 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col justify-between h-32 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
+                        <div class="flex justify-between items-start">
+                          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Total Hours</span>
+                          <div class="h-8 w-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center border border-blue-100 dark:border-blue-900/30 text-blue-600 dark:text-blue-400">
+                              <Clock class="w-4 h-4" />
+                          </div>
+                        </div>
+                        <div class="text-3xl font-semibold tracking-tighter text-zinc-900 dark:text-white">142.5 <span class="text-lg text-zinc-400 font-medium">h</span></div>
                       </div>
-                      <div class="text-2xl font-bold text-zinc-900 dark:text-white">142.5 h</div>
-                    </div>
-                    <div
-                      class="bg-white dark:bg-zinc-900/50 p-4 rounded-xl border border-zinc-200 dark:border-white/5 shadow-sm">
-                      <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-medium text-zinc-500">Active Clients</span>
-                        <div class="h-4 w-4 text-green-500"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" class="w-4 h-4">
-                            <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
-                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-                          </svg></div>
+
+                      <div class="bg-white dark:bg-zinc-950 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col justify-between h-32 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
+                        <div class="flex justify-between items-start">
+                          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Active Clients</span>
+                          <div class="h-8 w-8 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center border border-green-100 dark:border-green-900/30 text-green-600 dark:text-green-400">
+                              <Briefcase class="w-4 h-4" />
+                          </div>
+                        </div>
+                        <div class="text-3xl font-semibold tracking-tighter text-zinc-900 dark:text-white">3</div>
                       </div>
-                      <div class="text-2xl font-bold text-zinc-900 dark:text-white">3</div>
-                    </div>
-                    <div
-                      class="bg-white dark:bg-zinc-900/50 p-4 rounded-xl border border-zinc-200 dark:border-white/5 shadow-sm">
-                      <div class="flex items-center justify-between mb-2">
-                        <span class="text-xs font-medium text-zinc-500">Total Blockers</span>
-                        <div class="h-4 w-4 text-red-500"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" class="w-4 h-4">
-                            <circle cx="12" cy="12" r="10" />
-                            <line x1="12" x2="12" y1="8" y2="12" />
-                            <line x1="12" x2="12.01" y1="16" y2="16" />
-                          </svg></div>
+
+                      <div class="bg-white dark:bg-zinc-950 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col justify-between h-32 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors">
+                        <div class="flex justify-between items-start">
+                          <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Active Blockers</span>
+                          <div class="h-8 w-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400">
+                              <AlertTriangle class="w-4 h-4" />
+                          </div>
+                        </div>
+                        <div class="text-3xl font-semibold tracking-tighter text-red-600 dark:text-red-400">1</div>
                       </div>
-                      <div class="text-2xl font-bold text-red-500">1</div>
-                    </div>
                   </div>
 
-                  <div
-                    class="bg-white dark:bg-zinc-900/50 rounded-xl border border-zinc-200 dark:border-white/5 shadow-sm flex-1 overflow-hidden">
-                    <div class="p-4 border-b border-zinc-200 dark:border-white/5">
-                      <h3 class="font-semibold text-zinc-900 dark:text-white">Recent Proof of Work</h3>
-                    </div>
-                    <div class="p-0">
-                      <table class="w-full text-sm text-left">
-                        <thead class="bg-zinc-50/50 dark:bg-white/5 text-zinc-500">
-                          <tr>
-                            <th class="px-4 py-3 font-medium">Date</th>
-                            <th class="px-4 py-3 font-medium">Client</th>
-                            <th class="px-4 py-3 font-medium">Summary</th>
-                            <th class="px-4 py-3 font-medium">Evidence</th>
-                            <th class="px-4 py-3 font-medium">Status</th>
-                          </tr>
-                        </thead>
-                        <tbody class="divide-y divide-zinc-100 dark:divide-white/5">
-                          <tr class="group hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors">
-                            <td class="px-4 py-3 text-zinc-500">Today</td>
-                            <td class="px-4 py-3">
-                              <Badge variant="secondary"
-                                class="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 hover:bg-indigo-100">
-                                TechCorp</Badge>
-                            </td>
-                            <td class="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-200">Fixed API Rate Limiting
-                            </td>
-                            <td class="px-4 py-3">
-                              <div class="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 text-xs font-bold">
-                                <Video class="h-3.5 w-3.5" /> Video
+                  <div class="bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden flex-1">
+                      <div class="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+                        <h3 class="font-semibold text-zinc-900 dark:text-white text-sm">Recent Proof of Work</h3>
+                      </div>
+                      <div class="p-0">
+                        <div class="w-full">
+                            <div class="grid grid-cols-12 px-6 py-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                              <div class="col-span-2">Date</div>
+                              <div class="col-span-2">Client</div>
+                              <div class="col-span-4">Summary</div>
+                              <div class="col-span-2">Evidence</div>
+                              <div class="col-span-2 text-right">Status</div>
+                            </div>
+
+                            <div class="grid grid-cols-12 items-center px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors group cursor-pointer">
+                              <div class="col-span-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">Today</div>
+                              <div class="col-span-2">
+                                  <Badge variant="secondary" class="bg-zinc-100 text-zinc-700 border border-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700 font-medium rounded-md px-2 py-0.5 text-xs">TechCorp</Badge>
                               </div>
-                            </td>
-                            <td class="px-4 py-3">
-                              <Badge variant="outline"
-                                class="border-green-200 bg-green-50 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400 gap-1">
-                                <CheckCircle2 class="h-3 w-3" /> Done
-                              </Badge>
-                            </td>
-                          </tr>
-                          <tr class="group hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors">
-                            <td class="px-4 py-3 text-zinc-500">Yesterday</td>
-                            <td class="px-4 py-3">
-                              <Badge variant="secondary"
-                                class="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 hover:bg-indigo-100">
-                                DesignStudio</Badge>
-                            </td>
-                            <td class="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-200">Updated Figma Tokens</td>
-                            <td class="px-4 py-3">
-                              <div
-                                class="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 text-xs font-bold">
-                                <Paperclip class="h-3.5 w-3.5" />
-                                File
+                              <div class="col-span-4 text-sm font-medium text-zinc-900 dark:text-white truncate pr-4">Fixed API Rate Limiting issues on V2</div>
+                              <div class="col-span-2">
+                                  <div class="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 text-[10px] font-bold bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-md w-fit">
+                                    <Video class="h-3 w-3" /> Video
+                                  </div>
                               </div>
-                            </td>
-                            <td class="px-4 py-3">
-                              <Badge variant="outline"
-                                class="border-green-200 bg-green-50 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400 gap-1">
-                                <CheckCircle2 class="h-3 w-3" /> Done
-                              </Badge>
-                            </td>
-                          </tr>
-                          <tr
-                            class="group bg-red-50/50 dark:bg-red-900/10 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                            <td class="px-4 py-3 text-zinc-500">Jan 23</td>
-                            <td class="px-4 py-3">
-                              <Badge variant="secondary"
-                                class="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 hover:bg-indigo-100">
-                                StartupInc</Badge>
-                            </td>
-                            <td class="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-200">Waiting for AWS Access
-                              Keys</td>
-                            <td class="px-4 py-3"><span class="text-zinc-400 text-xs">No evidence</span></td>
-                            <td class="px-4 py-3">
-                              <Badge variant="destructive" class="gap-1">
-                                <div
-                                  class="h-3 w-3 rounded-full border border-current flex items-center justify-center">!
-                                </div> Blocked
-                              </Badge>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
+                              <div class="col-span-2 text-right">
+                                  <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 border border-green-200 dark:border-green-900/30 text-[10px] font-bold uppercase tracking-wider">
+                                    <CheckCircle2 class="h-3 w-3" /> Done
+                                  </div>
+                              </div>
+                            </div>
+
+                            <div class="grid grid-cols-12 items-center px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors group cursor-pointer">
+                              <div class="col-span-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">Yesterday</div>
+                              <div class="col-span-2">
+                                  <Badge variant="secondary" class="bg-zinc-100 text-zinc-700 border border-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700 font-medium rounded-md px-2 py-0.5 text-xs">DesignStudio</Badge>
+                              </div>
+                              <div class="col-span-4 text-sm font-medium text-zinc-900 dark:text-white truncate pr-4">Updated Figma Tokens for Mobile</div>
+                              <div class="col-span-2">
+                                  <div class="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/20 px-2 py-1 rounded-md w-fit">
+                                    <Paperclip class="h-3 w-3" /> File
+                                  </div>
+                              </div>
+                              <div class="col-span-2 text-right">
+                                  <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 border border-green-200 dark:border-green-900/30 text-[10px] font-bold uppercase tracking-wider">
+                                    <CheckCircle2 class="h-3 w-3" /> Done
+                                  </div>
+                              </div>
+                            </div>
+
+                            <div class="grid grid-cols-12 items-center px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors group cursor-pointer bg-red-50/30 dark:bg-red-900/5">
+                              <div class="col-span-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">Jan 23</div>
+                              <div class="col-span-2">
+                                  <Badge variant="secondary" class="bg-zinc-100 text-zinc-700 border border-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700 font-medium rounded-md px-2 py-0.5 text-xs">StartupInc</Badge>
+                              </div>
+                              <div class="col-span-4 text-sm font-medium text-zinc-900 dark:text-white truncate pr-4">Waiting for AWS Access Keys</div>
+                              <div class="col-span-2">
+                                  <span class="text-zinc-400 text-xs italic">No evidence</span>
+                              </div>
+                              <div class="col-span-2 text-right">
+                                  <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400 border border-red-200 dark:border-red-900/30 text-[10px] font-bold uppercase tracking-wider">
+                                    <AlertTriangle class="h-3 w-3" /> Blocked
+                                  </div>
+                              </div>
+                            </div>
+
+                        </div>
+                      </div>
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </div>

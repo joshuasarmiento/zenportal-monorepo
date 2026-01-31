@@ -47,7 +47,8 @@ const lastUpdated = 'January 25, 2026'
           <h2 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">2. Use of Service & Restrictions</h2>
           <ul class="list-disc pl-5 space-y-2 marker:text-zinc-300 dark:marker:text-zinc-700">
             <li><strong class="text-zinc-900 dark:text-white">Sole Responsibility:</strong> You are fully responsible for all activities that occur under your account. The Provider accepts no liability for any loss or damage from your failure to maintain security.</li>
-            <li><strong class="text-zinc-900 dark:text-white">Magic Links:</strong> You acknowledge that "Client Portals" are accessed via unauthenticated secure links ("Magic Links"). You bear the sole burden of ensuring these links are shared only with intended recipients.</li>
+            <li><strong class="text-zinc-900 dark:text-white">Magic Links:</strong> You acknowledge that "Client Portals" and "Reports" are accessed via unauthenticated secure links ("Magic Links"). You bear the sole burden of ensuring these links are shared only with intended recipients.</li>
+            <li><strong class="text-zinc-900 dark:text-white">Public Profiles:</strong> You are responsible for the content displayed on your Public Agency Profile.</li>
             <li><strong class="text-zinc-900 dark:text-white">Fair Use:</strong> The Provider reserves the right to terminate accounts that place an unreasonable load on the Service's infrastructure (e.g., automated scraping).</li>
           </ul>
         </section>
@@ -118,7 +119,7 @@ const lastUpdated = 'January 25, 2026'
             <Lock class="h-5 w-5" /> 9. Allocation of Risk
           </h2>
           <p>
-            You acknowledge that the subscription fee ($12) is set based on the limitations of liability and disclaimers set forth herein. If you required greater liability protection, the fee would be substantially higher. You agree that these limitations are a fundamental basis of the bargain.
+            You acknowledge that the subscription fee is set based on the limitations of liability and disclaimers set forth herein. If you required greater liability protection, the fee would be substantially higher. You agree that these limitations are a fundamental basis of the bargain.
           </p>
         </section>
 
