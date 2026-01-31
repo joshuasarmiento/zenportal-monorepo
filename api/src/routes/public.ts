@@ -53,16 +53,20 @@ app.get('/report/:token', async (c) => {
     if (timeSinceLastView > COOLDOWN_MS) {
       // Fire and forget (don't await to keep response fast)
       console.log(` ${clientData.owner.email} - ${clientData.companyName} just viewed your report`);
-      sendClientViewedEmail(clientData.owner.email, clientData.companyName)
+      const emailPromise = sendClientViewedEmail(clientData.owner.email, clientData.companyName)
         .then(() => console.log(`📧 Sent Client View Alert to ${clientData.owner.email}`))
         .catch(err => console.error('Failed to send view alert', err));
+
+      // Ensure email sends before function freezes
+      c.executionCtx.waitUntil(emailPromise);
 
       // Update last viewed time
       await db.update(clients)
         .set({ lastViewedAt: NOW })
         .where(eq(clients.id, clientData.id));
     } else {
-      console.log(`⏳ Rate limited view notification for ${clientData.owner.email} (Last sent: ${new Date(lastViewed).toISOString()})`);
+      const lastSentStr = lastViewed ? new Date(lastViewed).toISOString() : 'Never';
+      console.log(`⏳ Rate limited view notification for ${clientData.owner.email} (Last sent: ${lastSentStr})`);
     }
   }
 
