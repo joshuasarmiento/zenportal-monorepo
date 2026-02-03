@@ -17,7 +17,6 @@ import {
   Zap,
   Video,
   LayoutGrid,
-  Star,
   Banknote,
   Lock,
   Paperclip,
