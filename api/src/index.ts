@@ -6,6 +6,8 @@ import { logger } from 'hono/logger';
 import { handle } from 'hono/vercel';
 // Import the auth instance and middleware
 import { auth } from './lib/auth.js';
+import { csrf } from 'hono/csrf'
+import { secureHeaders } from 'hono/secure-headers'
 
 // Import your new Routers
 import { billingRouter } from './routes/billing.js';
@@ -21,6 +23,7 @@ import { config } from './config.js';
 const app = new Hono();
 
 // 1. Global Middleware
+app.use(secureHeaders())
 app.use('*', logger());
 app.use('*', cors({
   origin: config.app.allowedOrigins,
@@ -29,7 +32,34 @@ app.use('*', cors({
   allowHeaders: ['Content-Type', 'Authorization', 'paymongo-signature'],
 }));
 
+app.use(
+  csrf({
+    origin: config.app.allowedOrigins,
+    secFetchSite: (secFetchSite, c) => {
+      // Always allow same-origin
+      if (secFetchSite === 'same-origin') return true
+      // Allow cross-site for webhook endpoints
+      if (
+        secFetchSite === 'cross-site' &&
+        c.req.path.startsWith('/webhooks')
+      ) {
+        return true
+      }
+      return false
+    },
+  })
+)
+
 // 2. Mount Better Auth
+import { bodyLimit } from 'hono/body-limit';
+
+app.use('*', bodyLimit({
+  maxSize: 50 * 1024 * 1024, // 50MB
+  onError: (c) => {
+    return c.text('Request body too large', 413);
+  },
+}));
+
 app.on(['POST', 'GET'], '/api/auth/**', (c) => {
   return auth.handler(c.req.raw);
 });

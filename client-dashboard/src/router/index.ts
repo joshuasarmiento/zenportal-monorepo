@@ -1,16 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 
-// 1. App Pages (Protected)
-// Lazy loaded inline
-
-// Settings Pages
-// Lazy loaded inline
-
-// User Guide Pages
-// Lazy loaded inline
-
-
 const router = createRouter({
   history: createWebHistory(),
   routes: [

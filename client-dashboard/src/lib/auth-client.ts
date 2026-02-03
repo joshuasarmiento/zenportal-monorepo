@@ -3,7 +3,6 @@ import { createAuthClient } from "better-auth/vue"
 import {
     emailOTPClient,
     inferAdditionalFields,
-    lastLoginMethodClient
 } from "better-auth/client/plugins"
 import { env } from "@/env"
 
@@ -13,7 +12,6 @@ export const authClient = createAuthClient({
     baseURL: apiUrl,
     plugins: [
         emailOTPClient(),
-        lastLoginMethodClient(),
         inferAdditionalFields({
             user: {
                 tier: { type: "string", required: false },

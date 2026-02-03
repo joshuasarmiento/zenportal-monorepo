@@ -27,10 +27,19 @@ const updateClientSchema = clientSchema.partial();
 // GET /clients - READ ONLY (Always allowed)
 app.get('/', async (c) => {
   const userId = c.get('userId');
+  const page = Number(c.req.query('page')) || 1;
+  const limit = Number(c.req.query('limit')) || 50;
+  const offset = (page - 1) * limit;
+
   const myClients = await db.query.clients.findMany({
     where: eq(clients.userId, userId),
     orderBy: [desc(clients.createdAt)],
+    limit: limit,
+    offset: offset,
   });
+
+  // Optional: Return metadata if needed (not requested but helpful)
+  // For now just returning the array as before, but paginated.
   return c.json(myClients);
 });
 

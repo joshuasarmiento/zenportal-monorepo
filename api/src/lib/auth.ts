@@ -1,6 +1,6 @@
 // api/src/lib/auth.ts
 import { betterAuth, type User } from "better-auth";
-import { emailOTP, lastLoginMethod } from "better-auth/plugins";
+import { emailOTP } from "better-auth/plugins";
 import { APIError } from "better-auth/api";
 import { haveIBeenPwned } from "better-auth/plugins"
 
@@ -10,6 +10,8 @@ import { db } from '../db/index.js';
 import { config } from '../config.js';
 import * as schema from '../db/schema.js';
 import { sendAuthEmail } from './email.js';
+import { redis } from './redis.js';
+import { getCookie } from 'hono/cookie';
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -88,18 +90,35 @@ export const auth = betterAuth({
             },
             otpLength: 6,
             expiresIn: 300 // 5 minutes
-        }),
-        lastLoginMethod({
-            storeInDatabase: true
-        }),
+        })
     ]
 });
 
 export const requireAuth = createMiddleware<{ Variables: { userId: string, user: User, session: any } }>(async (c, next) => {
+    const authHeader = c.req.header('Authorization');
+    const cookieToken = getCookie(c, 'better-auth.session_token');
+    const token = authHeader?.split(' ')[1] || cookieToken;
+
+    if (token) {
+        const cached = await redis.get(`session:${token}`);
+        if (cached) {
+            const data = JSON.parse(cached);
+            c.set('user', data.user);
+            c.set('userId', data.user.id);
+            c.set('session', data.session);
+            return next();
+        }
+    }
+
     const session = await auth.api.getSession({ headers: c.req.raw.headers });
     if (!session?.user) {
         return c.json({ error: 'Unauthorized' }, 401);
     }
+
+    if (token) {
+        await redis.set(`session:${token}`, JSON.stringify(session), 'EX', 60 * 5); // 5 mins
+    }
+
     c.set('user', session.user);
     c.set('userId', session.user.id);
     c.set('session', session.session);

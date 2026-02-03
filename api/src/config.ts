@@ -30,6 +30,9 @@ export const config = {
   resend: {
     apiKey: getEnv('RESEND_API_KEY')
   },
+  redis: {
+    url: getEnv('REDIS_URL')
+  },
   app: {
     backendUrl: getEnv('BACKEND_URL'),
     frontendUrl: getEnv('FRONTEND_URL'),
