@@ -2,7 +2,8 @@ import { Hono } from 'hono';
 import { db } from '../db/index.js';
 import { users } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
-import { requireAuth, type AuthVariables } from '../lib/auth.js';
+import { requireAuth, type AuthVariables, auth } from '../lib/auth.js';
+import { sendAuthEmail } from '../lib/email.js';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { v4 as uuidv4 } from 'uuid';
@@ -84,6 +85,43 @@ app.post('/api-key', async (c) => {
     .where(eq(users.id, userId));
 
   return c.json(newKeys);
+});
+
+// POST /set-password - Set password for authenticated user (Trusted Flow)
+// Used when user is logged in (e.g. via Social) but has no password set.
+app.post('/set-password', zValidator('json', z.object({
+  password: z.string().min(8)
+})), async (c) => {
+  const userId = c.get('userId');
+  const { password } = c.req.valid('json');
+
+  try {
+    // Use better-auth's internal API to set the password
+    // Passing headers so it can extract the session/user context automatically
+    await auth.api.setPassword({
+      body: {
+        newPassword: password
+      },
+      headers: c.req.raw.headers
+    });
+
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId)
+    });
+
+    if (user && user.email) {
+      await sendAuthEmail(
+        user.email,
+        "Password Set Successfully",
+        `<p>Your password has been successfully created. You can now log in with your email and password.</p>`
+      );
+    }
+
+    return c.json({ success: true });
+  } catch (e: any) {
+    console.error("Failed to set password:", e);
+    return c.json({ error: e.message || 'Failed to set password' }, 500);
+  }
 });
 
 export { app as userRouter };

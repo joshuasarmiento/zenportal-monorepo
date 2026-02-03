@@ -23,6 +23,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 const userStore = useUserStore()
 const isLoadingProfile = ref(false)
@@ -117,17 +118,60 @@ const handleUpdateProfile = async () => {
 }
 
 const handleRequestSetPassword = async () => {
+    if (passForm.value.newPassword !== passForm.value.confirmPassword) {
+        toast.error("Passwords do not match")
+        return
+    }
+
+    if (passForm.value.newPassword.length < 8) {
+         toast.error("Password must be at least 8 characters")
+         return
+    }
+
     isLoadingPassword.value = true
     try {
-        const { error } = await authClient.emailOtp.sendVerificationOtp({
-            email: form.value.email,
-            type: "forget-password"
-        });
+        if (hasPassword.value) {
+            // Change Password Flow
+            const { error } = await authClient.changePassword({
+                newPassword: passForm.value.newPassword,
+                currentPassword: passForm.value.currentPassword,
+                revokeOtherSessions: true
+            })
+            
+            if (error) {
+                toast.error(error.message || "Failed to change password")
+            } else {
+                toast.success("Password updated successfully")
+                passForm.value = { currentPassword: '', newPassword: '', confirmPassword: '' }
+            }
 
-        if (error) {
-            toast.error(error.message || "Failed to send reset email")
         } else {
-            toast.info("Check your email for the password setup link")
+            // Set Password Flow (Trusted)
+            // Since user is logged in via Google, we trust them to set a password directly.
+            const sessionToken = localStorage.getItem('better-auth.session_token') || ''
+            
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/user/set-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                     // creds usually handled by cookie, but let's be safe if using Bearer
+                     'Authorization': `Bearer ${sessionToken}` 
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    password: passForm.value.newPassword
+                })
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                toast.error(data.error || "Failed to set password")
+            } else {
+                toast.success("Password set successfully")
+                passForm.value = { currentPassword: '', newPassword: '', confirmPassword: '' }
+                await userStore.fetchUser(true)
+            }
         }
     } catch (e) {
         toast.error("An unexpected error occurred")
@@ -228,8 +272,8 @@ const handleDeleteAccount = async () => {
                     <Alert class="bg-blue-50/50 border-blue-200 dark:bg-blue-900/10 dark:border-blue-800 dark:text-blue-200">
                         <KeyRound class="h-4 w-4 text-blue-600 dark:text-blue-400" />
                         <AlertTitle class="text-blue-700 dark:text-blue-400 font-bold">Google Authentication Active</AlertTitle>
-                        <AlertDescription class="text-blue-600/80 dark:text-blue-300/80 text-sm">
-                            Setting a password allows you to access your account if you lose access to your Google account.
+                        <AlertDescription class="text-blue-600/80 dark:text-blue-300/80 text-sm mt-1">
+                            You are logged in via Google. You can set a password below to enable email login as an alternative.
                         </AlertDescription>
                     </Alert>
                 </div>
@@ -286,7 +330,7 @@ const handleDeleteAccount = async () => {
                             </div>
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <p class="text-sm font-semibold text-zinc-900 dark:text-white">{{ session.userAgent ? session.userAgent.substring(0, 30) + '...' : 'Unknown Device' }}</p>
+                                    <p class="text-sm font-semibold text-zinc-900 dark:text-white">{{ session.userAgent ? session.userAgent.substring(0, 90) + '...' : 'Unknown Device' }}</p>
                                     <span v-if="session.isCurrent" class="px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold uppercase tracking-wide">Current</span>
                                 </div>
                                 <div class="flex items-center gap-3 text-xs text-zinc-500 mt-0.5">

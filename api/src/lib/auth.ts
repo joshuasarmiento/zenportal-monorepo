@@ -1,6 +1,6 @@
 // api/src/lib/auth.ts
 import { betterAuth, type User } from "better-auth";
-import { emailOTP } from "better-auth/plugins";
+import { emailOTP, admin } from "better-auth/plugins";
 import { APIError } from "better-auth/api";
 import { haveIBeenPwned } from "better-auth/plugins"
 
@@ -78,11 +78,11 @@ export const auth = betterAuth({
             async sendVerificationOTP({ email, otp, type }) {
                 try {
                     if (type === "forget-password") {
-                        await sendAuthEmail(email, "Reset your password", `<p>Your password reset code is: <strong>${otp}</strong></p>`);
+                        await sendAuthEmail(email, "Reset your password", `< p > Your password reset code is: <strong>${otp} </strong></p > `);
                     } else if (type === "sign-in") {
-                        await sendAuthEmail(email, "Your login code", `<p>Your login code is: <strong>${otp}</strong></p>`);
+                        await sendAuthEmail(email, "Your login code", `< p > Your login code is: <strong>${otp} </strong></p > `);
                     } else if (type === "email-verification") {
-                        await sendAuthEmail(email, "Verify your email", `<p>Your verification code is: <strong>${otp}</strong></p>`);
+                        await sendAuthEmail(email, "Verify your email", `< p > Your verification code is: <strong>${otp} </strong></p > `);
                     }
                 } catch (e) {
                     console.error("Failed to send OTP email", e)
@@ -100,7 +100,7 @@ export const requireAuth = createMiddleware<{ Variables: { userId: string, user:
     const token = authHeader?.split(' ')[1] || cookieToken;
 
     if (token) {
-        const cached = await redis.get(`session:${token}`);
+        const cached = await redis.get(`session:${token} `);
         if (cached) {
             const data = JSON.parse(cached);
             c.set('user', data.user);
@@ -116,7 +116,7 @@ export const requireAuth = createMiddleware<{ Variables: { userId: string, user:
     }
 
     if (token) {
-        await redis.set(`session:${token}`, JSON.stringify(session), 'EX', 60 * 5); // 5 mins
+        await redis.set(`session:${token} `, JSON.stringify(session), 'EX', 60 * 5); // 5 mins
     }
 
     c.set('user', session.user);
