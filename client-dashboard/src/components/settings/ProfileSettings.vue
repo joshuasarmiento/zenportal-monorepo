@@ -23,12 +23,22 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 const userStore = useUserStore()
 const isLoadingProfile = ref(false)
 const isLoadingPassword = ref(false)
 const isDeleting = ref(false)
+const isDeleteDialogOpen = ref(false)
+const deleteConfirmationStep = ref(1)
+const deleteInput = ref('')
 
 const form = ref({
     name: '',
@@ -181,25 +191,51 @@ const handleRequestSetPassword = async () => {
 }
 
 
-const handleDeleteAccount = async () => {
-    const confirm = window.confirm("PERMANENT ACTION: Are you sure you want to delete your account? All logs, clients, and data will be erased forever.")
-    if (!confirm) return
+const handleDeleteAccount = () => {
+    isDeleteDialogOpen.value = true
+    deleteConfirmationStep.value = 1
+    deleteInput.value = ''
+}
 
+const confirmDelete = async () => {
+    if (deleteConfirmationStep.value === 1) {
+        if (deleteInput.value.toLowerCase() === 'delete') {
+            deleteConfirmationStep.value = 2
+            deleteInput.value = ''
+        } else {
+            toast.error('Please type "delete" to continue')
+        }
+        return
+    }
+
+    if (deleteConfirmationStep.value === 2) {
+        if (deleteInput.value.toLowerCase() === 'delete account') {
+            await performDelete()
+        } else {
+            toast.error('Please type "delete account" to confirm')
+        }
+    }
+}
+
+const performDelete = async () => {
     isDeleting.value = true
     try {
         const { error } = await authClient.deleteUser()
         if (error) {
             toast.error(error.message || "Failed to delete account")
+            isDeleteDialogOpen.value = false
         } else {
             toast.success("Account deleted. Goodbye!")
             window.location.href = '/login'
         }
     } catch (e) {
         toast.error("An unexpected error occurred")
+        isDeleteDialogOpen.value = false
     } finally {
         isDeleting.value = false
     }
 }
+
 </script>
 
 <template>
@@ -385,4 +421,45 @@ const handleDeleteAccount = async () => {
             </CardContent>
         </Card>
     </div>
+
+    <Dialog :open="isDeleteDialogOpen" @update:open="isDeleteDialogOpen = $event">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Account</DialogTitle>
+          <DialogDescription class="pt-2 text-zinc-900 dark:text-zinc-100 font-medium">
+            Are you sure you want to delete your account? All logs, clients, and data will be erased forever.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div class="py-4 space-y-4">
+             <div class="space-y-2">
+                 <Label v-if="deleteConfirmationStep === 1">To confirm, type “delete”</Label>
+                 <Label v-else>To confirm, type “delete account”</Label>
+                 
+                 <Input 
+                    v-model="deleteInput"
+                    :placeholder="deleteConfirmationStep === 1 ? 'delete' : 'delete account'"
+                    @keydown.enter="confirmDelete"
+                    class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                 />
+             </div>
+        </div>
+
+        <DialogFooter class="flex-col sm:justify-between sm:flex-row items-center gap-4">
+          <p class="text-xs text-red-600 font-semibold order-2 sm:order-1">Deleting account cannot be undone</p>
+          <div class="flex gap-2 order-1 sm:order-2 w-full sm:w-auto">
+              <Button variant="outline" @click="isDeleteDialogOpen = false" :disabled="isDeleting">Cancel</Button>
+              <Button 
+                variant="destructive" 
+                @click="confirmDelete" 
+                :disabled="isDeleting || !deleteInput"
+                class="bg-red-600 hover:bg-red-700 font-bold"
+              >
+                <Loader2 v-if="isDeleting" class="mr-2 h-4 w-4 animate-spin" />
+                {{ deleteConfirmationStep === 1 ? 'Next' : 'Delete Forever' }}
+              </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 </template>
