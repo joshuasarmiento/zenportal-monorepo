@@ -9,7 +9,12 @@ import {
   Lock, 
   Save, 
   Trash2,  
-  KeyRound 
+  KeyRound,
+  Laptop,
+  Smartphone,
+  Globe,
+  Monitor,
+  LogOut
 } from 'lucide-vue-next'
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -41,8 +46,47 @@ const hasPassword = computed(() => {
     return accounts.some((acc: any) => acc.type === 'credential' || acc.providerId === 'email')
 })
 
+
+const sessions = ref<any[]>([])
+const isLoadingSessions = ref(false)
+
+const loadSessions = async () => {
+    isLoadingSessions.value = true
+    try {
+        const { data, error } = await authClient.listSessions()
+        if (error) {
+            console.error(error)
+             // fallback or toast
+        } else if (data) {
+            sessions.value = data
+        }
+    } catch (e) {
+        console.error("Failed to load sessions", e)
+    } finally {
+        isLoadingSessions.value = false
+    }
+}
+
+const handleRevokeSession = async (token: string) => {
+    try {
+        const { error } = await authClient.revokeSession({
+            token
+        })
+        
+        if (!error) {
+            toast.success("Session revoked")
+            sessions.value = sessions.value.filter(s => s.token !== token)
+        } else {
+             toast.error("Failed to revoke session")
+        }
+    } catch (e) {
+        toast.error("Error revoking session")
+    }
+}
+
 onMounted(async () => {
     if (!userStore.user) await userStore.fetchUser()
+    loadSessions()
     
     if (userStore.user) {
         form.value.name = userStore.user.name || ''
@@ -213,6 +257,60 @@ const handleDeleteAccount = async () => {
                         </Button>
                     </div>
                 </form>
+            </CardContent>
+        </Card>
+
+        <Card class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
+            <CardHeader class="border-b border-zinc-100 dark:border-zinc-800 pb-6">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="p-2 bg-zinc-100 dark:bg-zinc-900 rounded-lg">
+                        <Monitor class="h-4 w-4 text-zinc-900 dark:text-white" />
+                    </div>
+                    <CardTitle class="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">Active Sessions</CardTitle>
+                </div>
+                <CardDescription class="text-zinc-500">
+                    Manage devices where you are currently logged in.
+                </CardDescription>
+            </CardHeader>
+            <CardContent class="pt-8">
+                <div v-if="isLoadingSessions" class="flex justify-center py-8">
+                    <Loader2 class="h-6 w-6 animate-spin text-zinc-400" />
+                </div>
+                <div v-else class="space-y-4">
+                    <div v-for="session in sessions" :key="session.token" class="flex items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                        <div class="flex items-center gap-4">
+                            <div class="h-10 w-10 rounded-full bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center border border-zinc-100 dark:border-zinc-700">
+                                <Laptop v-if="(session.userAgent || '').includes('Mac') || (session.userAgent || '').includes('Windows')" class="h-5 w-5 text-zinc-500" />
+                                <Smartphone v-else-if="(session.userAgent || '').includes('iPhone') || (session.userAgent || '').includes('Android')" class="h-5 w-5 text-zinc-500" />
+                                <Globe v-else class="h-5 w-5 text-zinc-500" />
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-sm font-semibold text-zinc-900 dark:text-white">{{ session.userAgent ? session.userAgent.substring(0, 30) + '...' : 'Unknown Device' }}</p>
+                                    <span v-if="session.isCurrent" class="px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold uppercase tracking-wide">Current</span>
+                                </div>
+                                <div class="flex items-center gap-3 text-xs text-zinc-500 mt-0.5">
+                                    <span>{{ session.ipAddress || 'Unknown IP' }}</span>
+                                    <span class="text-zinc-300 dark:text-zinc-700">•</span>
+                                    <span>Expires {{ new Date(session.expiresAt).toLocaleDateString() }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <Button 
+                            v-if="!session.isCurrent"
+                            variant="ghost" 
+                            size="sm"
+                            @click="handleRevokeSession(session.token)"
+                            class="text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        >
+                            <LogOut class="h-4 w-4" />
+                        </Button>
+                    </div>
+                    
+                    <div v-if="sessions.length === 0" class="text-center py-8 text-zinc-500 text-sm">
+                        No active sessions found.
+                    </div>
+                </div>
             </CardContent>
         </Card>
 

@@ -32,6 +32,8 @@ export const {
     useSession,
     updateUser,
     changePassword,
+    listSessions,
+    revokeSession,
     deleteUser,
     forgetPassword,
     resetPassword
