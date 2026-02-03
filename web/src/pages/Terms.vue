@@ -52,7 +52,7 @@ useHead({
             By accessing or using ZenPortal ("Service"), you agree to be bound by these Terms. If you disagree with any
             part of the terms, you are strictly prohibited from using the Service.
             <strong class="text-zinc-900 dark:text-white">ZenPortal</strong> is a proprietary service operated by
-            <strong class="text-zinc-900 dark:text-white">Joshua Sarmiento</strong> ("Provider").
+            <strong class="text-zinc-900 dark:text-white">ZenPortal</strong> ("Provider").
           </p>
         </section>
 

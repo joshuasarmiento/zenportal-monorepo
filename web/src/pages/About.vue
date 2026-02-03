@@ -63,8 +63,10 @@ useHead({
                 earnings on expensive software.</span>
             </p>
             <p>
-              It started as a simple internal tool for a small dev team in Bicol. Today, it's helping thousands of VAs
-              transition from "employee" to "consultant" by using smart, free tools to look professional.
+              <!-- It started as a simple internal tool for a small dev team in Bicol. Today, it's helping thousands of VAs
+              transition from "employee" to "consultant" by using smart, free tools to look professional. -->
+              It started as a simple internal tool for a small dev team in Bicol. We're building it to help Filipino VAs 
+              transition from "employee" to "consultant" — using smart, affordable tools to look professional from day one.
             </p>
           </div>
 
@@ -175,7 +177,8 @@ useHead({
       <div class="relative z-10 max-w-3xl mx-auto">
         <h2 class="text-4xl md:text-6xl font-semibold tracking-tighter mb-8">Join the movement.</h2>
         <p class="text-zinc-400 text-lg mb-10 max-w-xl mx-auto">
-          Stop letting clients treat you like a robot. Start managing your work like a legitimate business.
+          <!-- Stop letting clients treat you like a robot. Start managing your work like a legitimate business. -->
+          Stop being treated like a low-cost assistant. Start presenting yourself like a real business partner.
         </p>
 
         <div class="flex flex-col items-center gap-6">

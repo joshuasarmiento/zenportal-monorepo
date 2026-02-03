@@ -217,7 +217,10 @@ useHead({
                 <CardContent class="flex flex-col md:flex-row items-center justify-between p-8 md:p-12 gap-6 relative z-10">
                     <div class="text-center md:text-left">
                         <h3 class="text-2xl md:text-3xl font-bold mb-2 tracking-tight">Ready to look professional?</h3>
-                        <p class="text-zinc-400 dark:text-zinc-600">Join thousands of Filipino VAs and Developers scaling their business.</p>
+                        <p class="text-zinc-400 dark:text-zinc-600">
+                          <!-- Join thousands of Filipino VAs and Developers scaling their business. -->
+                           Built for Filipino VAs and freelancers ready to level up.
+                        </p>
                     </div>
                     <Button 
                       size="lg"

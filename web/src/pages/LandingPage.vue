@@ -145,7 +145,7 @@ useHead({
             </router-link>
           </Button>
           
-          <div class="flex items-center gap-3">
+          <!-- <div class="flex items-center gap-3">
             <div class="flex -space-x-3">
               <Avatar class="border-2 border-white dark:border-zinc-950 h-9 w-9 ring-1 ring-zinc-100 dark:ring-zinc-800">
                 <AvatarImage src="https://i.pravatar.cc/100?img=5" />
@@ -161,9 +161,9 @@ useHead({
                <div class="flex text-yellow-500 text-[10px]">
                  <Star v-for="i in 5" :key="i" class="w-3 h-3 fill-current" />
                </div>
-               <p class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Trusted by 2,000+ VAs</p>
+               <p class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Built for Filipino VAs & Freelancers</p>
             </div>
-          </div>
+          </div> -->
         </div>
 
         <div class="relative w-full max-w-5xl mx-auto perspective-1000 group">
