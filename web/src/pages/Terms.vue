@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Gavel, ShieldAlert, CreditCard, Scale, Lock } from 'lucide-vue-next'
 import { useHead } from '@unhead/vue'
+import BackgroundNoise from '@/components/ui/background-noise/BackgroundNoise.vue'
 
 const lastUpdated = 'January 25, 2026'
 
@@ -21,12 +22,7 @@ useHead({
   <div
     class="min-h-screen bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black pt-32 pb-20 overflow-x-hidden">
 
-    <div class="fixed inset-0 z-0 pointer-events-none">
-      <div class="absolute bottom-0 left-0 w-[50%] h-[50%] rounded-full bg-purple-500/5 blur-[120px]"></div>
-      <div
-        class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay">
-      </div>
-    </div>
+    <BackgroundNoise />
 
     <div class="max-w-4xl mx-auto px-6 relative z-10">
 

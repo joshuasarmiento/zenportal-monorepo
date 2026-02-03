@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Home } from 'lucide-vue-next'
+import BackgroundNoise from '@/components/ui/background-noise/BackgroundNoise.vue'
 </script>
 
 <template>
   <div class="h-screen w-full flex flex-col items-center justify-center bg-white dark:bg-zinc-950 text-center px-6 relative overflow-hidden font-sans">
     
-    <div class="absolute inset-0 z-0 pointer-events-none">
-       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] rounded-full bg-blue-500/5 blur-[120px]"></div>
-       <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
-    </div>
+    <BackgroundNoise />
 
     <div class="relative z-10">
       <h1 class="text-[10rem] md:text-[12rem] font-black tracking-tighter leading-none bg-gradient-to-b from-zinc-200 to-transparent dark:from-zinc-800 dark:to-transparent bg-clip-text text-transparent select-none">

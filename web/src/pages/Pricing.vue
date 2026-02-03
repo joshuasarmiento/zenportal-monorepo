@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Check, X, Sparkles } from 'lucide-vue-next'
+import BackgroundNoise from '@/components/ui/background-noise/BackgroundNoise.vue'
 
 const plans = [
   {
@@ -59,12 +60,7 @@ useHead({
   <div
     class="min-h-screen font-sans bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 overflow-x-hidden pt-32 pb-20">
 
-    <div class="fixed inset-0 z-0 pointer-events-none">
-      <div class="absolute top-[20%] right-1/2 w-[60%] h-[60%] rounded-full bg-blue-500/5 blur-[120px]"></div>
-      <div
-        class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay">
-      </div>
-    </div>
+    <BackgroundNoise />
 
     <main class="relative z-10 max-w-5xl mx-auto px-6">
       <div class="text-center mb-16">

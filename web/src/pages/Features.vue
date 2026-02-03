@@ -13,6 +13,7 @@ import {
   Code,
   Play
 } from 'lucide-vue-next'
+import BackgroundNoise from '@/components/ui/background-noise/BackgroundNoise.vue'
 
 const handleSignUp = () => {
   window.open(`${import.meta.env.VITE_APP_URL}/sign-up`, '_blank')
@@ -33,11 +34,7 @@ useHead({
 <template>
   <div class="min-h-screen font-sans bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black overflow-x-hidden">
     
-    <div class="fixed inset-0 z-0 pointer-events-none">
-      <div class="absolute top-[10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/5 blur-[120px]"></div>
-      <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-500/5 blur-[120px]"></div>
-      <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
-    </div>
+    <BackgroundNoise />
 
     <section class="relative z-10 pt-32 pb-24 max-w-5xl mx-auto px-6 text-center">
       <div class="flex justify-center mb-8">
