@@ -1,6 +1,7 @@
 // api/src/db/schema.ts
 import { sqliteTable, text, integer, real, index } from 'drizzle-orm/sqlite-core';
 import { relations, sql } from 'drizzle-orm';
+import { table } from 'console';
 
 // --- BETTER AUTH TABLES ---
 
@@ -39,12 +40,10 @@ export const users = sqliteTable('user', {
   // Programmatic Access
   apiKeyRead: text('api_key_read').unique(),
   apiKeyWrite: text('api_key_write').unique(),
-}, (table) => {
-  return {
-    apiKeyReadIdx: index('api_key_read_idx').on(table.apiKeyRead),
-    apiKeyWriteIdx: index('api_key_write_idx').on(table.apiKeyWrite),
-  }
-});
+}, (table) => [
+  index('api_key_read_idx').on(table.apiKeyRead),
+  index('api_key_write_idx').on(table.apiKeyWrite),
+]);
 
 export const sessions = sqliteTable("session", {
   id: text("id").primaryKey(),
@@ -108,12 +107,10 @@ export const clients = sqliteTable('clients', {
 
   createdAt: integer('created_at', { mode: 'timestamp' })
     .default(sql`(strftime('%s', 'now') * 1000)`),
-}, (table) => {
-  return {
-    userIdIdx: index('client_user_idx').on(table.userId),
-    tokenIdx: index('client_token_idx').on(table.accessToken),
-  };
-});
+}, (table) => [
+  index('client_user_idx').on(table.userId),
+  index('client_token_idx').on(table.accessToken),
+]);
 
 export const subscription = sqliteTable("subscription", {
   id: text("id").primaryKey(), // PayMongo Checkout Session ID or Reference
@@ -147,14 +144,12 @@ export const workLogs = sqliteTable('work_logs', {
 
   createdAt: integer('created_at', { mode: 'timestamp' })
     .default(sql`(strftime('%s', 'now') * 1000)`),
-}, (table) => {
-  return {
-    userDateIdx: index('user_date_idx').on(table.userId, table.date),
-    userIdIdx: index('log_user_idx').on(table.userId),
-    clientIdIdx: index('log_client_idx').on(table.clientId),
-    dateIdx: index('log_date_idx').on(table.date),
-  };
-});
+}, (table) => [
+  index('user_date_idx').on(table.userId, table.date),
+  index('log_user_idx').on(table.userId),
+  index('log_client_idx').on(table.clientId),
+  index('log_date_idx').on(table.date),
+]);
 
 // --- RELATIONS ---
 export const usersRelations = relations(users, ({ many }) => ({

@@ -5,6 +5,7 @@
     "build": "esbuild src/index.ts --bundle --platform=node --format=esm --packages=external --outfile=dist/index.js",
     "typecheck": "tsc --noEmit",
     "start": "node dist/index.js",
+    "test": "vitest run",
     "ngrok": "bun ngrok http 3000",
     "dk:push": "bun drizzle-kit push",
     "dev": "tsx watch src/index.ts"
@@ -30,6 +31,7 @@
     "drizzle-kit": "^0.31.8",
     "esbuild": "^0.20.0",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }
