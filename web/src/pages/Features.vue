@@ -184,7 +184,7 @@ useHead({
                     <CardTitle class="text-lg">Client Portal</CardTitle>
                 </CardHeader>
                 <CardContent class="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed">
-                    A dedicated URL (e.g. zenportal.io/p/your-name) where clients can see everything without signing up.
+                    A dedicated URL where clients can see everything without signing up.
                 </CardContent>
             </Card>
 
@@ -226,7 +226,8 @@ useHead({
                       size="lg"
                       class="rounded-full h-12 px-8 bg-white text-zinc-900 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800 font-semibold"
                       @click="handleSignUp">
-                      Start Free Trial <ArrowRight class="ml-2 h-4 w-4" />
+                        Sign Up Now
+                      <ArrowRight class="ml-2 h-4 w-4" />
                     </Button>
                 </CardContent>
             </Card>
