@@ -66,8 +66,8 @@ export const auth = betterAuth({
     },
     socialProviders: {
         google: {
-            // accessType: "offline",
-            // prompt: "select_account consent",
+            accessType: "offline",
+            prompt: "select_account consent",
             clientId: config.google.googleclientId,
             clientSecret: config.google.googleclientSecret,
             redirectURI: `${config.app.backendUrl}/api/auth/callback/google`
