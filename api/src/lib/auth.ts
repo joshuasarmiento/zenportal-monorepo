@@ -1,5 +1,6 @@
 // api/src/lib/auth.ts
 import { betterAuth, type User } from "better-auth";
+import { eq } from "drizzle-orm";
 import { emailOTP, admin } from "better-auth/plugins";
 import { APIError } from "better-auth/api";
 import { haveIBeenPwned } from "better-auth/plugins"
@@ -103,13 +104,38 @@ export const requireAuth = createMiddleware<{ Variables: { userId: string, user:
     const token = authHeader?.split(' ')[1] || cookieToken;
 
     if (token) {
-        const cached = await redis.get(`session:${token} `);
+        const cached = await redis.get(`session:${token}`);
         if (cached) {
             const data = JSON.parse(cached);
-            c.set('user', data.user);
-            c.set('userId', data.user.id);
-            c.set('session', data.session);
-            return next();
+
+            let isCacheValid = true;
+
+            // Global Revocation: Check if user data is stale
+            if (data.user?.id) {
+                // We fetch just the updatedAt field to be lightweight
+                const dbUser = await db.query.users.findFirst({
+                    where: eq(schema.users.id, data.user.id),
+                    columns: { updatedAt: true }
+                });
+
+                if (dbUser) {
+                    const cachedTime = new Date(data.user.updatedAt).getTime();
+                    const dbTime = new Date(dbUser.updatedAt).getTime();
+
+                    // If DB record is newer than the cached record, cache is stale
+                    if (dbTime > cachedTime) {
+                        isCacheValid = false;
+                        await redis.del(`session:${token}`);
+                    }
+                }
+            }
+
+            if (isCacheValid) {
+                c.set('user', data.user);
+                c.set('userId', data.user.id);
+                c.set('session', data.session);
+                return next();
+            }
         }
     }
 
@@ -119,7 +145,7 @@ export const requireAuth = createMiddleware<{ Variables: { userId: string, user:
     }
 
     if (token) {
-        await redis.set(`session:${token} `, JSON.stringify(session), 'EX', 60 * 5); // 5 mins
+        await redis.set(`session:${token}`, JSON.stringify(session), 'EX', 60 * 5); // 5 mins
     }
 
     c.set('user', session.user);
