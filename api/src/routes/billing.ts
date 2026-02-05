@@ -1,162 +1,125 @@
 // api/src/routes/billing.ts
 import { Hono } from 'hono';
 import { db } from '../db/index.js';
-import { users, subscription } from '../db/schema.js';
-import { eq, desc } from 'drizzle-orm';
+import { users } from '../db/schema.js';
+import { eq } from 'drizzle-orm';
 import { requireAuth } from '../lib/auth.js';
-import { config } from '../config.js';
+import { dodo } from '../lib/auth.js';
 
 const app = new Hono<{ Variables: { userId: string } }>();
 
 app.use('*', requireAuth);
 
-// Helper: PayMongo API Request
-// We use this to talk to PayMongo API for Checkout Sessions
-async function paymongoRequest(endpoint: string, method: string = 'GET', body?: any) {
-  const url = `https://api.paymongo.com/v1${endpoint}`;
-  const options: RequestInit = {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Basic ${btoa(config.paymongo.secretKey + ':')}`,
-    },
-  };
-
-  if (body) {
-    options.body = JSON.stringify({ data: body });
-  }
-
-  const response = await fetch(url, options);
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    console.error('PayMongo Error:', JSON.stringify(errorData, null, 2));
-    throw new Error('Payment service error');
-  }
-
-  return response.json();
-}
-
-// 1. POST /subscribe (Renamed from /checkout to match your Frontend)
-// Creates a new PayMongo Checkout Session
-app.post('/subscribe', async (c) => {
-  const userId = c.get('userId');
-
-  const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
-  if (!user) return c.json({ error: 'User not found' }, 404);
-
-  try {
-    const payload = {
-      attributes: {
-        billing: {
-          name: user.name,
-          email: user.email,
-        },
-        line_items: [
-          {
-            name: "ZenPortal Pro Plan",
-            amount: 200000, // 2,000.00 PHP (in centavos)
-            currency: "PHP",
-            quantity: 1,
-            images: ["https://placehold.co/400"],
-          },
-        ],
-        payment_method_types: ["qrph", "gcash", "card"],
-        description: "Upgrade to Pro",
-        success_url: `${config.app.frontendUrl}/settings/billing/?success=true`,
-        cancel_url: `${config.app.frontendUrl}/settings/billing/?canceled=true`,
-        send_email_receipt: true, //
-        show_description: true,
-        show_line_items: true,
-        metadata: {
-          userId: userId,
-          tier: 'pro'
-        }
-      },
-    };
-
-    const sessionData = await paymongoRequest('/checkout_sessions', 'POST', payload);
-
-    // Return the full data so the frontend can get the ID and URL
-    return c.json(sessionData);
-
-  } catch (error) {
-    console.error(error);
-    return c.json({ error: 'Failed to create checkout session' }, 500);
-  }
-});
-
-// 2. GET /session/:id
-// Retrieve a Checkout Session to check its status
-app.get('/session/:id', async (c) => {
-  const sessionId = c.req.param('id');
-  try {
-    const sessionData = await paymongoRequest(`/checkout_sessions/${sessionId}`, 'GET');
-
-    // Security: Ensure the session belongs to the requesting user
-    const metaUserId = sessionData.data.attributes.metadata?.userId;
-    if (metaUserId && metaUserId !== c.get('userId')) {
-      return c.json({ error: 'Unauthorized access to this session' }, 403);
-    }
-
-    return c.json(sessionData);
-  } catch (error) {
-    return c.json({ error: 'Failed to retrieve session' }, 500);
-  }
-});
-
-// 3. POST /session/:id/expire
-// Expire (Cancel) a Checkout Session
-app.post('/session/:id/expire', async (c) => {
-  const sessionId = c.req.param('id');
-  try {
-    // Optional: Retrieve first to verify ownership before expiring
-    const currentSession = await paymongoRequest(`/checkout_sessions/${sessionId}`, 'GET');
-    const metaUserId = currentSession.data.attributes.metadata?.userId;
-
-    if (metaUserId && metaUserId !== c.get('userId')) {
-      return c.json({ error: 'Unauthorized' }, 403);
-    }
-
-    const expiredSession = await paymongoRequest(`/checkout_sessions/${sessionId}/expire`, 'POST');
-    return c.json(expiredSession);
-  } catch (error) {
-    return c.json({ error: 'Failed to expire session' }, 500);
-  }
-});
-
-// GET /subscription - Check status (Unchanged)
+// GET /subscription - Check status from Dodo
 app.get('/subscription', async (c) => {
   const userId = c.get('userId');
 
-  const sub = await db.query.subscription.findFirst({
-    where: eq(subscription.referenceId, userId),
-    orderBy: [desc(subscription.createdAt)],
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: { dodoPaymentsCustomerId: true, tier: true }
   });
 
-  const isPro = sub && sub.periodEnd && sub.periodEnd > new Date();
+  if (!user?.dodoPaymentsCustomerId) {
+    return c.json({ subscription: null });
+  }
 
-  return c.json({
-    subscription: isPro ? {
+  try {
+    // Fetch active subscriptions from Dodo
+    // The SDK uses pagination, result has 'items' array
+    const response = await dodo.subscriptions.list({
+      customer_id: user.dodoPaymentsCustomerId,
       status: 'active',
-      plan: sub.plan,
-      period_end: sub.periodEnd?.getTime(),
-    } : null
-  });
+      page_size: 1
+    });
+    // @ts-ignore - Handle type overlap if necessary, but SDK returns items
+    const activeSub = response.items?.[0];
+
+    if (!activeSub) {
+      return c.json({ subscription: null });
+    }
+
+    return c.json({
+      subscription: {
+        status: activeSub.status,
+        plan: 'pro', // Assuming simple pro plan for now
+        period_end: activeSub.next_billing_date ? new Date(activeSub.next_billing_date).getTime() : null,
+        id: activeSub.subscription_id
+      }
+    });
+
+  } catch (error) {
+    console.error('Failed to fetch Dodo subscription:', error);
+    // Fallback to local tier status if API fails
+    if (user.tier === 'pro') {
+      return c.json({ subscription: { status: 'active', plan: 'pro' } });
+    }
+    return c.json({ error: 'Failed to fetch subscription status' }, 500);
+  }
 });
 
 app.get('/transactions', async (c) => {
   const userId = c.get('userId');
 
-  try {
-    const history = await db.query.subscription.findMany({
-      where: eq(subscription.referenceId, userId),
-      orderBy: [desc(subscription.createdAt)],
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: { dodoPaymentsCustomerId: true }
+  });
+
+  console.log(`[Billing] Fetching transactions for user ${userId}, Dodo ID: ${user?.dodoPaymentsCustomerId}`);
+
+  if (!user?.dodoPaymentsCustomerId) {
+    console.log('[Billing] No Dodo Customer ID found for user. Attempting to recover by email...');
+
+    // Fetch full user to get email
+    const fullUser = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { email: true }
     });
 
-    return c.json({ transactions: history });
+    if (fullUser?.email) {
+      try {
+        const customers = await dodo.customers.list({ email: fullUser.email });
+        const customer = customers.items?.[0]; // Dodo returns items array
+
+        if (customer) {
+          console.log(`[Billing] Found Dodo Customer ID ${customer.customer_id} for email ${fullUser.email}. Updating DB...`);
+
+          await db.update(users)
+            .set({ dodoPaymentsCustomerId: customer.customer_id })
+            .where(eq(users.id, userId));
+
+          // Use this ID for the current request
+          if (user) {
+            user.dodoPaymentsCustomerId = customer.customer_id;
+          }
+        } else {
+          console.log('[Billing] No customer found in Dodo for this email.');
+          return c.json({ transactions: [] });
+        }
+      } catch (err) {
+        console.error('[Billing] Failed to lookup customer by email:', err);
+        return c.json({ transactions: [] });
+      }
+    } else {
+      return c.json({ transactions: [] });
+    }
+  }
+
+  try {
+    // user is definitely defined here due to checks above, but TS needs coaxing
+    if (!user?.dodoPaymentsCustomerId) {
+      throw new Error("No Dodo Customer ID available");
+    }
+
+    const response = await dodo.payments.list({
+      customer_id: user.dodoPaymentsCustomerId,
+      page_size: 100
+    });
+
+    console.log(`[Billing] Found ${response.items?.length || 0} transactions`);
+    return c.json({ transactions: response.items || [] });
   } catch (error) {
-    console.error(error);
+    console.error('Failed to fetch Dodo transactions:', error);
     return c.json({ error: 'Failed to fetch transactions' }, 500);
   }
 });

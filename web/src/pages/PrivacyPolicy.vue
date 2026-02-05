@@ -104,7 +104,7 @@ useHead({
           <section class="space-y-4">
             <h2 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">3. Sub-Processors</h2>
             <p>
-              To provide the Service for ₱699/mo, we rely on best-in-class infrastructure partners. You consent to data
+              To provide the Service for $12/mo, we rely on best-in-class infrastructure partners. You consent to data
               processing by:
             </p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">

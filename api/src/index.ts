@@ -11,7 +11,6 @@ import { secureHeaders } from 'hono/secure-headers'
 
 // Import your new Routers
 import { billingRouter } from './routes/billing.js';
-import { webhooksRouter } from './routes/webhooks.js';
 import { clientsRouter } from './routes/clients.js';
 import { logsRouter } from './routes/logs.js';
 import { userRouter } from './routes/user.js';
@@ -68,7 +67,6 @@ app.on(['POST', 'GET'], '/api/auth/**', async (c) => {
 
 // 3. Mount Your API Routes
 app.route('/api/billing', billingRouter);
-app.route('/webhooks', webhooksRouter);
 app.route('/clients', clientsRouter);
 app.route('/logs', logsRouter);
 app.route('/user', userRouter);

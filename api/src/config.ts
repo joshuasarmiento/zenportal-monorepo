@@ -15,10 +15,10 @@ export const config = {
     databaseUrl: getEnv('TURSO_DATABASE_URL'),
     authToken: getEnv('TURSO_AUTH_TOKEN')
   },
-  paymongo: {
-    secretKey: getEnv('PAYMONGO_SECRET_KEY'),
-    publicKey: getEnv('PAYMONGO_PUBLIC_KEY'),
-    webhookSecret: getEnv('PAYMONGO_WEBHOOK'),
+  dodoPayments: {
+    apiKey: getEnv('DODO_PAYMENTS_API_KEY'),
+    webhookSecret: getEnv('DODO_PAYMENTS_WEBHOOK_SECRET'),
+    productId: getEnv('DODO_PRODUCT_ID'),
   },
   betterAuth: {
     secretKey: getEnv('BETTER_AUTH_SECRET')

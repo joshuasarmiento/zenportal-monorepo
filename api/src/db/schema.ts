@@ -35,7 +35,7 @@ export const users = sqliteTable('user', {
   notifyMarketing: integer('notify_marketing', { mode: 'boolean' }).default(false),
 
   tier: text('tier', { enum: ['free', 'pro'] }).default('free'),
-  paymongoCustomerId: text('paymongo_customer_id'),
+  dodoPaymentsCustomerId: text('dodo_payments_customer_id'),
 
   // Programmatic Access
   apiKeyRead: text('api_key_read').unique(),

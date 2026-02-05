@@ -4,6 +4,13 @@ import { eq } from "drizzle-orm";
 import { emailOTP, admin } from "better-auth/plugins";
 import { APIError } from "better-auth/api";
 import { haveIBeenPwned } from "better-auth/plugins"
+import {
+    dodopayments,
+    checkout,
+    portal,
+    webhooks as dodoWebhooks,
+} from "@dodopayments/better-auth";
+import DodoPayments from "dodopayments";
 
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { createMiddleware } from 'hono/factory';
@@ -12,6 +19,11 @@ import { config } from '../config.js';
 import * as schema from '../db/schema.js';
 import { sendAuthEmail } from './email.js';
 import { redis } from './redis.js';
+
+export const dodo = new DodoPayments({
+    bearerToken: config.dodoPayments.apiKey,
+    environment: 'test_mode', // Switch to 'live_mode' in production
+});
 
 
 export const auth = betterAuth({
@@ -38,7 +50,7 @@ export const auth = betterAuth({
                 defaultValue: "free",
                 input: false // Not user-editable
             },
-            paymongoCustomerId: {
+            dodoPaymentsCustomerId: {
                 type: "string",
                 required: false,
                 input: false
@@ -104,7 +116,66 @@ export const auth = betterAuth({
             },
             otpLength: 6,
             expiresIn: 300 // 5 minutes
-        })
+        }),
+        dodopayments({
+            client: dodo,
+            createCustomerOnSignUp: true,
+            use: [
+                checkout({
+                    products: [{
+                        productId: config.dodoPayments.productId,
+                        slug: "pro-plan",
+                    }],
+                    successUrl: `${config.app.frontendUrl}/settings/billing?success=true`,
+                    authenticatedUsersOnly: true,
+                }),
+                portal(),
+                dodoWebhooks({
+                    webhookKey: config.dodoPayments.webhookSecret,
+                    onPayload: async (payload) => {
+                        console.log("Received Dodo webhook:", payload.type);
+
+                        // Handle Subscription Active
+                        if (payload.type === 'subscription.active') {
+                            const subscription = payload.data as any;
+                            const customerId = subscription.customer.customer_id;
+                            const userId = subscription.metadata?.userId || subscription.customer?.metadata?.userId;
+
+                            if (userId) {
+                                await db.update(schema.users)
+                                    .set({ tier: 'pro', dodoPaymentsCustomerId: customerId })
+                                    .where(eq(schema.users.id, userId));
+                                console.log(`✅ User ${userId} upgraded to PRO based on metadata`);
+                            } else {
+                                await db.update(schema.users)
+                                    .set({ tier: 'pro', dodoPaymentsCustomerId: customerId })
+                                    .where(eq(schema.users.dodoPaymentsCustomerId, customerId));
+                                console.log(`✅ User with customerId ${customerId} upgraded to PRO`);
+                            }
+                        }
+
+                        // Handle Subscription Cancelled or Failed
+                        if (payload.type === 'subscription.cancelled' || payload.type === 'subscription.failed') {
+                            const subscription = payload.data as any;
+                            const customerId = subscription.customer.customer_id;
+                            const userId = subscription.metadata?.userId || subscription.customer?.metadata?.userId;
+
+                            if (userId) {
+                                await db.update(schema.users)
+                                    .set({ tier: 'free' })
+                                    .where(eq(schema.users.id, userId));
+                                console.log(`❌ User ${userId} downgraded to FREE based on metadata`);
+                            } else {
+                                await db.update(schema.users)
+                                    .set({ tier: 'free' })
+                                    .where(eq(schema.users.dodoPaymentsCustomerId, customerId));
+                                console.log(`❌ User with customerId ${customerId} downgraded to FREE`);
+                            }
+                        }
+                    },
+                }),
+            ],
+        }),
     ]
 });
 

@@ -5,11 +5,13 @@
     "": {
       "name": "api",
       "dependencies": {
+        "@dodopayments/better-auth": "^1.4.2",
         "@hono/node-server": "^1.19.9",
         "@hono/zod-validator": "^0.7.6",
         "@libsql/client": "^0.17.0",
         "@types/uuid": "^10.0.0",
         "better-auth": "^1.4.18",
+        "dodopayments": "^2.18.0",
         "dotenv": "^17.2.3",
         "drizzle-orm": "^0.45.1",
         "hono": "^4.11.5",
@@ -38,6 +40,10 @@
     "@better-auth/utils": ["@better-auth/utils@0.3.0", "", {}, "sha512-W+Adw6ZA6mgvnSnhOki270rwJ42t4XzSK6YWGF//BbVXL6SwCLWfyzBc1lN2m/4RM28KubdBKQ4X5VMoLRNPQw=="],
 
     "@better-fetch/fetch": ["@better-fetch/fetch@1.1.21", "", {}, "sha512-/ImESw0sskqlVR94jB+5+Pxjf+xBwDZF/N5+y2/q4EqD7IARUTSpPfIo8uf39SYpCxyOCtbyYpUrZ3F/k0zT4A=="],
+
+    "@dodopayments/better-auth": ["@dodopayments/better-auth@1.4.2", "", { "dependencies": { "@dodopayments/core": "^0.3.8" }, "peerDependencies": { "zod": "^3.25.0 || ^4.0.0" } }, "sha512-RrQXBg8exg43b7eafMeDuBkdLSxxkwxfdr1VAGzaoY28w2Sbc8pgQ8zrnhbzTEjmN97doCRp+9lACj0UdobWxQ=="],
+
+    "@dodopayments/core": ["@dodopayments/core@0.3.8", "", { "dependencies": { "dodopayments": "^2.4.6", "standardwebhooks": "^1.0.0" }, "peerDependencies": { "zod": "^3.25.0 || ^4.0.0" } }, "sha512-Klynu56uAwDNv8vSMxtSnDby+pBjK9W6860d0pWY8kkYdq9SyBJiW64vf/3kVRmd5RZoaHe8x0dS5QEyFMgdLw=="],
 
     "@drizzle-team/brocli": ["@drizzle-team/brocli@0.10.2", "", {}, "sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w=="],
 
@@ -244,6 +250,8 @@
     "denque": ["denque@2.1.0", "", {}, "sha512-HVQE3AAb/pxF8fQAoiqpvg9i3evqug3hoiwakOyZAwJm+6vZehbkYXZ0l4JxS+I3QxM97v5aaRNhj8v5oBhekw=="],
 
     "detect-libc": ["detect-libc@2.0.2", "", {}, "sha512-UX6sGumvvqSaXgdKGUsgZWqcUyIXZ/vZTrlRT/iobiKhGL0zL4d3osHj3uqllWJK+i+sixDS/3COVEOFbupFyw=="],
+
+    "dodopayments": ["dodopayments@2.18.0", "", { "dependencies": { "standardwebhooks": "^1.0.0" }, "bin": { "dodopayments": "bin/cli" } }, "sha512-MZypTPx99TIT2iqZ++avwy54jNHbe0P1YMrQWW0BISoCznZdbd2iuKoaBnSGsmQDpRhlW98NzoESnTEMmpSfmQ=="],
 
     "dotenv": ["dotenv@17.2.3", "", {}, "sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w=="],
 

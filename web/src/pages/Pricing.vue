@@ -22,7 +22,7 @@ const plans = [
   },
   {
     name: 'Agency Pro',
-    price: '699',
+    price: '12',
     desc: 'Scale your freelance business.',
     features: [
       'Unlimited Clients',
@@ -135,7 +135,7 @@ useHead({
             <CardDescription class="text-base text-zinc-400 dark:text-zinc-600">Scale your freelance business.
             </CardDescription>
             <div class="mt-6 flex items-baseline gap-1">
-              <span class="text-5xl font-bold tracking-tighter">₱ {{ plans[1]?.price }}</span>
+              <span class="text-5xl font-bold tracking-tighter">$ {{ plans[1]?.price }}</span>
               <span class="text-zinc-400 dark:text-zinc-600 font-medium">/month</span>
             </div>
           </CardHeader>

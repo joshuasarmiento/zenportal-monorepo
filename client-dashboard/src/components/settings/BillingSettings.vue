@@ -4,31 +4,37 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Crown, Loader2, AlertCircle, XCircle, ArrowRight, FileText, CheckCircle2 } from 'lucide-vue-next'
+import { Crown, Loader2, FileText, CheckCircle2, XCircle, Download } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
+import { env } from '@/env'
+import { authClient } from '@/lib/auth-client'
+import { useRoute, useRouter } from 'vue-router'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API_URL = env.VITE_API_URL
+const route = useRoute()
+const router = useRouter()
 
 const loading = ref(false)
 const loadingSubscription = ref(true)
-const canceling = ref(false)
 const subscription = ref<any>(null)
 const transactions = ref<any[]>([]) 
 
-const pendingSession = ref<{ id: string; url: string; status: string } | null>(null)
-
 const isPro = computed(() => 
-  subscription.value?.status === 'active' && 
+  subscription.value?.status === 'active' || 
   subscription.value?.plan?.includes('pro') 
 )
 
 onMounted(async () => {
+  if (route.query.success) {
+    toast.success("Subscription updated successfully!")
+    // Remove query param
+    router.replace({ query: {} })
+  }
+  
   await Promise.all([
     fetchSubscription(),
     fetchTransactions(),
-    checkPendingSession()
   ])
 })
 
@@ -60,42 +66,21 @@ const fetchTransactions = async () => {
   }
 }
 
-const checkPendingSession = async () => {
-  const savedId = localStorage.getItem('pending_checkout_id')
-  if (!savedId) return
-
-  try {
-    const res = await fetchAuth(`/api/billing/session/${savedId}`)
-    const session = res.data
-
-    if (session.attributes.status === 'active') {
-      pendingSession.value = {
-        id: session.id,
-        url: session.attributes.checkout_url,
-        status: 'active'
-      }
-    } else if (session.attributes.status === 'paid') {
-      localStorage.removeItem('pending_checkout_id')
-      toast.success("Payment verified!")
-      await fetchSubscription()
-      await fetchTransactions()
-    } else {
-      localStorage.removeItem('pending_checkout_id')
-    }
-  } catch (err) {
-    localStorage.removeItem('pending_checkout_id')
-  }
-}
-
 const handleUpgrade = async () => {
   loading.value = true
   try {
-    const response = await fetchAuth('/api/billing/subscribe', { method: 'POST' })
-    const session = response.data
-    if (session?.attributes?.checkout_url) {
-      localStorage.setItem('pending_checkout_id', session.id)
-      window.location.href = session.attributes.checkout_url
-    }
+      const { data, error } = await authClient.dodopayments.checkoutSession({
+          slug: 'pro-plan', 
+      })
+
+      if (error) {
+           toast.error(error.message || "Failed to start checkout")
+           return
+      }
+
+      if (data?.url) {
+          window.location.href = data.url
+      }
   } catch (err: any) {
     toast.error('Failed to start checkout', { description: err.message })
   } finally {
@@ -103,23 +88,24 @@ const handleUpgrade = async () => {
   }
 }
 
-const cancelPendingPayment = async () => {
-  if (!pendingSession.value) return
-  canceling.value = true
-  try {
-    await fetchAuth(`/api/billing/session/${pendingSession.value.id}/expire`, { method: 'POST' })
-    localStorage.removeItem('pending_checkout_id')
-    pendingSession.value = null
-    toast.success("Transaction cancelled")
-  } catch (err: any) {
-    toast.error("Could not cancel transaction", { description: err.message })
-  } finally {
-    canceling.value = false
-  }
-}
-
 const handlePortal = async () => {
-  toast.info("Manage Subscription", { description: "Contact support to modify your plan." })
+    loading.value = true;
+    try {
+        const { data, error } = await authClient.dodopayments.customer.portal()
+        
+        if (error) {
+            toast.error(error.message || "Failed to open portal")
+            return
+        }
+
+        if (data?.url) {
+             window.location.href = data.url
+        }
+    } catch(err) {
+        toast.error("Failed to redirect to portal")
+    } finally {
+        loading.value = false
+    }
 }
 
 const formatDate = (dateInput: string | number | Date) => {
@@ -129,43 +115,13 @@ const formatDate = (dateInput: string | number | Date) => {
   })
 }
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(amount)
+const formatCurrency = (amount: number, currency: string = 'USD') => {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount / 100)
 }
 </script>
 
 <template>
   <div class="space-y-8">
-    
-    <div v-if="pendingSession && !isPro" class="animate-in fade-in slide-in-from-top-4 duration-500">
-      <Alert variant="default" class="border-orange-200 bg-orange-50 dark:bg-orange-900/10 dark:border-orange-800">
-        <AlertCircle class="h-4 w-4 text-orange-600 dark:text-orange-500" />
-        <AlertTitle class="text-orange-800 dark:text-orange-500 font-bold tracking-tight">
-          Pending Transaction Detected
-        </AlertTitle>
-        <AlertDescription class="text-orange-700 dark:text-orange-400 mt-2 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <p class="text-sm font-medium">
-            You have an unfinished checkout session. Would you like to continue payment or cancel it?
-          </p>
-          <div class="flex gap-2 w-full sm:w-auto">
-            <Button size="sm" variant="outline" 
-              class="border-orange-200 hover:bg-orange-100 text-orange-800 dark:border-orange-800 dark:hover:bg-orange-900/50 dark:text-orange-400 h-8"
-              @click="cancelPendingPayment" :disabled="canceling">
-              <Loader2 v-if="canceling" class="mr-2 h-3 w-3 animate-spin" />
-              <XCircle v-else class="mr-2 h-3 w-3" />
-              Cancel
-            </Button>
-            
-            <Button size="sm" class="bg-orange-600 hover:bg-orange-700 text-white border-0 h-8 font-bold" as-child>
-              <a :href="pendingSession.url">
-                Pay Now <ArrowRight class="ml-2 h-3 w-3" />
-              </a>
-            </Button>
-          </div>
-        </AlertDescription>
-      </Alert>
-    </div>
-
     <Card class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
       <CardHeader class="border-b border-zinc-100 dark:border-zinc-800 pb-6 flex flex-row justify-between items-start">
         <div class="space-y-1">
@@ -210,6 +166,7 @@ const formatCurrency = (amount: number) => {
               </div>
               
               <Button variant="secondary" @click="handlePortal" :disabled="loading" class="bg-white text-zinc-900 hover:bg-zinc-100 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800 font-medium border-0">
+                <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
                 Manage Billing
               </Button>
             </div>
@@ -227,18 +184,15 @@ const formatCurrency = (amount: number) => {
                 </div>
                 <h4 class="text-zinc-900 dark:text-white font-bold text-xl mb-3 tracking-tight">Upgrade to Agency Pro</h4>
                 <p class="text-zinc-500 dark:text-zinc-400 text-sm mb-8 max-w-sm mx-auto leading-relaxed">
-                  Remove limits and look professional with custom branding, unlimited clients, and video uploads.
+                  Remove limits and look professional with custom brandi  ng, unlimited clients, and video uploads.
                 </p>
-                <Button size="lg" @click="handleUpgrade" :disabled="loading || !!pendingSession"
+                <Button size="lg" @click="handleUpgrade" :disabled="loading"
                   class="h-12 px-8 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 font-bold transition-all hover:scale-105 shadow-lg shadow-zinc-500/20 dark:shadow-none">
                   <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
-                  {{ loading ? 'Processing...' : 'Subscribe for ₱2,000/mo' }}
+                  {{ loading ? 'Processing...' : 'Subscribe for $12/mo' }}
                 </Button>
                 <div class="mt-6 flex flex-col items-center gap-1">
-                    <span class="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">Secure payment via PayMongo</span>
-                    <span v-if="pendingSession" class="text-xs text-orange-600 font-medium animate-pulse">
-                      * You have a pending transaction above.
-                    </span>
+                    <span class="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">Secure payment via Dodo</span>
                 </div>
             </div>
           </div>
@@ -265,23 +219,39 @@ const formatCurrency = (amount: number) => {
               <TableHead class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Description</TableHead>
               <TableHead class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Amount</TableHead>
               <TableHead class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Status</TableHead>
-              <TableHead class="text-xs font-bold text-zinc-400 uppercase tracking-wider text-right pr-6">Ref ID</TableHead>
+              <TableHead class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Payment Method</TableHead>
+              <TableHead class="text-xs font-bold text-zinc-400 uppercase tracking-wider text-right pr-6">Invoice</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow v-for="item in transactions" :key="item.id" class="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
-              <TableCell class="pl-6 font-medium text-zinc-600 dark:text-zinc-400">{{ formatDate(item.createdAt) }}</TableCell>
+            <TableRow v-for="item in transactions" :key="item.payment_id || item.id" class="border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
+              <TableCell class="pl-6 font-medium text-zinc-600 dark:text-zinc-400">{{ formatDate(item.created_at || item.createdAt) }}</TableCell>
               <TableCell class="font-medium text-zinc-900 dark:text-white">
-                {{ item.plan === 'pro' ? 'Agency Pro Plan' : item.plan }}
+                {{ item.product_name || 'ZenPortal Pro' }}
               </TableCell>
-              <TableCell class="text-zinc-600 dark:text-zinc-300 font-mono">{{ formatCurrency(2000) }}</TableCell>
+              <TableCell class="text-zinc-600 dark:text-zinc-300 font-mono">{{ formatCurrency(item.total_amount || item.amount || 0, item.currency) }}</TableCell>
               <TableCell>
-                <Badge variant="outline" class="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30 capitalize gap-1 pl-1.5 pr-2.5 py-0.5 rounded-full font-bold text-[10px]">
-                  <CheckCircle2 class="w-3 h-3" /> {{ item.status }}
+                <Badge variant="outline" :class="{
+                  'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30': item.status === 'succeeded',
+                  'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30': item.status === 'failed',
+                  'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-900/30': item.status === 'pending' || item.status === 'processing'
+                }" class="capitalize gap-1 pl-1.5 pr-2.5 py-0.5 rounded-full font-bold text-[10px]">
+                  <CheckCircle2 v-if="item.status === 'succeeded'" class="w-3 h-3" /> 
+                  <XCircle v-else-if="item.status === 'failed'" class="w-3 h-3" />
+                  <Loader2 v-else class="w-3 h-3 animate-spin" />
+                  {{ item.status }}
                 </Badge>
               </TableCell>
-              <TableCell class="text-right pr-6 font-mono text-xs text-zinc-400">
-                {{ item.id.slice(0, 8) }}...
+              <TableCell class="text-zinc-500 dark:text-zinc-400 text-xs capitalize">
+                {{ (item.payment_method_type || item.payment_method || 'Card').replace(/_/g, ' ') }}
+              </TableCell>
+              <TableCell class="text-right pr-6">
+                <Button v-if="item.invoice_url" variant="ghost" size="sm" as-child class="h-8 w-8 p-0 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                  <a :href="item.invoice_url" target="_blank" title="Download Invoice">
+                    <Download class="h-4 w-4 text-zinc-500" />
+                  </a>
+                </Button>
+                <span v-else class="text-zinc-300 dark:text-zinc-700 text-xs">-</span>
               </TableCell>
             </TableRow>
           </TableBody>

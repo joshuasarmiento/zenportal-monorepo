@@ -4,6 +4,7 @@ import {
     emailOTPClient,
     inferAdditionalFields,
 } from "better-auth/client/plugins"
+import { dodopaymentsClient } from "@dodopayments/better-auth"
 import { env } from "@/env"
 
 const apiUrl = import.meta.env.VITE_BETTERAUTH_URL || env.VITE_BETTERAUTH_URL;
@@ -18,10 +19,10 @@ export const authClient = createAuthClient({
                 portalSlug: { type: "string", required: false },
                 apiKeyRead: { type: "string", required: false },
                 apiKeyWrite: { type: "string", required: false },
-                paymongoCustomerId: { type: "string", required: false }, // Renamed from stripeCustomerId
+                dodoPaymentsCustomerId: { type: "string", required: false },
             }
         }),
-        // Removed stripeClient plugin entirely
+        dodopaymentsClient(),
     ],
 })
 

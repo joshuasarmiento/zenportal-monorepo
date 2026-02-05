@@ -91,7 +91,7 @@ useHead({
           </h2>
           <div class="space-y-4 text-sm md:text-base">
             <p><strong class="text-zinc-900 dark:text-white">4.1 Subscription:</strong> The Service is billed in advance
-              on a monthly basis. The fee is stated on the Pricing page (currently ₱699 PHP/mo) and is subject to
+              on a monthly basis. The fee is stated on the Pricing page (currently $12 USD/mo) and is subject to
               change with notice.</p>
             <div
               class="p-4 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 text-red-800 dark:text-red-300">
