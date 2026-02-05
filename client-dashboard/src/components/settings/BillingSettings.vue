@@ -176,8 +176,6 @@ const formatCurrency = (amount: number, currency: string = 'USD') => {
           <div v-else
             class="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 text-center relative overflow-hidden group">
             
-            <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
-            
             <div class="relative z-10">
                 <div class="bg-white dark:bg-zinc-800 w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-sm border border-zinc-100 dark:border-zinc-700">
                   <Crown class="h-6 w-6 text-zinc-900 dark:text-white" />
