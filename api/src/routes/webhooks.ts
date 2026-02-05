@@ -79,23 +79,26 @@ app.post('/paymongo', async (c) => {
       const periodEnd = new Date();
       periodEnd.setDate(now.getDate() + 30);
 
-      // 1. Update User to Pro
-      await db.update(users)
-        .set({
-          tier: 'pro',
-          paymongoCustomerId: attributes.billing?.email
-        })
-        .where(eq(users.id, userId));
+      // Wrap mutations in a transaction for atomicity
+      await db.transaction(async (tx) => {
+        // 1. Update User to Pro
+        await tx.update(users)
+          .set({
+            tier: 'pro',
+            paymongoCustomerId: attributes.billing?.email
+          })
+          .where(eq(users.id, userId));
 
-      // 2. Insert Subscription Record
-      await db.insert(subscription).values({
-        id: event.data.id,
-        referenceId: userId,
-        plan: 'pro',
-        status: 'paid',
-        periodStart: now,
-        periodEnd: periodEnd,
-        createdAt: now,
+        // 2. Insert Subscription Record
+        await tx.insert(subscription).values({
+          id: event.data.id,
+          referenceId: userId,
+          plan: 'pro',
+          status: 'paid',
+          periodStart: now,
+          periodEnd: periodEnd,
+          createdAt: now,
+        });
       });
 
       // 3. Send Email Notification

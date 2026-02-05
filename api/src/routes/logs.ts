@@ -50,52 +50,70 @@ app.post('/', zValidator('json', logSchema), async (c) => {
   const userId = c.get('userId');
   const body = c.req.valid('json');
 
-  // 1. Get User Tier
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-    columns: { tier: true, name: true, notifyClientOnLog: true }
-  });
+  let result;
 
-  const isPro = user?.tier === 'pro';
+  try {
+    // Wrap critical logic in a transaction to prevent limit race conditions
+    result = await db.transaction(async (tx) => {
+      // 1. Get User Tier
+      const user = await tx.query.users.findFirst({
+        where: eq(users.id, userId),
+        columns: { tier: true, name: true, notifyClientOnLog: true }
+      });
 
-  // 2. Enforce Monthly Limit for Free Tier
-  if (!isPro) {
-    const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+      const isPro = user?.tier === 'pro';
 
-    // Count logs created by this user in the current month
-    // Note: Adjust the SQL syntax if you are using Postgres vs SQLite (this is generally compatible)
-    const [usage] = await db
-      .select({ count: count() })
-      .from(workLogs)
-      .where(and(
-        eq(workLogs.userId, userId),
-        sql`${workLogs.date} LIKE ${currentMonth + '%'}`
-      ));
+      // 2. Enforce Monthly Limit for Free Tier
+      if (!isPro) {
+        const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
 
-    if (usage.count >= 100) {
+        // Lock-like behavior: The transaction ensures isolation for this read-then-write
+        const [usage] = await tx
+          .select({ count: count() })
+          .from(workLogs)
+          .where(and(
+            eq(workLogs.userId, userId),
+            sql`${workLogs.date} LIKE ${currentMonth + '%'}`
+          ));
+
+        if (usage.count >= 100) {
+          // Throwing an error rolls back the transaction
+          throw new Error('LIMIT_REACHED');
+        }
+      }
+
+      // 3. Enforce Pro Features (Video/Attachment)
+      const videoUrl = isPro ? body.videoUrl : null;
+      const attachmentUrl = body.attachmentUrl || null;
+
+      const insertedLog = await tx.insert(workLogs).values({
+        id: uuidv4(),
+        userId: userId,
+        clientId: body.clientId,
+        date: body.date,
+        summary: body.summary,
+        hoursWorked: body.hoursWorked,
+        videoUrl: videoUrl || null,
+        attachmentUrl: attachmentUrl || null,
+        isBlocked: body.isBlocked || false,
+        blockerDetails: body.blockerDetails || '',
+      }).returning();
+
+      return { log: insertedLog[0], user };
+    });
+  } catch (err: any) {
+    if (err.message === 'LIMIT_REACHED') {
       return c.json({
         error: 'Monthly limit reached (100 logs). Upgrade to Pro for unlimited logs.',
         code: 'LIMIT_REACHED'
       }, 403);
     }
+    throw err;
   }
 
-  // 3. Enforce Pro Features (Video/Attachment)
-  const videoUrl = isPro ? body.videoUrl : null;
-  const attachmentUrl = body.attachmentUrl || null;
-
-  const newLog = await db.insert(workLogs).values({
-    id: uuidv4(),
-    userId: userId,
-    clientId: body.clientId,
-    date: body.date,
-    summary: body.summary,
-    hoursWorked: body.hoursWorked,
-    videoUrl: videoUrl || null,
-    attachmentUrl: attachmentUrl || null,
-    isBlocked: body.isBlocked || false,
-    blockerDetails: body.blockerDetails || '',
-  }).returning();
+  // Restore variables for email logic
+  const { log: newLogItem, user } = result as any;
+  const newLog = [newLogItem];
 
   // 4. Trigger Email Notification
   const client = await db.query.clients.findFirst({
