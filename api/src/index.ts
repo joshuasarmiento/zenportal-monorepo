@@ -60,16 +60,9 @@ app.use('*', bodyLimit({
   },
 }));
 
-import { getCookie } from 'hono/cookie';
-import { redis } from './lib/redis.js';
+
 
 app.on(['POST', 'GET'], '/api/auth/**', async (c) => {
-  if (c.req.path === '/api/auth/sign-out' && c.req.method === 'POST') {
-    const token = getCookie(c, 'better-auth.session_token');
-    if (token) {
-      await redis.del(`session:${token}`);
-    }
-  }
   return auth.handler(c.req.raw);
 });
 

@@ -12,7 +12,7 @@ import { config } from '../config.js';
 import * as schema from '../db/schema.js';
 import { sendAuthEmail } from './email.js';
 import { redis } from './redis.js';
-import { getCookie } from 'hono/cookie';
+
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -51,19 +51,29 @@ export const auth = betterAuth({
         enabled: true,
         autoSignIn: true,
         requireEmailVerification: true,
-        validator: {
-            validatePassword: async (password: string) => {
-                const isStrong = password.length >= 8 &&
-                    /[A-Z].*[A-Z]/.test(password) && // At least 2 capital letters
-                    /[0-9]/.test(password);         // At least 1 number
+        // validator: {
+        //     validatePassword: async (password: string) => {
+        //         const isStrong = password.length >= 8 &&
+        //             /[A-Z].*[A-Z]/.test(password) && // At least 2 capital letters
+        //             /[0-9]/.test(password);         // At least 1 number
 
-                if (!isStrong) {
-                    throw new APIError("BAD_REQUEST", {
-                        message: "Your password is not strong enough. Add more words that are less common. Capitalize more than the first letter."
-                    });
-                }
-            }
-        }
+        //         if (!isStrong) {
+        //             throw new APIError("BAD_REQUEST", {
+        //                 message: "Your password is not strong enough. Add more words that are less common. Capitalize more than the first letter."
+        //             });
+        //         }
+        //     }
+        // }
+    },
+    secondaryStorage: {
+        get: async (key) => await redis.get(key),
+        set: async (key, value, ttl) => {
+            if (ttl) await redis.set(key, value, "EX", ttl);
+            else await redis.set(key, value);
+        },
+        delete: async (key) => {
+            await redis.del(key);
+        },
     },
     socialProviders: {
         google: {
@@ -99,53 +109,10 @@ export const auth = betterAuth({
 });
 
 export const requireAuth = createMiddleware<{ Variables: { userId: string, user: User, session: any } }>(async (c, next) => {
-    const authHeader = c.req.header('Authorization');
-    const cookieToken = getCookie(c, 'better-auth.session_token');
-    const token = authHeader?.split(' ')[1] || cookieToken;
-
-    if (token) {
-        const cached = await redis.get(`session:${token}`);
-        if (cached) {
-            const data = JSON.parse(cached);
-
-            let isCacheValid = true;
-
-            // Global Revocation: Check if user data is stale
-            if (data.user?.id) {
-                // We fetch just the updatedAt field to be lightweight
-                const dbUser = await db.query.users.findFirst({
-                    where: eq(schema.users.id, data.user.id),
-                    columns: { updatedAt: true }
-                });
-
-                if (dbUser) {
-                    const cachedTime = new Date(data.user.updatedAt).getTime();
-                    const dbTime = new Date(dbUser.updatedAt).getTime();
-
-                    // If DB record is newer than the cached record, cache is stale
-                    if (dbTime > cachedTime) {
-                        isCacheValid = false;
-                        await redis.del(`session:${token}`);
-                    }
-                }
-            }
-
-            if (isCacheValid) {
-                c.set('user', data.user);
-                c.set('userId', data.user.id);
-                c.set('session', data.session);
-                return next();
-            }
-        }
-    }
-
     const session = await auth.api.getSession({ headers: c.req.raw.headers });
-    if (!session?.user) {
-        return c.json({ error: 'Unauthorized' }, 401);
-    }
 
-    if (token) {
-        await redis.set(`session:${token}`, JSON.stringify(session), 'EX', 60 * 5); // 5 mins
+    if (!session) {
+        return c.json({ error: 'Unauthorized' }, 401);
     }
 
     c.set('user', session.user);
