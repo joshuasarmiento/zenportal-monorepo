@@ -104,11 +104,11 @@ export const auth = betterAuth({
             async sendVerificationOTP({ email, otp, type }) {
                 try {
                     if (type === "forget-password") {
-                        await sendAuthEmail(email, "Reset your password", `< p > Your password reset code is: <strong>${otp} </strong></p > `);
+                        await sendAuthEmail(email, "Reset your password", `<p> Your password reset code is: <strong>${otp} </strong></p>`);
                     } else if (type === "sign-in") {
-                        await sendAuthEmail(email, "Your login code", `< p > Your login code is: <strong>${otp} </strong></p > `);
+                        await sendAuthEmail(email, "Your login code", `<p> Your login code is: <strong>${otp} </strong></p>`);
                     } else if (type === "email-verification") {
-                        await sendAuthEmail(email, "Verify your email", `< p > Your verification code is: <strong>${otp} </strong></p > `);
+                        await sendAuthEmail(email, "Verify your email", `<p> Your verification code is: <strong>${otp} </strong></p>`);
                     }
                 } catch (e) {
                     console.error("Failed to send OTP email", e)
@@ -133,44 +133,72 @@ export const auth = betterAuth({
                 dodoWebhooks({
                     webhookKey: config.dodoPayments.webhookSecret,
                     onPayload: async (payload) => {
-                        console.log("Received Dodo webhook:", payload.type);
+                        const eventId = (payload as any).id || `evt_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+                        const eventType = payload.type;
 
-                        // Handle Subscription Active
-                        if (payload.type === 'subscription.active') {
-                            const subscription = payload.data as any;
-                            const customerId = subscription.customer.customer_id;
-                            const userId = subscription.metadata?.userId || subscription.customer?.metadata?.userId;
+                        console.log(`Received Dodo webhook: ${eventType} (ID: ${eventId})`);
 
-                            if (userId) {
-                                await db.update(schema.users)
-                                    .set({ tier: 'pro', dodoPaymentsCustomerId: customerId })
-                                    .where(eq(schema.users.id, userId));
-                                console.log(`✅ User ${userId} upgraded to PRO based on metadata`);
-                            } else {
-                                await db.update(schema.users)
-                                    .set({ tier: 'pro', dodoPaymentsCustomerId: customerId })
-                                    .where(eq(schema.users.dodoPaymentsCustomerId, customerId));
-                                console.log(`✅ User with customerId ${customerId} upgraded to PRO`);
-                            }
-                        }
+                        try {
+                            await db.transaction(async (tx) => {
+                                // 1. Idempotency Check
+                                const existing = await tx.select()
+                                    .from(schema.webhookEvents)
+                                    .where(eq(schema.webhookEvents.id, eventId))
+                                    .get();
 
-                        // Handle Subscription Cancelled or Failed
-                        if (payload.type === 'subscription.cancelled' || payload.type === 'subscription.failed') {
-                            const subscription = payload.data as any;
-                            const customerId = subscription.customer.customer_id;
-                            const userId = subscription.metadata?.userId || subscription.customer?.metadata?.userId;
+                                if (existing) {
+                                    console.log(`⚠️ Webhook event ${eventId} already processed. Skipping.`);
+                                    return;
+                                }
 
-                            if (userId) {
-                                await db.update(schema.users)
-                                    .set({ tier: 'free' })
-                                    .where(eq(schema.users.id, userId));
-                                console.log(`❌ User ${userId} downgraded to FREE based on metadata`);
-                            } else {
-                                await db.update(schema.users)
-                                    .set({ tier: 'free' })
-                                    .where(eq(schema.users.dodoPaymentsCustomerId, customerId));
-                                console.log(`❌ User with customerId ${customerId} downgraded to FREE`);
-                            }
+                                // 2. Process Payload
+                                if (eventType === 'subscription.active') {
+                                    const subscription = payload.data as any;
+                                    const customerId = subscription.customer.customer_id;
+                                    const userId = subscription.metadata?.userId || subscription.customer?.metadata?.userId;
+
+                                    if (userId) {
+                                        await tx.update(schema.users)
+                                            .set({ tier: 'pro', dodoPaymentsCustomerId: customerId })
+                                            .where(eq(schema.users.id, userId));
+                                        console.log(`✅ User ${userId} upgraded to PRO`);
+                                    } else {
+                                        await tx.update(schema.users)
+                                            .set({ tier: 'pro', dodoPaymentsCustomerId: customerId })
+                                            .where(eq(schema.users.dodoPaymentsCustomerId, customerId));
+                                        console.log(`✅ User with customerId ${customerId} upgraded to PRO`);
+                                    }
+                                } else if (eventType === 'subscription.cancelled' || eventType === 'subscription.failed') {
+                                    const subscription = payload.data as any;
+                                    const customerId = subscription.customer.customer_id;
+                                    const userId = subscription.metadata?.userId || subscription.customer?.metadata?.userId;
+
+                                    if (userId) {
+                                        await tx.update(schema.users)
+                                            .set({ tier: 'free' })
+                                            .where(eq(schema.users.id, userId));
+                                        console.log(`❌ User ${userId} downgraded to FREE`);
+                                    } else {
+                                        await tx.update(schema.users)
+                                            .set({ tier: 'free' })
+                                            .where(eq(schema.users.dodoPaymentsCustomerId, customerId));
+                                        console.log(`❌ User with customerId ${customerId} downgraded to FREE`);
+                                    }
+                                }
+
+                                // 3. Record Successful Processing
+                                await tx.insert(schema.webhookEvents).values({
+                                    id: eventId,
+                                    type: eventType,
+                                    createdAt: new Date(),
+                                    processedAt: new Date(),
+                                    status: 'processed'
+                                });
+                            });
+                        } catch (error) {
+                            console.error(`🚨 Webhook processing failed for ${eventId}:`, error);
+                            // Rethrow to ensure Dodo retries the webhook
+                            throw error;
                         }
                     },
                 }),

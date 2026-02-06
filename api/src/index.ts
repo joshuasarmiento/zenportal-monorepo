@@ -1,5 +1,7 @@
 // api/src/index.ts
-import { serve } from '@hono/node-server'; // [!code ++]
+import './instrument.js';
+import * as Sentry from '@sentry/node';
+import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
@@ -22,6 +24,11 @@ import { config } from './config.js';
 const app = new Hono();
 
 // 1. Global Middleware
+app.onError((err, c) => {
+  Sentry.captureException(err);
+  return c.text('Internal Server Error', 500);
+});
+
 app.use(secureHeaders())
 app.use('*', logger());
 app.use('*', cors({

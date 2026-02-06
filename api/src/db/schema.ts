@@ -175,3 +175,12 @@ export const workLogsRelations = relations(workLogs, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+// --- WEBHOOK EVENTS TABLE ---
+export const webhookEvents = sqliteTable('webhook_events', {
+  id: text('id').primaryKey(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  type: text('type').notNull(),
+  processedAt: integer('processed_at', { mode: 'timestamp' }),
+  status: text('status', { enum: ['processed', 'failed'] }).default('processed'),
+});

@@ -26,8 +26,11 @@ const envSchema = z.object({
     REDIS_URL: z.string().url('REDIS_URL must be a valid URL'),
 
     // Application URLs
-    BACKEND_URL: z.string().url('BACKEND_URL must be a valid URL'),
-    FRONTEND_URL: z.string().url('FRONTEND_URL must be a valid URL'),
+    BACKEND_URL: z.url('BACKEND_URL must be a valid URL'),
+    FRONTEND_URL: z.url('FRONTEND_URL must be a valid URL'),
+
+    // Monitoring
+    SENTRY_DSN: z.string().optional(),
 });
 
 // Validate `process.env` against the schema
