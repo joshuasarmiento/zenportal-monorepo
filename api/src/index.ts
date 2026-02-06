@@ -47,7 +47,8 @@ app.use(
       // Allow cross-site for webhook endpoints
       if (
         secFetchSite === 'cross-site' &&
-        c.req.path.startsWith('/webhooks')
+        c.req.path.startsWith('/webhooks') ||
+        c.req.path.startsWith('/api/auth/dodopayments/webhooks')
       ) {
         return true
       }
