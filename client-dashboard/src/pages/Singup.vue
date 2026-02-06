@@ -107,7 +107,7 @@ const handleVerifySignup = async () => {
                     {{ isOtpStep ? 'Security Check' : 'Create Account' }}
                   </h1>
                   <p class="text-zinc-500 dark:text-zinc-400 text-sm">
-                    {{ isOtpStep ? `Confirm the code sent to ${form.email}` : 'Join ZenPortal to manage your freelance agency' }}
+                    {{ isOtpStep ? `Confirm the code sent to ${form.email}` : 'Join ZenPortal to manage your freelance business' }}
                   </p>
                 </div>
 
@@ -119,7 +119,7 @@ const handleVerifySignup = async () => {
 
                   <div class="grid gap-2">
                     <Label for="email" class="font-medium">Email</Label>
-                    <Input id="email" v-model="form.email" type="email" placeholder="john@agency.com" required class="bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800" />
+                    <Input id="email" v-model="form.email" type="email" placeholder="john@example.com" required class="bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800" />
                   </div>
 
                   <div class="grid gap-2">

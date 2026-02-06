@@ -36,7 +36,7 @@ const router = createRouter({
     },
     {
       path: '/p/:slug',
-      component: () => import('@/pages/public/AgencyProfile.vue'),
+      component: () => import('@/pages/public/PublicProfile.vue'),
       meta: { public: true }
     },
 

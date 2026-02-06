@@ -21,7 +21,7 @@ const plans = [
     popular: false
   },
   {
-    name: 'Agency Pro',
+    name: 'Pro',
     price: '12',
     desc: 'Scale your freelance business.',
     features: [
@@ -49,9 +49,9 @@ import { useHead } from '@unhead/vue'
 useHead({
   title: 'Pricing - Free Forever for Starters',
   meta: [
-    { name: 'description', content: 'Start using ZenPortal for free. Upgrade to Agency Pro for unlimited clients and custom branding only when you need it.' },
+    { name: 'description', content: 'Start using ZenPortal for free. Upgrade to Pro for unlimited clients and custom branding only when you need it.' },
     { property: 'og:title', content: 'ZenPortal Pricing - Simple & Transparent' },
-    { property: 'og:description', content: 'Perfect for your first client. Scale your freelance business with Agency Pro.' },
+    { property: 'og:description', content: 'Perfect for your first client. Scale your freelance business with Pro.' },
   ]
 })
 </script>
@@ -131,7 +131,7 @@ useHead({
           </div>
 
           <CardHeader class="pb-8 relative z-10">
-            <CardTitle class="text-2xl font-bold">Agency Pro</CardTitle>
+            <CardTitle class="text-2xl font-bold">Pro</CardTitle>
             <CardDescription class="text-base text-zinc-400 dark:text-zinc-600">Scale your freelance business.
             </CardDescription>
             <div class="mt-6 flex items-baseline gap-1">

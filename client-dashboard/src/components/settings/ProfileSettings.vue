@@ -406,7 +406,7 @@ const performDelete = async () => {
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="space-y-1">
                         <p class="text-sm font-bold text-red-900 dark:text-red-200">Delete Account</p>
-                        <p class="text-xs text-red-700/60 dark:text-red-400/60">Permanently delete your profile, work logs, and all agency data.</p>
+                        <p class="text-xs text-red-700/60 dark:text-red-400/60">Permanently delete your profile, work logs, and all account data.</p>
                     </div>
                     <Button 
                         variant="destructive" 

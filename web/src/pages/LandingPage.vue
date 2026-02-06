@@ -55,7 +55,7 @@ const features = [
   {
     icon: Banknote,
     title: 'Iwas "Barat" Clients',
-    desc: 'Present like an Agency, command Agency rates. Stop looking like a "cheaper option."',
+    desc: 'Present like a Pro, command Pro rates. Stop looking like a "cheaper option."',
     class: 'md:col-span-1 bg-zinc-50 dark:bg-zinc-900/50',
     iconClass: 'text-green-600 dark:text-green-400'
   },
@@ -68,8 +68,8 @@ const features = [
   },
   {
     icon: Zap,
-    title: 'Tatak "Pro" Agency',
-    desc: 'Customize with your own Logo & Colors. Remove our branding so you look like a legitimate software-powered agency.',
+    title: 'Tatak "Pro"',
+    desc: 'Customize with your own Logo & Colors. Remove our branding so you look like a legitimate software-powered business.',
     class: 'md:col-span-1 bg-purple-50 dark:bg-purple-900/20 border-purple-100 dark:border-purple-900/50',
     iconClass: 'text-purple-600 dark:text-purple-400'
   }
@@ -192,7 +192,7 @@ useHead({
                       </div>
                       <div class="grid flex-1 text-left text-sm leading-tight">
                         <span class="truncate font-bold text-zinc-900 dark:text-white tracking-tight">ZenPortal</span>
-                        <span class="truncate text-xs text-zinc-500 font-medium">Agency Admin</span>
+                        <span class="truncate text-xs text-zinc-500 font-medium">Admin</span>
                       </div>
                   </div>
                 </div>
@@ -426,7 +426,7 @@ useHead({
     <section class="py-32 px-6 max-w-7xl mx-auto">
       <div class="mb-16 md:mb-24">
          <h2 class="text-3xl md:text-5xl font-semibold tracking-tighter text-zinc-900 dark:text-white mb-6">Diskarteng Pinoy,<br/><span class="text-zinc-400">World-Class Tech.</span></h2>
-         <p class="text-lg text-zinc-600 dark:text-zinc-400 max-w-xl">Everything you need to look like a legitimate agency of one.</p>
+         <p class="text-lg text-zinc-600 dark:text-zinc-400 max-w-xl">Everything you need to look like a legitimate business of one.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-4">

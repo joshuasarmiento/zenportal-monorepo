@@ -113,7 +113,7 @@ const isGroupActive = (children: { path: string }[]) => {
             </div>
             <div class="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
               <span class="truncate font-bold text-zinc-900 dark:text-white tracking-tight">ZenPortal</span>
-              <span class="truncate text-xs text-zinc-500 font-medium">Agency Admin</span>
+              <span class="truncate text-xs text-zinc-500 font-medium">Admin</span>
             </div>
           </SidebarMenuButton>
         </SidebarMenuItem>

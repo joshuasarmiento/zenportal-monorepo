@@ -67,7 +67,7 @@ useHead({
               Portals" and "Reports" are accessed via unauthenticated secure links ("Magic Links"). You bear the sole
               burden of ensuring these links are shared only with intended recipients.</li>
             <li><strong class="text-zinc-900 dark:text-white">Public Profiles:</strong> You are responsible for the
-              content displayed on your Public Agency Profile.</li>
+              content displayed on your Public Profile.</li>
             <li><strong class="text-zinc-900 dark:text-white">Fair Use:</strong> The Provider reserves the right to
               terminate accounts that place an unreasonable load on the Service's infrastructure (e.g., automated
               scraping).</li>

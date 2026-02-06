@@ -11,7 +11,7 @@ import { toast } from 'vue-sonner'
 
 const route = useRoute()
 const slug = route.params.slug as string
-const agency = ref<any>(null)
+const profile = ref<any>(null)
 const error = ref('')
 const loading = ref(true)
 
@@ -96,8 +96,8 @@ const colorMap: Record<string, { bg: string, text: string, gradient: string, rin
 
 // Ensure strict typing for styles
 const activeTheme = computed(() => {
-    if (!agency.value) return themeStyles.modern
-    const t = agency.value.publicTemplate || 'modern'
+    if (!profile.value) return themeStyles.modern
+    const t = profile.value.publicTemplate || 'modern'
     if (Object.keys(themeStyles).includes(t)) {
         return themeStyles[t as keyof typeof themeStyles]
     }
@@ -105,26 +105,26 @@ const activeTheme = computed(() => {
 })
 
 const themeColor = computed(() => {
-    if (!agency.value) return colorMap.indigo
-    const color = agency.value.accentColor || 'indigo'
+    if (!profile.value) return colorMap.indigo
+    const color = profile.value.accentColor || 'indigo'
     return colorMap[color] || colorMap.indigo
 })
 
 const memberSince = computed(() => {
-    if (!agency.value?.createdAt) return new Date().getFullYear()
-    return new Date(agency.value.createdAt).getFullYear()
+    if (!profile.value?.createdAt) return new Date().getFullYear()
+    return new Date(profile.value.createdAt).getFullYear()
 })
 
 const handleLogin = () => { 
-    toast.info(`Existing clients should check their inbox for a magic link from ${agency.value?.name}.`)
+    toast.info(`Existing clients should check their inbox for a magic link from ${profile.value?.name}.`)
 }
 
 onMounted(async () => {
     try {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/public/agency/${slug}`)
-        if (!res.ok) throw new Error('Agency not found')
-        agency.value = await res.json()
-    } catch (err) { error.value = 'This agency profile does not exist.' } finally { loading.value = false }
+        if (!res.ok) throw new Error('Profile not found')
+        profile.value = await res.json()
+    } catch (err) { error.value = 'This profile does not exist.' } finally { loading.value = false }
 })
 </script>
 <template>
@@ -149,23 +149,23 @@ onMounted(async () => {
             <div class="h-14 w-14 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center mb-6">
                 <Building2 class="h-7 w-7 text-zinc-500" />
             </div>
-            <h1 class="text-xl font-bold mb-2 tracking-tight text-zinc-900 dark:text-white">Agency Not Found</h1>
+            <h1 class="text-xl font-bold mb-2 tracking-tight text-zinc-900 dark:text-white">Profile Not Found</h1>
             <p class="text-zinc-500">{{ error }}</p>
         </div>
     </div>
 
-    <div v-else-if="agency" :class="[activeTheme.bg, activeTheme.font]" class="min-h-screen text-zinc-900 dark:text-zinc-50 flex flex-col relative overflow-hidden transition-colors duration-300">
+    <div v-else-if="profile" :class="[activeTheme.bg, activeTheme.font]" class="min-h-screen text-zinc-900 dark:text-zinc-50 flex flex-col relative overflow-hidden transition-colors duration-300">
         
         <div class="fixed inset-0 z-0 pointer-events-none">
              <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
         </div>
 
-        <div v-if="agency.publicTemplate === 'modern' || !agency.publicTemplate" class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] opacity-30 pointer-events-none z-0">
+        <div v-if="profile.publicTemplate === 'modern' || !profile.publicTemplate" class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] opacity-30 pointer-events-none z-0">
              <div :class="`absolute top-[-20%] left-[-10%] w-[60%] h-[80%] rounded-full blur-[120px] mix-blend-screen opacity-50 ${themeColor?.bg}`"></div>
              <div :class="`absolute top-[10%] right-[-10%] w-[50%] h-[70%] rounded-full blur-[100px] mix-blend-screen opacity-30 ${themeColor?.bg}`"></div>
         </div>
 
-        <div v-if="agency.publicTemplate !== 'corporate'" class="absolute inset-0 z-0 opacity-[0.02] dark:opacity-[0.05]" 
+        <div v-if="profile.publicTemplate !== 'corporate'" class="absolute inset-0 z-0 opacity-[0.02] dark:opacity-[0.05]" 
              style="background-image: radial-gradient(#888 1px, transparent 1px); background-size: 32px 32px;">
         </div>
 
@@ -177,12 +177,12 @@ onMounted(async () => {
                     <div class="px-8 pb-8 -mt-20 flex flex-col md:flex-row gap-8 items-start md:items-end relative z-10">
                         
                         <div class="relative group">
-                            <div v-if="agency.publicTemplate === 'modern'" :class="`absolute -inset-1 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-500 ${themeColor?.bg}`"></div>
+                            <div v-if="profile.publicTemplate === 'modern'" :class="`absolute -inset-1 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-500 ${themeColor?.bg}`"></div>
                             
                             <Avatar class="h-36 w-36 relative bg-white dark:bg-zinc-900" :class="activeTheme.avatarContainer">
-                                <AvatarImage :src="agency.image" class="object-cover" :class="activeTheme.avatar" />
+                                <AvatarImage :src="profile.image" class="object-cover" :class="activeTheme.avatar" />
                                 <AvatarFallback class="text-white text-5xl font-bold" :class="[themeColor?.bg, activeTheme.avatar]">
-                                    {{ agency.name?.[0] || 'A' }}
+                                    {{ profile.name?.[0] || 'A' }}
                                 </AvatarFallback>
                             </Avatar>
                         </div>
@@ -190,31 +190,31 @@ onMounted(async () => {
                         <div class="flex-1 space-y-2 mb-2 pt-2">
                             <div class="flex items-center gap-3 flex-wrap">
                                 <h1 class="text-3xl md:text-5xl font-bold tracking-tighter text-zinc-900 dark:text-white text-balance">
-                                    {{ agency.name }}
+                                    {{ profile.name }}
                                 </h1>
-                                <Badge v-if="agency.tier === 'pro'" variant="secondary" :class="[activeTheme.badge, 'px-3 py-1 h-7 gap-1.5 font-medium']">
+                                <Badge v-if="profile.tier === 'pro'" variant="secondary" :class="[activeTheme.badge, 'px-3 py-1 h-7 gap-1.5 font-medium']">
                                     <CheckCircle2 :class="`h-4 w-4 ${themeColor?.text}`" />
                                     <span class="text-zinc-600 dark:text-zinc-400">Verified</span>
                                 </Badge>
                             </div>
                             
-                            <p v-if="agency.headline" class="text-xl text-zinc-500 dark:text-zinc-400 font-medium text-balance leading-relaxed tracking-tight">
-                                {{ agency.headline }}
+                            <p v-if="profile.headline" class="text-xl text-zinc-500 dark:text-zinc-400 font-medium text-balance leading-relaxed tracking-tight">
+                                {{ profile.headline }}
                             </p>
                             <p v-else class="text-zinc-500">Professional Service Provider</p>
                             
                             <div class="flex gap-3 pt-4">
-                                <a v-if="agency.websiteUrl" :href="agency.websiteUrl" target="_blank" 
+                                <a v-if="profile.websiteUrl" :href="profile.websiteUrl" target="_blank" 
                                    :class="activeTheme.social"
                                    class="h-10 w-10 flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-all duration-300">
                                     <Globe class="h-5 w-5" />
                                 </a>
-                                <a v-if="agency.linkedinUrl" :href="agency.linkedinUrl" target="_blank" 
+                                <a v-if="profile.linkedinUrl" :href="profile.linkedinUrl" target="_blank" 
                                    :class="activeTheme.social"
                                    class="h-10 w-10 flex items-center justify-center text-zinc-500 hover:text-blue-600 transition-all duration-300">
                                     <Linkedin class="h-5 w-5" />
                                 </a>
-                                <a v-if="agency.twitterUrl" :href="agency.twitterUrl" target="_blank" 
+                                <a v-if="profile.twitterUrl" :href="profile.twitterUrl" target="_blank" 
                                    :class="activeTheme.social"
                                    class="h-10 w-10 flex items-center justify-center text-zinc-500 hover:text-black dark:hover:text-white transition-all duration-300">
                                     <Twitter class="h-5 w-5" />
@@ -234,7 +234,7 @@ onMounted(async () => {
                     </div>
                 </div>
 
-                <Separator v-if="agency.publicTemplate !== 'creative'" class="bg-zinc-100 dark:bg-zinc-800" />
+                <Separator v-if="profile.publicTemplate !== 'creative'" class="bg-zinc-100 dark:bg-zinc-800" />
                 <div v-else class="h-0.5 bg-black dark:bg-white w-full"></div>
 
                 <CardContent class="p-8 md:p-10 grid gap-12">
@@ -243,10 +243,10 @@ onMounted(async () => {
                         <div class="md:col-span-2 space-y-6">
                             <h3 class="text-xl font-bold tracking-tight flex items-center gap-3 text-zinc-900 dark:text-white">
                                 <span :class="`w-1.5 h-6 ${themeColor?.bg} ${activeTheme.avatar === 'rounded-xl' ? 'rounded-full' : 'rounded-none'}`"></span>
-                                About Agency
+                                About Me
                             </h3>
                             <div class="prose prose-zinc dark:prose-invert max-w-none text-zinc-600 dark:text-zinc-400 leading-relaxed text-lg">
-                                <p v-if="agency.bio" class="whitespace-pre-wrap">{{ agency.bio }}</p>
+                                <p v-if="profile.bio" class="whitespace-pre-wrap">{{ profile.bio }}</p>
                                 <p v-else class="italic opacity-60">
                                     Welcome to my client portal. This is where I track work logs and share progress updates with my clients.
                                 </p>
@@ -256,7 +256,7 @@ onMounted(async () => {
                         <div class="md:col-span-1">
                             <div :class="[
                                 'p-8 flex flex-col gap-6 sticky top-8',
-                                agency.publicTemplate === 'creative' 
+                                profile.publicTemplate === 'creative' 
                                     ? 'bg-white dark:bg-zinc-900 border-2 border-black dark:border-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] rounded-lg' 
                                     : 'bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-3xl'
                             ]">
@@ -264,8 +264,8 @@ onMounted(async () => {
                                     <h4 class="font-bold text-zinc-900 dark:text-white mb-2 text-lg tracking-tight">Let's Connect</h4>
                                     <p class="text-zinc-500 text-sm leading-relaxed">Interested in starting a new project together? Get in touch.</p>
                                 </div>
-                                <Button as-child variant="outline" :class="['w-full h-12 justify-between group', agency.publicTemplate === 'creative' ? 'border-2 border-black bg-white hover:bg-zinc-100 rounded-md shadow-none' : 'rounded-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800']">
-                                    <a :href="`mailto:${agency.email}`">
+                                <Button as-child variant="outline" :class="['w-full h-12 justify-between group', profile.publicTemplate === 'creative' ? 'border-2 border-black bg-white hover:bg-zinc-100 rounded-md shadow-none' : 'rounded-full bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800']">
+                                    <a :href="`mailto:${profile.email}`">
                                         <span class="flex items-center gap-2 font-medium"><Mail class="h-4 w-4" /> Email Me</span>
                                         <ArrowRight class="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white group-hover:translate-x-1 transition-all" />
                                     </a>

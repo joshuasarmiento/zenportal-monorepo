@@ -129,7 +129,7 @@ useHead({
               <div>
                 <h3 class="font-bold text-zinc-900 dark:text-white mb-2 text-lg">Partner, not Employee</h3>
                 <p class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                  Our UI is designed to make you look like a premium agency, allowing you to justify higher rates and
+                  Our UI is designed to make you look like a premium business, allowing you to justify higher rates and
                   gain client respect.
                 </p>
               </div>

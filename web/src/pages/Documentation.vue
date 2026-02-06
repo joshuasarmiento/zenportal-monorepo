@@ -317,7 +317,7 @@ new_log = response.json()</code></pre>
                   <ul class="space-y-2 text-sm">
                     <li class="grid grid-cols-[120px_1fr]"><span class="font-bold">id</span> <span>Primary Key (Clerk User ID)</span></li>
                     <li class="grid grid-cols-[120px_1fr]"><span class="font-bold">tier</span> <span>Enum: 'free' | 'pro'</span></li>
-                    <li class="grid grid-cols-[120px_1fr]"><span class="font-bold">portalSlug</span> <span>Unique agency handle</span></li>
+                    <li class="grid grid-cols-[120px_1fr]"><span class="font-bold">portalSlug</span> <span>Unique profile handle</span></li>
                     <li class="grid grid-cols-[120px_1fr]"><span class="font-bold">apiKeyRead</span> <span>(Pro) Read-only API key</span></li>
                   </ul>
                 </CardContent>
