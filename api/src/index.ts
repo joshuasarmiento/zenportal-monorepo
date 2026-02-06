@@ -56,7 +56,11 @@ app.use(
   })
 )
 
-// 2. Mount Better Auth
+// 2. Mount Rate Limiting
+import { rateLimit } from './lib/rate-limit.js';
+app.use('*', rateLimit());
+
+// 3. Mount Better Auth
 import { bodyLimit } from 'hono/body-limit';
 
 app.use('*', bodyLimit({

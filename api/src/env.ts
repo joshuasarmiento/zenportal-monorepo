@@ -29,6 +29,10 @@ const envSchema = z.object({
     BACKEND_URL: z.url('BACKEND_URL must be a valid URL'),
     FRONTEND_URL: z.url('FRONTEND_URL must be a valid URL'),
 
+    // Rate Limiting
+    RATE_LIMIT_MAX: z.coerce.number().default(100),
+    RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60000),
+
     // Monitoring
     SENTRY_DSN: z.string().optional(),
 });
