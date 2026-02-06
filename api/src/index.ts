@@ -19,12 +19,14 @@ import { userRouter } from './routes/user.js';
 import { statsRouter } from './routes/stats.js';
 import { publicRouter } from './routes/public.js';
 import { v1ProgrammaticRouter } from './routes/v1_programmatic.js';
+import { workspacesRouter } from './routes/workspaces.js';
 import { config } from './config.js';
 
 const app = new Hono();
 
 // 1. Global Middleware
 app.onError((err, c) => {
+  console.error('[Hono Error]', err);
   Sentry.captureException(err);
   return c.text('Internal Server Error', 500);
 });
@@ -35,7 +37,7 @@ app.use('*', cors({
   origin: config.app.allowedOrigins,
   credentials: true,
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowHeaders: ['Content-Type', 'Authorization', 'paymongo-signature'],
+  allowHeaders: ['Content-Type', 'Authorization', 'paymongo-signature', 'x-workspace-id'],
 }));
 
 app.use(
@@ -47,8 +49,8 @@ app.use(
       // Allow cross-site for webhook endpoints
       if (
         secFetchSite === 'cross-site' &&
-        c.req.path.startsWith('/webhooks') ||
-        c.req.path.startsWith('/api/auth/dodopayments/webhooks')
+        (c.req.path.startsWith('/webhooks') ||
+          c.req.path.startsWith('/api/auth'))
       ) {
         return true
       }
@@ -73,8 +75,10 @@ app.use('*', bodyLimit({
 
 
 
-app.on(['POST', 'GET'], '/api/auth/**', async (c) => {
-  return auth.handler(c.req.raw);
+app.all('/api/auth/*', async (c) => {
+  console.log(`[Auth Debug] Handling ${c.req.method} ${c.req.path}`);
+  const res = await auth.handler(c.req.raw);
+  return res;
 });
 
 // 3. Mount Your API Routes
@@ -85,6 +89,7 @@ app.route('/user', userRouter);
 app.route('/stats', statsRouter);
 app.route('/public', publicRouter);
 app.route('/api/v1', v1ProgrammaticRouter);
+app.route('/api/workspaces', workspacesRouter);
 
 // 4. Health Check - This is what you see in the browser
 app.get('/', (c) => c.text('ZenPortal API is running 🚀'));

@@ -75,6 +75,7 @@ const router = createRouter({
         { path: 'billing', component: () => import('@/components/settings/BillingSettings.vue') },
         { path: 'notifications', component: () => import('@/components/settings/NotificationSettings.vue') },
         { path: 'api', component: () => import('@/components/settings/ApiKeysSettings.vue') },
+        { path: 'team', component: () => import('@/components/settings/TeamSettings.vue') },
       ]
     },
     {
@@ -92,6 +93,11 @@ const router = createRouter({
         { path: 'earnings-goals', component: () => import('@/components/user-guide/EarningsGoals.vue') },
         { path: 'api-automation', component: () => import('@/components/user-guide/ApiAutomation.vue') },
       ]
+    },
+
+    {
+      path: '/setup-workspace',
+      component: () => import('@/pages/SetupWorkspace.vue')
     },
 
     // --- 404 Catch-all ---
@@ -115,12 +121,11 @@ router.beforeEach(async (to, _from, next) => {
   const isPublic = to.meta.public
 
   // 2. Handle non-existent pages (404 logic)
-  // If the route doesn't match any defined path (matches the catch-all)
   if (to.name === 'NotFound' || to.matched.some(record => record.path === '/:pathMatch(.*)*')) {
     if (isAuthenticated) {
-      return next('/dashboard') // Authenticated users go to Dashboard
+      return next('/dashboard')
     } else {
-      return next('/login') // Unauthenticated users go to Login
+      return next('/login')
     }
   }
 
@@ -130,11 +135,24 @@ router.beforeEach(async (to, _from, next) => {
     if (to.path === '/login' || to.path === '/sign-up') {
       return next('/dashboard')
     }
+
+    // Check Workspace Status
+    const hasWorkspace = userStore.workspaces.length > 0;
+
+    // If no workspace, force to setup (unless already there)
+    if (!hasWorkspace && to.path !== '/setup-workspace') {
+      return next('/setup-workspace')
+    }
+
+    // If has workspace, prevent visiting setup (unless explicitly allowed, but usually one-time-ish flow for new user)
+    // Actually, user might want to create another workspace. 
+    // Is /setup-workspace the place? Yes. So allow access if they navigate there manually?
+    // Let's allow access to /setup-workspace even if they have one, so they can add more.
+
     return next()
   }
 
   // 4. Unauthenticated user logic
-  // Only allow access to routes explicitly marked as public
   if (isPublic) {
     return next()
   } else {

@@ -36,7 +36,9 @@ export const auth = betterAuth({
             account: schema.accounts,
             verification: schema.verifications,
             twoFactor: schema.twoFactor,
-            subscription: schema.subscription
+            subscription: schema.subscription,
+            workspace: schema.workspaces,
+            workspaceMember: schema.workspaceMembers,
         }
     }),
     user: {
@@ -44,17 +46,7 @@ export const auth = betterAuth({
             enabled: true
         },
         additionalFields: {
-            tier: {
-                type: "string",
-                required: false,
-                defaultValue: "free",
-                input: false // Not user-editable
-            },
-            dodoPaymentsCustomerId: {
-                type: "string",
-                required: false,
-                input: false
-            }
+            // tier and dodoPaymentsCustomerId moved to workspaces table
         }
     },
     trustedOrigins: config.app.allowedOrigins,
@@ -155,34 +147,35 @@ export const auth = betterAuth({
                                 if (eventType === 'subscription.active') {
                                     const subscription = payload.data as any;
                                     const customerId = subscription.customer.customer_id;
-                                    const userId = subscription.metadata?.userId || subscription.customer?.metadata?.userId;
+                                    // Metadata should now contain workspaceId
+                                    const workspaceId = subscription.metadata?.workspaceId || subscription.customer?.metadata?.workspaceId;
 
-                                    if (userId) {
-                                        await tx.update(schema.users)
+                                    if (workspaceId) {
+                                        await tx.update(schema.workspaces)
                                             .set({ tier: 'pro', dodoPaymentsCustomerId: customerId })
-                                            .where(eq(schema.users.id, userId));
-                                        console.log(`✅ User ${userId} upgraded to PRO`);
+                                            .where(eq(schema.workspaces.id, workspaceId));
+                                        console.log(`✅ Workspace ${workspaceId} upgraded to PRO`);
                                     } else {
-                                        await tx.update(schema.users)
+                                        await tx.update(schema.workspaces)
                                             .set({ tier: 'pro', dodoPaymentsCustomerId: customerId })
-                                            .where(eq(schema.users.dodoPaymentsCustomerId, customerId));
-                                        console.log(`✅ User with customerId ${customerId} upgraded to PRO`);
+                                            .where(eq(schema.workspaces.dodoPaymentsCustomerId, customerId));
+                                        console.log(`✅ Workspace with customerId ${customerId} upgraded to PRO`);
                                     }
                                 } else if (eventType === 'subscription.cancelled' || eventType === 'subscription.failed') {
                                     const subscription = payload.data as any;
                                     const customerId = subscription.customer.customer_id;
-                                    const userId = subscription.metadata?.userId || subscription.customer?.metadata?.userId;
+                                    const workspaceId = subscription.metadata?.workspaceId || subscription.customer?.metadata?.workspaceId;
 
-                                    if (userId) {
-                                        await tx.update(schema.users)
+                                    if (workspaceId) {
+                                        await tx.update(schema.workspaces)
                                             .set({ tier: 'free' })
-                                            .where(eq(schema.users.id, userId));
-                                        console.log(`❌ User ${userId} downgraded to FREE`);
+                                            .where(eq(schema.workspaces.id, workspaceId));
+                                        console.log(`❌ Workspace ${workspaceId} downgraded to FREE`);
                                     } else {
-                                        await tx.update(schema.users)
+                                        await tx.update(schema.workspaces)
                                             .set({ tier: 'free' })
-                                            .where(eq(schema.users.dodoPaymentsCustomerId, customerId));
-                                        console.log(`❌ User with customerId ${customerId} downgraded to FREE`);
+                                            .where(eq(schema.workspaces.dodoPaymentsCustomerId, customerId));
+                                        console.log(`❌ Workspace with customerId ${customerId} downgraded to FREE`);
                                     }
                                 }
 
@@ -207,16 +200,62 @@ export const auth = betterAuth({
     ]
 });
 
-export const requireAuth = createMiddleware<{ Variables: { userId: string, user: User, session: any } }>(async (c, next) => {
+
+// Helper to get workspace
+async function getActiveWorkspace(userId: string, workspaceIdFromHeader?: string) {
+    // 1. Try header
+    if (workspaceIdFromHeader) {
+        const member = await db.query.workspaceMembers.findFirst({
+            where: (t, { eq, and }) => and(eq(t.workspaceId, workspaceIdFromHeader), eq(t.userId, userId)),
+            with: { workspace: true }
+        });
+        if (member) return { workspace: member.workspace, member };
+    }
+
+    // 2. Fallback to default workspace
+    const user = await db.query.users.findFirst({
+        where: (t, { eq }) => eq(t.id, userId),
+        with: { workspaces: { with: { workspace: true }, limit: 1 } }
+    });
+
+    if (user?.defaultWorkspaceId) {
+        const member = await db.query.workspaceMembers.findFirst({
+            where: (t, { eq, and }) => and(eq(t.workspaceId, user.defaultWorkspaceId!), eq(t.userId, userId)),
+            with: { workspace: true }
+        });
+        if (member) return { workspace: member.workspace, member };
+    }
+
+    // 3. Fallback to first workspace finding
+    const firstMember = await db.query.workspaceMembers.findFirst({
+        where: (t, { eq }) => eq(t.userId, userId),
+        with: { workspace: true }
+    });
+
+    if (firstMember) return { workspace: firstMember.workspace, member: firstMember };
+
+    return null;
+}
+
+export const requireAuth = createMiddleware<{ Variables: { userId: string, user: User, session: any, workspace: typeof schema.workspaces.$inferSelect, member: typeof schema.workspaceMembers.$inferSelect } }>(async (c, next) => {
     const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
     if (!session) {
         return c.json({ error: 'Unauthorized' }, 401);
     }
 
+    const workspaceIdHeader = c.req.header('x-workspace-id');
+    const workspaceContext = await getActiveWorkspace(session.user.id, workspaceIdHeader);
+
     c.set('user', session.user);
     c.set('userId', session.user.id);
     c.set('session', session.session);
+
+    if (workspaceContext) {
+        c.set('workspace', workspaceContext.workspace);
+        c.set('member', workspaceContext.member);
+    }
+
     return next();
 });
 
@@ -224,4 +263,6 @@ export type AuthVariables = {
     userId: string;
     user: User;
     session: any;
+    workspace: typeof schema.workspaces.$inferSelect;
+    member: typeof schema.workspaceMembers.$inferSelect;
 };

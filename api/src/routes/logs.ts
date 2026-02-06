@@ -1,15 +1,15 @@
 import { Hono } from 'hono';
 import { db } from '../db/index.js';
-import { workLogs, users, clients } from '../db/schema.js';
-import { requireAuth } from '../lib/auth.js';
-import { and, eq, desc, sql, count } from 'drizzle-orm'; // Added sql, count
+import { workLogs, clients, workspaces, users } from '../db/schema.js';
+import { requireAuth, type AuthVariables } from '../lib/auth.js';
+import { and, eq, desc, sql, count } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { sendLogEmail } from '../lib/email.js';
 import { config } from '../config.js';
 
-const app = new Hono<{ Variables: { userId: string } }>();
+const app = new Hono<{ Variables: AuthVariables }>();
 
 app.use('*', requireAuth);
 
@@ -29,60 +29,123 @@ const updateLogSchema = logSchema.partial();
 
 // GET /logs - Get logs with Pagination
 app.get('/', async (c) => {
-  const userId = c.get('userId');
+  const userId = c.get('userId'); // Still allow filtering by "My Logs"
+  const workspace = c.get('workspace');
+  if (!workspace) return c.json({ error: 'No active workspace' }, 401);
+
+  // We should only show logs that belong to clients in the CURRENT workspace.
+  // And arguably, only logs created by the current user? Or all logs in workspace?
+  // Use case: "My Work Logs".
+  // Let's filter by BOTH userId AND workspace context via Client relationship.
+  // But optimized: Filter by userId, then we can filter in memory or join.
+  // Better: Join. 
+  // Drizzle query builder with `with` handles this.
+
   const page = Number(c.req.query('page') || 1);
   const limit = 20;
   const offset = (page - 1) * limit;
 
-  const logs = await db.query.workLogs.findMany({
-    where: eq(workLogs.userId, userId),
-    with: { client: true },
-    orderBy: [desc(workLogs.date)],
-    limit: limit,
-    offset: offset,
-  });
+  // We want logs where userId = me AND client.workspaceId = currentWorkspace
+  // This is tricky with simple query builder unless we start from clients or use sql.
+  // Let's rely on the fact that if I switch workspace, I should only see clients from that workspace.
+  // So validation on frontend filters clients.
+  // But backend must enforce.
 
-  return c.json(logs);
+  // Alternative: query.workLogs.findMany where userId = me.
+  // Then filter result? Pagination breaks.
+
+  // Correct Drizzle way:
+  // We need to ensure the client belongs to the workspace.
+  // But Drizzle Query API is limited for deep filtering.
+  // Let's use `db.select().from(workLogs).innerJoin(clients, ...)`
+
+  const logs = await db.select({
+    id: workLogs.id,
+    userId: workLogs.userId,
+    clientId: workLogs.clientId,
+    date: workLogs.date,
+    summary: workLogs.summary,
+    hoursWorked: workLogs.hoursWorked,
+    videoUrl: workLogs.videoUrl,
+    attachmentUrl: workLogs.attachmentUrl,
+    isBlocked: workLogs.isBlocked,
+    blockerDetails: workLogs.blockerDetails,
+    createdAt: workLogs.createdAt,
+    client: clients // Select client data too
+  })
+    .from(workLogs)
+    .innerJoin(clients, eq(workLogs.clientId, clients.id))
+    .where(and(
+      eq(workLogs.userId, userId),
+      eq(clients.workspaceId, workspace.id)
+    ))
+    .orderBy(desc(workLogs.date))
+    .limit(limit)
+    .offset(offset);
+
+  // Transform to match previous structure (nested client)
+  const formattedLogs = logs.map(l => ({
+    ...l,
+    client: l.client
+  }));
+
+  return c.json(formattedLogs);
 });
 
 // POST /logs - Create a new entry
 app.post('/', zValidator('json', logSchema), async (c) => {
   const userId = c.get('userId');
+  const workspace = c.get('workspace');
+  if (!workspace) return c.json({ error: 'No active workspace' }, 401);
+
   const body = c.req.valid('json');
 
   let result;
 
   try {
-    // Wrap critical logic in a transaction to prevent limit race conditions
     result = await db.transaction(async (tx) => {
-      // 1. Get User Tier
-      const user = await tx.query.users.findFirst({
-        where: eq(users.id, userId),
-        columns: { tier: true, name: true, notifyClientOnLog: true }
+      // 1. Verify Client belongs to Workspace
+      const client = await tx.query.clients.findFirst({
+        where: and(eq(clients.id, body.clientId), eq(clients.workspaceId, workspace.id)),
+        columns: { id: true, contactEmail: true, companyName: true, accessToken: true }
       });
 
-      const isPro = user?.tier === 'pro';
+      if (!client) throw new Error('CLIENT_NOT_FOUND_OR_ACCESS_DENIED');
 
-      // 2. Enforce Monthly Limit for Free Tier
+      // 2. Get Workspace Tier Limits
+      const workspaceData = await tx.query.workspaces.findFirst({
+        where: eq(workspaces.id, workspace.id),
+        columns: { tier: true, notifyClientOnLog: true }
+      });
+
+      const isPro = workspaceData?.tier === 'pro';
+
+      // 3. Enforce Monthly Limit via Workspace count or User count?
+      // Let's enforce per Workspace total logs? Or per User in Workspace?
+      // Plan: "Freelancer vs Agency". 
+      // If Agency is Free, limit applies to whole agency? usage limits usually account-wide.
+      // Let's assume LIMIT is per Workspace.
+
       if (!isPro) {
         const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
 
-        // Lock-like behavior: The transaction ensures isolation for this read-then-write
+        // Count all logs in this workspace for this month
+        // Requires join
         const [usage] = await tx
           .select({ count: count() })
           .from(workLogs)
+          .innerJoin(clients, eq(workLogs.clientId, clients.id))
           .where(and(
-            eq(workLogs.userId, userId),
+            eq(clients.workspaceId, workspace.id),
             sql`${workLogs.date} LIKE ${currentMonth + '%'}`
           ));
 
         if (usage.count >= 100) {
-          // Throwing an error rolls back the transaction
           throw new Error('LIMIT_REACHED');
         }
       }
 
-      // 3. Enforce Pro Features (Video/Attachment)
+      // 4. Enforce Pro Features
       const videoUrl = isPro ? body.videoUrl : null;
       const attachmentUrl = body.attachmentUrl || null;
 
@@ -99,53 +162,53 @@ app.post('/', zValidator('json', logSchema), async (c) => {
         blockerDetails: body.blockerDetails || '',
       }).returning();
 
-      return { log: insertedLog[0], user };
+      // Fetch user name for email
+      const user = await tx.query.users.findFirst({
+        where: eq(users.id, userId),
+        columns: { name: true }
+      });
+
+      return { log: insertedLog[0], workspaceData, client, user };
     });
   } catch (err: any) {
     if (err.message === 'LIMIT_REACHED') {
       return c.json({
-        error: 'Monthly limit reached (100 logs). Upgrade to Pro for unlimited logs.',
+        error: 'Monthly workspace limit reached (100 logs). Upgrade to Pro.',
         code: 'LIMIT_REACHED'
       }, 403);
+    }
+    if (err.message === 'CLIENT_NOT_FOUND_OR_ACCESS_DENIED') {
+      return c.json({ error: 'Invalid Client' }, 400);
     }
     throw err;
   }
 
-  // Restore variables for email logic
-  const { log: newLogItem, user } = result as any;
+  // Restore variables
+  const { log: newLogItem, workspaceData, client, user } = result as any;
   const newLog = [newLogItem];
 
-  // 4. Trigger Email Notification
-  const client = await db.query.clients.findFirst({
-    where: eq(clients.id, body.clientId),
-    columns: { contactEmail: true, companyName: true, accessToken: true }
-  });
-
-  if (client?.contactEmail && user?.name && user.notifyClientOnLog) {
+  // 5. Trigger Email Notification
+  // Use workspace settings, not user settings
+  if (client?.contactEmail && user?.name && workspaceData?.notifyClientOnLog) {
     const reportLink = `${config.app.frontendUrl}/c/${client.accessToken}`;
-    console.log(`New Log 
-      ${client.contactEmail}, 
-      ${client.companyName}, 
-      ${user.name},
-      ${body.summary},
-      ${reportLink}`
-    );
+
     await sendLogEmail({
       to: client.contactEmail,
       clientName: client.companyName,
-      vaName: user.name,
+      vaName: user.name, // "John Doe" from "Agency X"
       summary: body.summary,
       link: reportLink
     });
-    console.log(`📧 Sent Work Log Email to ${client.contactEmail}`);
   }
 
   return c.json(newLog[0]);
 });
 
-// GET /logs/:id (Unchanged)
+// GET /logs/:id
 app.get('/:id', async (c) => {
   const userId = c.get('userId');
+  const workspace = c.get('workspace');
+  if (!workspace) return c.json({ error: 'No active workspace' }, 401);
   const logId = c.req.param('id');
 
   const log = await db.query.workLogs.findFirst({
@@ -154,29 +217,43 @@ app.get('/:id', async (c) => {
   });
 
   if (!log) return c.json({ error: 'Log not found' }, 404);
+
+  // Security check: ensure log's client belongs to current workspace
+  if (log.client.workspaceId !== workspace.id) {
+    return c.json({ error: 'Unauthorized' }, 403);
+  }
+
   return c.json(log);
 });
 
 // PATCH /logs/:id
 app.patch('/:id', zValidator('json', updateLogSchema), async (c) => {
   const userId = c.get('userId');
+  const workspace = c.get('workspace');
+  if (!workspace) return c.json({ error: 'No active workspace' }, 401);
+
   const logId = c.req.param('id');
   const body = c.req.valid('json');
 
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
+  const workspaceData = await db.query.workspaces.findFirst({
+    where: eq(workspaces.id, workspace.id),
     columns: { tier: true }
   });
 
-  if (body.videoUrl && user?.tier !== 'pro') {
-    delete body.videoUrl; // Strip video url if user is not pro
+  if (body.videoUrl && workspaceData?.tier !== 'pro') {
+    delete body.videoUrl;
   }
 
+  // Ensure log exists and belongs to user AND workspace
+  // We first fetch it to check workspace ownership via client
   const existingLog = await db.query.workLogs.findFirst({
     where: and(eq(workLogs.id, logId), eq(workLogs.userId, userId)),
+    with: { client: true }
   });
 
-  if (!existingLog) return c.json({ error: 'Log not found or unauthorized' }, 404);
+  if (!existingLog || existingLog.client.workspaceId !== workspace.id) {
+    return c.json({ error: 'Log not found or unauthorized' }, 404);
+  }
 
   const updatedLog = await db.update(workLogs)
     .set(body)

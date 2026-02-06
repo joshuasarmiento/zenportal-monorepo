@@ -12,7 +12,6 @@ import {
   Users, 
   BarChart3, 
   Settings, 
-  Zap, 
   ChevronsUpDown, 
   Sparkles, 
   LogOut,
@@ -20,7 +19,10 @@ import {
   Moon,    
   Sun,  
   Laptop,
-  ChevronRight
+  ChevronRight,
+  Building2,
+  Plus,
+  Check
 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import { useApi } from '@/lib/api'
@@ -107,15 +109,52 @@ const isGroupActive = (children: { path: string }[]) => {
     <SidebarHeader class="pt-4 pb-2">
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors">
-            <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 shadow-md">
-              <Zap class="size-4 fill-current" />
-            </div>
-            <div class="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-              <span class="truncate font-bold text-zinc-900 dark:text-white tracking-tight">ZenPortal</span>
-              <span class="truncate text-xs text-zinc-500 font-medium">Agency Admin</span>
-            </div>
-          </SidebarMenuButton>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <SidebarMenuButton size="lg" class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors">
+                <div class="flex aspect-square size-8 items-center justify-center rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 shadow-md">
+                   <template v-if="userStore.currentWorkspace?.type === 'agency'">
+                      <Building2 class="size-4 fill-current" />
+                   </template>
+                   <template v-else>
+                      <User class="size-4 fill-current" />
+                   </template>
+                </div>
+                <div class="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+                  <span class="truncate font-bold text-zinc-900 dark:text-white tracking-tight">{{ userStore.currentWorkspace?.name || 'Loading...' }}</span>
+                  <span class="truncate text-xs text-zinc-500 font-medium capitalize">{{ userStore.currentWorkspace?.type || 'Workspace' }} Plan</span>
+                </div>
+                <ChevronsUpDown class="ml-auto size-4 text-zinc-400" />
+              </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-xl border-zinc-200 dark:border-zinc-800 shadow-xl" align="start" :side-offset="8">
+                <div class="px-2 py-1.5">
+                    <span class="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Workspaces</span>
+                </div>
+                <DropdownMenuItem 
+                    v-for="ws in userStore.workspaces" 
+                    :key="ws.id" 
+                    @click="userStore.currentWorkspace?.id !== ws.id && userStore.switchWorkspace(ws.id)"
+                    class="cursor-pointer focus:bg-zinc-100 dark:focus:bg-zinc-900 gap-2"
+                >
+                    <div class="flex h-6 w-6 items-center justify-center rounded-sm border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800">
+                         <Building2 v-if="ws.type === 'agency'" class="size-3 shrink-0" />
+                         <User v-else class="size-3 shrink-0" />
+                    </div>
+                    <span>{{ ws.name }}</span>
+                    <Check v-if="userStore.currentWorkspace?.id === ws.id" class="ml-auto size-4" />
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator class="bg-zinc-100 dark:bg-zinc-800" />
+                
+                <DropdownMenuItem @click="$router.push('/setup-workspace')" class="cursor-pointer focus:bg-zinc-100 dark:focus:bg-zinc-900 gap-2">
+                    <div class="flex h-6 w-6 items-center justify-center rounded-sm border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800">
+                        <Plus class="size-4" />
+                    </div>
+                    <span>Create Workspace</span>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarHeader>

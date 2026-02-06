@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { db } from '../db/index.js';
-import { users } from '../db/schema.js';
+import { users, workspaces } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 import { requireAuth, type AuthVariables, auth } from '../lib/auth.js';
 import { sendAuthEmail } from '../lib/email.js';
@@ -15,32 +15,42 @@ app.use('*', requireAuth);
 // 1. Define the Schema
 // Updated to match Better Auth schema (name, image)
 const updateUserSchema = z.object({
-  name: z.string().optional(),       // Renamed from fullName
-  image: z.string().optional(),      // Renamed from avatarUrl
-  portalSlug: z.string().optional(),
-  accentColor: z.string().optional(),
-  notifyClientView: z.boolean().optional(),
-  notifyClientOnLog: z.boolean().optional(),
-  notifyWeeklyRecap: z.boolean().optional(),
-  notifyMarketing: z.boolean().optional(),
+  name: z.string().optional(),
+  image: z.string().optional(),
+
+  // Custom Profile Fields
   headline: z.string().optional(),
   bio: z.string().optional(),
   websiteUrl: z.string().optional(),
   linkedinUrl: z.string().optional(),
   twitterUrl: z.string().optional(),
-  publicTemplate: z.enum(['modern', 'corporate', 'creative']).optional(),
+
+  // Notification settings might need to move to workspace too? 
+  // Schema says notify* fields are on WORKSPACE now (notifyClientView, notifyClientOnLog, etc)
+  // Let's verify schema.ts again?
+  // Schema.ts step 174 showed notify* fields on WORKSPACES (lines 92-94).
+  // So they should be removed from User too.
+
+  // Only keep what is actually on User table
 });
 
 // GET /me - Return the authenticated user
 app.get('/me', async (c) => {
+  console.log('[User Route] GET /me called');
   const userId = c.get('userId');
+  console.log('[User Route] userId:', userId);
 
   // Fetch the full user profile including all custom fields
   const user = await db.query.users.findFirst({
     where: eq(users.id, userId)
   });
 
-  if (!user) return c.json({ error: 'User not found' }, 404);
+  if (!user) {
+    console.log('[User Route] User not found in DB');
+    return c.json({ error: 'User not found' }, 404);
+  }
+
+  console.log('[User Route] User found, returning profile');
   return c.json(user);
 });
 
@@ -65,14 +75,11 @@ app.patch('/me', zValidator('json', updateUserSchema), async (c) => {
 app.post('/api-key', async (c) => {
   const userId = c.get('userId');
 
-  // We query the DB to ensure we have the absolute latest 'tier' status
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-    columns: { tier: true }
-  });
+  const workspace = c.get('workspace');
+  if (!workspace) return c.json({ error: 'No active workspace' }, 401);
 
-  if (user?.tier !== 'pro') {
-    return c.json({ error: 'API access is a Pro feature. Please upgrade your account.' }, 403);
+  if (workspace.tier !== 'pro') {
+    return c.json({ error: 'API access is a Pro feature. Please upgrade your workspace.' }, 403);
   }
 
   const newKeys = {
@@ -80,9 +87,9 @@ app.post('/api-key', async (c) => {
     apiKeyWrite: `zen_write_${uuidv4()}`,
   };
 
-  await db.update(users)
+  await db.update(workspaces)
     .set(newKeys)
-    .where(eq(users.id, userId));
+    .where(eq(workspaces.id, workspace.id));
 
   return c.json(newKeys);
 });

@@ -1,25 +1,21 @@
 // api/src/routes/billing.ts
 import { Hono } from 'hono';
-import { db } from '../db/index.js';
-import { users } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
-import { requireAuth } from '../lib/auth.js';
+import { requireAuth, type AuthVariables } from '../lib/auth.js';
 import { dodo } from '../lib/auth.js';
 
-const app = new Hono<{ Variables: { userId: string } }>();
+const app = new Hono<{ Variables: AuthVariables }>();
 
 app.use('*', requireAuth);
 
 // GET /subscription - Check status from Dodo
 app.get('/subscription', async (c) => {
-  const userId = c.get('userId');
+  const workspace = c.get('workspace');
 
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-    columns: { dodoPaymentsCustomerId: true, tier: true }
-  });
+  if (!workspace) {
+    return c.json({ error: 'No active workspace' }, 401);
+  }
 
-  if (!user?.dodoPaymentsCustomerId) {
+  if (!workspace.dodoPaymentsCustomerId) {
     return c.json({ subscription: null });
   }
 
@@ -27,7 +23,7 @@ app.get('/subscription', async (c) => {
     // Fetch active subscriptions from Dodo
     // The SDK uses pagination, result has 'items' array
     const response = await dodo.subscriptions.list({
-      customer_id: user.dodoPaymentsCustomerId,
+      customer_id: workspace.dodoPaymentsCustomerId,
       status: 'active',
       page_size: 1
     });
@@ -50,7 +46,7 @@ app.get('/subscription', async (c) => {
   } catch (error) {
     console.error('Failed to fetch Dodo subscription:', error);
     // Fallback to local tier status if API fails
-    if (user.tier === 'pro') {
+    if (workspace.tier === 'pro') {
       return c.json({ subscription: { status: 'active', plan: 'pro' } });
     }
     return c.json({ error: 'Failed to fetch subscription status' }, 500);
@@ -58,61 +54,22 @@ app.get('/subscription', async (c) => {
 });
 
 app.get('/transactions', async (c) => {
-  const userId = c.get('userId');
+  const workspace = c.get('workspace');
 
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-    columns: { dodoPaymentsCustomerId: true }
-  });
-
-  console.log(`[Billing] Fetching transactions for user ${userId}, Dodo ID: ${user?.dodoPaymentsCustomerId}`);
-
-  if (!user?.dodoPaymentsCustomerId) {
-    console.log('[Billing] No Dodo Customer ID found for user. Attempting to recover by email...');
-
-    // Fetch full user to get email
-    const fullUser = await db.query.users.findFirst({
-      where: eq(users.id, userId),
-      columns: { email: true }
-    });
-
-    if (fullUser?.email) {
-      try {
-        const customers = await dodo.customers.list({ email: fullUser.email });
-        const customer = customers.items?.[0]; // Dodo returns items array
-
-        if (customer) {
-          console.log(`[Billing] Found Dodo Customer ID ${customer.customer_id} for email ${fullUser.email}. Updating DB...`);
-
-          await db.update(users)
-            .set({ dodoPaymentsCustomerId: customer.customer_id })
-            .where(eq(users.id, userId));
-
-          // Use this ID for the current request
-          if (user) {
-            user.dodoPaymentsCustomerId = customer.customer_id;
-          }
-        } else {
-          console.log('[Billing] No customer found in Dodo for this email.');
-          return c.json({ transactions: [] });
-        }
-      } catch (err) {
-        console.error('[Billing] Failed to lookup customer by email:', err);
-        return c.json({ transactions: [] });
-      }
-    } else {
-      return c.json({ transactions: [] });
-    }
+  if (!workspace) {
+    return c.json({ error: 'No active workspace' }, 401);
   }
 
+  console.log(`[Billing] Fetching transactions for workspace ${workspace.id}, Dodo ID: ${workspace.dodoPaymentsCustomerId}`);
+
   try {
-    // user is definitely defined here due to checks above, but TS needs coaxing
-    if (!user?.dodoPaymentsCustomerId) {
-      throw new Error("No Dodo Customer ID available");
+    if (!workspace.dodoPaymentsCustomerId) {
+      // Graceful return empty if no customer ID, meaning no payments ever made via new system
+      return c.json({ transactions: [] });
     }
 
     const response = await dodo.payments.list({
-      customer_id: user.dodoPaymentsCustomerId,
+      customer_id: workspace.dodoPaymentsCustomerId,
       page_size: 100
     });
 

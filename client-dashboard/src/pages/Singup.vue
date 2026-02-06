@@ -76,7 +76,7 @@ const handleVerifySignup = async () => {
         if (error) return toast.error(error.message || "Verification failed")
         
         toast.success("Account verified successfully!")
-        router.push('/dashboard')
+        router.push('/setup-workspace')
     } catch (e: any) {
         toast.error("Verification failed")
     } finally {

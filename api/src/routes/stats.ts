@@ -1,15 +1,15 @@
 import { Hono } from 'hono';
 import { stream } from 'hono/streaming';
 import { db } from '../db/index.js';
-import { workLogs, clients, users } from '../db/schema.js';
-import { requireAuth } from '../lib/auth.js';
+import { workLogs, clients, workspaces } from '../db/schema.js';
+import { requireAuth, type AuthVariables } from '../lib/auth.js';
 import { eq, and, sql, desc, asc, gte, count } from 'drizzle-orm';
 
-const app = new Hono<{ Variables: { userId: string } }>();
+const app = new Hono<{ Variables: AuthVariables }>();
 
 app.use('*', requireAuth);
 
-// Helper: Get Date Range strictly as strings (YYYY-MM-DD) for SQLite index usage
+// Helper: Get Date Range
 const getDateRange = (range: string) => {
   const now = new Date();
   const d = new Date(now);
@@ -32,19 +32,16 @@ const getDateRange = (range: string) => {
 
 /**
  * GET /stats/export
- * SCALABILITY FIX: Uses Streams & Chunking to prevent OOM (Out Of Memory) crashes.
  */
 app.get('/export', async (c) => {
   const userId = c.get('userId');
+  const workspace = c.get('workspace');
+  if (!workspace) return c.json({ error: 'No active workspace' }, 401);
+
   const range = c.req.query('range') || 'all';
 
-  // 1. SECURITY CHECK: Is User Pro?
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-    columns: { tier: true }
-  });
-
-  if (user?.tier !== 'pro') {
+  // 1. SECURITY CHECK: Is Workspace Pro?
+  if (workspace.tier !== 'pro') {
     return c.json({ error: 'Export is a Pro feature' }, 403);
   }
 
@@ -53,14 +50,23 @@ app.get('/export', async (c) => {
   c.header('Content-Disposition', `attachment; filename="work_logs_${new Date().toISOString().split('T')[0]}.csv"`);
 
   return stream(c, async (stream) => {
-    // 1. Write Header (Added Video & Attachment columns)
+    // 1. Write Header
     await stream.write(`Date,Client,Summary,Hours,Rate,Total,Status,Video Link,Attachment\n`);
 
-    // 2. Build Query Filters
-    const filters = [eq(workLogs.userId, userId)];
+    // 2. Build Query Filters based on Workspace Clients
+    // We want logs for clients in this workspace. 
+    // Filter: workLogs -> innerJoin clients -> clients.workspaceId = workspace.id
+    // Should we verify userId? "My Logs" vs "Team Logs"?
+    // "Export" usually implies "My Work" or "Workspace Work" depending on role.
+    // For now, let's export "My Work" within "This Workspace".
+    const baseFilters = [
+      eq(workLogs.userId, userId),
+      eq(clients.workspaceId, workspace.id)
+    ];
+
     if (range !== 'all') {
       const { start } = getDateRange(range);
-      filters.push(gte(workLogs.date, start));
+      baseFilters.push(gte(workLogs.date, start));
     }
 
     // 3. Batch Fetching (Chunking)
@@ -77,14 +83,12 @@ app.get('/export', async (c) => {
           hours: workLogs.hoursWorked,
           rate: clients.hourlyRate,
           isBlocked: workLogs.isBlocked,
-          // 🟢 ADDED: Select the link columns
-          // Note: Verify these match your schema.ts exactly!
           video: workLogs.videoUrl,
           file: workLogs.attachmentUrl
         })
         .from(workLogs)
         .innerJoin(clients, eq(workLogs.clientId, clients.id))
-        .where(and(...filters))
+        .where(and(...baseFilters))
         .orderBy(desc(workLogs.date))
         .limit(BATCH_SIZE)
         .offset(offset);
@@ -102,8 +106,6 @@ app.get('/export', async (c) => {
         const safeSummary = `"${(log.summary || '').replace(/"/g, '""').replace(/(\r\n|\n|\r)/g, ' ')}"`;
         const safeClient = `"${(log.clientName || 'Unknown').replace(/"/g, '""')}"`;
         const status = log.isBlocked ? 'Blocked' : 'Done';
-
-        // 🟢 ADDED: Handle nulls for links
         const videoLink = log.video || '';
         const fileLink = log.file || '';
 
@@ -120,10 +122,12 @@ app.get('/export', async (c) => {
 
 /**
  * GET /stats
- * SCALABILITY FIX: Uses Promise.all for concurrency & optimized SQL logic
  */
 app.get('/', async (c) => {
   const userId = c.get('userId');
+  const workspace = c.get('workspace');
+  if (!workspace) return c.json({ error: 'No active workspace' }, 401);
+
   const range = c.req.query('range') || '6m';
 
   // 1. Prepare Date Logic
@@ -132,7 +136,15 @@ app.get('/', async (c) => {
   const groupByFormat = isDailyGroup ? '%Y-%m-%d' : '%Y-%m';
   const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
 
-  // 2. Run Heavy Queries in PARALLEL (Drastically reduces latency)
+  // Base Logic: Stats for "Me" in "This Workspace"
+  const baseCondition = and(
+    eq(workLogs.userId, userId),
+    eq(clients.workspaceId, workspace.id) // Ensure integrity through join
+  );
+
+  const dateCondition = gte(workLogs.date, startDateStr);
+
+  // 2. Run Heavy Queries in PARALLEL
   const [statsResult, historyResult, topClientsResult, usageResult] = await Promise.all([
 
     // Query A: Dashboard Aggregates
@@ -141,14 +153,11 @@ app.get('/', async (c) => {
       earningsPeriod: sql<number>`COALESCE(SUM(${workLogs.hoursWorked} * ${clients.hourlyRate}), 0)`,
       blockedRevenue: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.isBlocked} = 1 THEN ${workLogs.hoursWorked} * ${clients.hourlyRate} ELSE 0 END), 0)`,
       pendingBlockersCount: sql<number>`COALESCE(SUM(CASE WHEN ${workLogs.isBlocked} = 1 THEN 1 ELSE 0 END), 0)`,
-      activeClients: sql<number>`COUNT(DISTINCT ${workLogs.clientId})` // Only count clients active IN THIS PERIOD
+      activeClients: sql<number>`COUNT(DISTINCT ${workLogs.clientId})`
     })
       .from(workLogs)
       .innerJoin(clients, eq(workLogs.clientId, clients.id))
-      .where(and(
-        eq(workLogs.userId, userId),
-        gte(workLogs.date, startDateStr)
-      )),
+      .where(and(baseCondition, dateCondition)),
 
     // Query B: Revenue History (Chart)
     db.select({
@@ -157,10 +166,7 @@ app.get('/', async (c) => {
     })
       .from(workLogs)
       .innerJoin(clients, eq(workLogs.clientId, clients.id))
-      .where(and(
-        eq(workLogs.userId, userId),
-        gte(workLogs.date, startDateStr)
-      ))
+      .where(and(baseCondition, dateCondition))
       .groupBy(sql`strftime(${groupByFormat}, ${workLogs.date})`)
       .orderBy(asc(sql`strftime(${groupByFormat}, ${workLogs.date})`)),
 
@@ -171,20 +177,27 @@ app.get('/', async (c) => {
     })
       .from(workLogs)
       .innerJoin(clients, eq(workLogs.clientId, clients.id))
-      .where(and(
-        eq(workLogs.userId, userId),
-        gte(workLogs.date, startDateStr)
-      ))
+      .where(and(baseCondition, dateCondition))
       .groupBy(clients.id)
       .orderBy(desc(sql`SUM(${workLogs.hoursWorked} * ${clients.hourlyRate})`))
       .limit(5),
 
-    // Query D: Monthly Log Count for Usage Limit
+    // Query D: Monthly Log Count for Usage Limit (Workspace Wide?)
+    // If usage limit is per Workspace, we should count all logs in workspace?
+    // "Freelancer" = "Workspace".
+    // If I am in an Agency, does my 100 log limit apply to ME or the AGENCY?
+    // Usually Agencies have Pro.
+    // Let's assume limit applies to the WORKSPACE total volume if Free.
+    // So we should query ALL logs in workspace.
+    // BUT `logs.ts` logic seemed to focus on User's usage (legacy).
+    // In `logs.ts` updated version, I filtered by `clients.workspaceId`.
+    // Let's match that here regardless of userId.
     db
       .select({ count: count() })
       .from(workLogs)
+      .innerJoin(clients, eq(workLogs.clientId, clients.id))
       .where(and(
-        eq(workLogs.userId, userId),
+        eq(clients.workspaceId, workspace.id), // Count all logs in workspace
         sql`${workLogs.date} LIKE ${currentMonth + '%'}`
       ))
   ]);
@@ -198,7 +211,6 @@ app.get('/', async (c) => {
     let label = r.rawDate;
     if (!r.rawDate) return { period: 'Unknown', amount: 0, rawDate: '' };
 
-    // Helper to make dates readable
     try {
       if (!isDailyGroup) {
         const [y, m] = r.rawDate.split('-');
@@ -222,7 +234,6 @@ app.get('/', async (c) => {
     percent: totalRangeEarnings > 0 ? Math.round((Number(c.amount || 0) / totalRangeEarnings) * 100) : 0
   }));
 
-  // Goals (Hardcoded for now, could be moved to User Settings DB)
   const GOAL_TARGET = 2000;
   const currentEarnings = Number(dashboardStats?.earningsPeriod || 0);
 
