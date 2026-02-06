@@ -24,7 +24,9 @@ export const redis = globalForRedis.redis || new Redis(config.redis.url, {
 });
 
 // Save the instance to the global object in development
-if (process.env.NODE_ENV !== 'production') globalForRedis.redis = redis;
+import { env } from '../env.js';
+
+if (env.NODE_ENV !== 'production') globalForRedis.redis = redis;
 
 // 5. Minimal Logging
 // In Vercel, console.logs inside the global scope only run during cold starts.

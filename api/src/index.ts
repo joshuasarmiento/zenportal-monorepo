@@ -77,7 +77,9 @@ app.route('/api/v1', v1ProgrammaticRouter);
 // 4. Health Check - This is what you see in the browser
 app.get('/', (c) => c.text('ZenPortal API is running 🚀'));
 
-if (process.env.NODE_ENV !== 'production') {
+import { env } from './env.js';
+
+if (env.NODE_ENV !== 'production') {
   const port = 3000;
   console.log(`🚀 Hono Server running on http://localhost:${port}`)
   serve({

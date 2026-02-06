@@ -2,7 +2,7 @@
 import { betterAuth, type User } from "better-auth";
 import { eq } from "drizzle-orm";
 import { emailOTP, admin } from "better-auth/plugins";
-import { APIError } from "better-auth/api";
+// import { APIError } from "better-auth/api";
 import { haveIBeenPwned } from "better-auth/plugins"
 import {
     dodopayments,
