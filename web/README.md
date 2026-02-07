@@ -1,5 +1,43 @@
-# Vue 3 + TypeScript + Vite
+# ZenPortal Web
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+The main web interface for ZenPortal, built with Vue 3 and Vite.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Tech Stack
+-   **Framework:** [Vue 3](https://vuejs.org/)
+-   **Build Tool:** [Vite](https://vitejs.dev/)
+-   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+-   **Language:** [TypeScript](https://www.typescriptlang.org/)
+
+## Getting Started
+
+### Prerequisites
+-   [Bun](https://bun.sh/) or Node.js
+
+### Installation
+
+Install dependencies:
+```sh
+bun install
+```
+
+### Development
+
+Start the development server:
+```sh
+bun run dev
+```
+The application will be available at `http://localhost:5173` (or the port shown in your terminal).
+
+### Build
+
+Build the application for production:
+```sh
+bun run build
+```
+
+### Preview
+
+Preview the production build:
+```sh
+bun run preview
+```
