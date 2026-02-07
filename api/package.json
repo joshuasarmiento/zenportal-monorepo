@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "^22.0.0",
+    "@types/node": "^25.2.1",
     "drizzle-kit": "^0.31.8",
     "esbuild": "^0.20.0",
     "tsx": "^4.21.0",

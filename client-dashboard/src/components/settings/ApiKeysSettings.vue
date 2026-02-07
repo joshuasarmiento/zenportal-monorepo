@@ -7,26 +7,33 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Loader2, Copy, Check, KeyRound, AlertTriangle, Sparkles, Lock } from 'lucide-vue-next'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Loader2, Copy, Check, KeyRound, AlertTriangle, Sparkles, Lock, RefreshCw, EyeOff } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
 const { fetchApi } = useApi()
 const userStore = useUserStore()
 const generating = ref(false)
 const upgrading = ref(false)
+const showNewKeysDialog = ref(false)
 
 const copiedKey = ref<'read' | 'write' | null>(null)
-
 const isPro = computed(() => userStore.isPro)
 
-const readKey = computed(() => (userStore.user as any)?.apiKeyRead)
-const writeKey = computed(() => (userStore.user as any)?.apiKeyWrite)
+const newKeys = ref<{ apiKeyRead: string, apiKeyWrite: string } | null>(null)
+
+const hasExistingKeys = computed(() => {
+  return !!(userStore.user as any)?.apiKeyRead
+})
 
 const generateKeys = async () => {
   generating.value = true
+  newKeys.value = null // Reset
   try {
-    await fetchApi('/user/api-key', { method: 'POST' })
-    await userStore.fetchUser(true) 
+    const res = await fetchApi('/user/api-key', { method: 'POST' })
+    newKeys.value = res
+    showNewKeysDialog.value = true // Open Modal
+    
     toast.success('API Keys generated successfully!')
   } catch (err: any) {
     toast.error(err.message || 'Failed to generate keys')
@@ -36,7 +43,9 @@ const generateKeys = async () => {
 }
 
 const copyToClipboard = (keyType: 'read' | 'write') => {
-  const key = keyType === 'read' ? readKey.value : writeKey.value
+  if (!newKeys.value) return
+  
+  const key = keyType === 'read' ? newKeys.value.apiKeyRead : newKeys.value.apiKeyWrite
   if (!key) return
 
   navigator.clipboard.writeText(key)
@@ -64,26 +73,29 @@ const handleUpgrade = async () => {
 <template>
   <Card class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
     <CardHeader class="border-b border-zinc-100 dark:border-zinc-800 pb-6">
-      <CardTitle class="flex items-center gap-2 text-lg font-bold tracking-tight text-zinc-900 dark:text-white">
-        <div class="p-2 bg-zinc-100 dark:bg-zinc-900 rounded-lg">
-           <KeyRound class="h-4 w-4" />
+      <div class="flex items-center justify-between">
+        <div class="space-y-1">
+           <CardTitle class="flex items-center gap-2 text-lg font-bold tracking-tight text-zinc-900 dark:text-white">
+            <div class="p-2 bg-zinc-100 dark:bg-zinc-900 rounded-lg">
+               <KeyRound class="h-4 w-4" />
+            </div>
+            API Access
+          </CardTitle>
+          <CardDescription class="text-zinc-500">
+            Manage programmatic access to your ZenPortal workspace.
+          </CardDescription>
         </div>
-        API Access
-      </CardTitle>
-      <CardDescription class="text-zinc-500">
-        Generate keys for programmatic access.
-      </CardDescription>
+        <Button v-if="isPro" variant="outline" size="sm" @click="generateKeys" :disabled="generating" class="<border-zinc-200 dark:border-zinc-800">
+           <RefreshCw v-if="generating" class="h-3.5 w-3.5 mr-2 animate-spin" />
+           <KeyRound v-else class="h-3.5 w-3.5 mr-2" />
+           {{ hasExistingKeys ? 'Roll Keys' : 'Generate Keys' }}
+        </Button>
+      </div>
     </CardHeader>
-    <CardContent class="pt-8 space-y-8">
-
-      <Alert v-if="isPro" variant="destructive" class="border-orange-200 bg-orange-50 text-orange-900 dark:border-orange-800/30 dark:bg-orange-900/10 dark:text-orange-200 [&>svg]:text-orange-600">
-        <AlertTriangle class="h-4 w-4" />
-        <AlertTitle class="font-bold tracking-tight">Security Warning</AlertTitle>
-        <AlertDescription class="text-orange-800 dark:text-orange-300/80 text-sm">
-          Treat your API keys like passwords. Do not share them publicly.
-        </AlertDescription>
-      </Alert>
-
+    
+    <CardContent class="pt-8">
+      
+      <!-- PRO UPGRADE WALL -->
       <div v-if="!isPro" class="text-center bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 p-10 rounded-2xl">
           <div class="bg-indigo-100 dark:bg-indigo-900/30 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400">
             <Lock class="h-6 w-6" />
@@ -96,42 +108,110 @@ const handleUpgrade = async () => {
             {{ upgrading ? 'Redirecting...' : 'Upgrade Now' }}
           </Button>
       </div>
-      
-      <div v-else-if="readKey || writeKey" class="space-y-6">
-        <div class="space-y-3">
-          <Label class="text-sm font-semibold">Read-Only Key</Label>
-          <div class="flex items-center gap-2">
-            <Input :model-value="readKey" readonly class="font-mono text-xs bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 h-10 text-zinc-600 dark:text-zinc-400" />
-            <Button variant="outline" size="icon" @click="copyToClipboard('read')" class="border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900">
-              <Check v-if="copiedKey === 'read'" class="h-4 w-4 text-green-600" />
-              <Copy v-else class="h-4 w-4 text-zinc-500" />
-            </Button>
-          </div>
-          <p class="text-[11px] text-zinc-400">Use this key to fetch data (GET requests).</p>
-        </div>
-        <div class="space-y-3">
-          <Label class="text-sm font-semibold">Write-Access Key</Label>
-          <div class="flex items-center gap-2">
-            <Input :model-value="writeKey" readonly class="font-mono text-xs bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 h-10 text-zinc-600 dark:text-zinc-400" />
-            <Button variant="outline" size="icon" @click="copyToClipboard('write')" class="border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900">
-              <Check v-if="copiedKey === 'write'" class="h-4 w-4 text-green-600" />
-              <Copy v-else class="h-4 w-4 text-zinc-500" />
-            </Button>
-          </div>
-          <p class="text-[11px] text-zinc-400">Use this key to modify data (POST/PATCH/DELETE).</p>
-        </div>
-      </div>
-    </CardContent>
 
-    <CardFooter v-if="isPro" class="border-t border-zinc-100 dark:border-zinc-800 pt-6 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-900/50">
-      <p class="text-xs text-zinc-500 font-medium">
-        Generating new keys invalidates old ones.
-      </p>
-      <Button variant="outline" class="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-900/20" @click="generateKeys" :disabled="generating">
-        <Loader2 v-if="generating" class="mr-2 h-4 w-4 animate-spin" />
-        Regenerate Keys
-      </Button>
-    </CardFooter>
+      <!-- EXISTING KEYS VIEW -->
+      <div v-else-if="hasExistingKeys" class="space-y-6">
+        <Alert class="border-blue-100 bg-blue-50 text-blue-900 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-200">
+          <AlertTitle class="font-semibold text-sm flex items-center gap-2">
+            <Check class="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            Active API Keys
+          </AlertTitle>
+          <AlertDescription class="text-xs text-blue-800 dark:text-blue-300/80 mt-1">
+            Your API keys are active. To prevent abuse, we only show the full key once upon generation.
+          </AlertDescription>
+        </Alert>
+
+        <div class="grid gap-6 md:grid-cols-2">
+            <div class="space-y-2">
+                <Label class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Read-Only Key</Label>
+                <div class="relative">
+                    <Input value="zen_read_••••••••••••••••••••" readonly disabled class="font-mono text-sm bg-zinc-50 dark:bg-zinc-900/50" />
+                    <EyeOff class="h-4 w-4 absolute right-3 top-3 text-zinc-400" />
+                </div>
+            </div>
+             <div class="space-y-2">
+                <Label class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Write-Access Key</Label>
+                <div class="relative">
+                    <Input value="zen_write_••••••••••••••••••••" readonly disabled class="font-mono text-sm bg-zinc-50 dark:bg-zinc-900/50" />
+                     <EyeOff class="h-4 w-4 absolute right-3 top-3 text-zinc-400" />
+                </div>
+            </div>
+        </div>
+        
+        <p class="text-xs text-zinc-500 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+            Need to rotate your keys? Click <strong>Roll Keys</strong> above. This will immediately invalidate existing keys.
+        </p>
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div v-else class="text-center py-12 text-zinc-500">
+        <div class="w-16 h-16 bg-zinc-50 dark:bg-zinc-900 rounded-2xl flex items-center justify-center mx-auto mb-4 grayscale opacity-50">
+             <KeyRound class="h-8 w-8 text-zinc-400" />
+        </div>
+        <h3 class="text-sm font-semibold text-zinc-900 dark:text-white mb-1">No API Keys</h3>
+        <p class="text-xs text-zinc-500 max-w-sm mx-auto">Generate keys to access the ZenPortal API programmatically.</p>
+        <Button variant="link" @click="generateKeys" class="text-indigo-600 dark:text-indigo-400 mt-2">Generate First Key</Button>
+      </div>
+
+    </CardContent>
+    
+    <!-- NEW KEYS DIALOG -->
+    <Dialog v-model:open="showNewKeysDialog">
+      <DialogContent class="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle class="flex items-center gap-2">
+            <div class="p-1.5 bg-green-100 dark:bg-green-900/30 rounded-md text-green-600">
+                <Check class="h-4 w-4" />
+            </div>
+            API Keys Generated
+          </DialogTitle>
+          <DialogDescription>
+            Please copy your keys now. They will <strong>not</strong> be shown again.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div v-if="newKeys" class="space-y-4 py-4">
+             <div class="space-y-2">
+                <Label class="text-xs font-bold text-zinc-500 uppercase">Read-Only Key</Label>
+                <div class="flex items-center gap-2">
+                    <div class="relative flex-1">
+                        <Input :model-value="newKeys.apiKeyRead" readonly class="font-mono text-xs pr-10 bg-green-50/50 border-green-200 dark:bg-green-900/10 dark:border-green-800 text-zinc-600 dark:text-zinc-300" />
+                    </div>
+                    <Button size="icon" variant="outline" @click="copyToClipboard('read')" class="shrink-0">
+                         <Check v-if="copiedKey === 'read'" class="h-4 w-4 text-green-600" />
+                         <Copy v-else class="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <Label class="text-xs font-bold text-zinc-500 uppercase">Write-Access Key</Label>
+                <div class="flex items-center gap-2">
+                    <div class="relative flex-1">
+                        <Input :model-value="newKeys.apiKeyWrite" readonly class="font-mono text-xs pr-10 bg-green-50/50 border-green-200 dark:bg-green-900/10 dark:border-green-800 text-zinc-600 dark:text-zinc-300" />
+                    </div>
+                    <Button size="icon" variant="outline" @click="copyToClipboard('write')" class="shrink-0">
+                         <Check v-if="copiedKey === 'write'" class="h-4 w-4 text-green-600" />
+                         <Copy v-else class="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
+            
+            <Alert variant="destructive" class="mt-4 border-orange-200 bg-orange-50 text-orange-900 dark:border-orange-900/30 dark:bg-orange-900/10">
+                <AlertTriangle class="h-4 w-4 text-orange-600 mr-2" />
+                <AlertDescription class="text-xs font-medium text-orange-800 dark:text-orange-200">
+                    Store these securely. We cannot recover them if lost.
+                </AlertDescription>
+            </Alert>
+        </div>
+
+        <DialogFooter class="sm:justify-start">
+          <Button type="button" variant="secondary" class="w-full" @click="showNewKeysDialog = false">
+            I have stored my keys
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
   </Card>
 </template>

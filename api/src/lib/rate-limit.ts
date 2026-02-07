@@ -15,10 +15,13 @@ export const rateLimit = (options: RateLimitOptions = {}) => {
 
     return createMiddleware(async (c, next) => {
         // Determine the key for the rate limit
-        // Default to IP address if no key generator is provided
+        // Trust the first IP in X-Forwarded-For if behind a proxy
+        const forwardedFor = c.req.header('x-forwarded-for');
+        const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : 'unknown-ip';
+
         const key = options.keyGenerator
             ? options.keyGenerator(c)
-            : c.req.header('x-forwarded-for') || 'unknown-ip';
+            : ip;
 
         // Current window timestamp (floored to the start of the window)
         const now = Date.now();
@@ -61,7 +64,9 @@ export const rateLimit = (options: RateLimitOptions = {}) => {
         } catch (error) {
             console.error('Rate limit error:', error);
             // Fail open: If Redis fails, allow the request to proceed
-            // but maybe log it to Sentry if available.
+            // but log it to Sentry if available.
+            // Sentry exception capture should ideally handle this if configured globally,
+            // but we ensure flow continues.
             await next();
         }
     });

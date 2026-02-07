@@ -2,7 +2,7 @@
 import { betterAuth, type User } from "better-auth";
 import { eq } from "drizzle-orm";
 import { emailOTP, admin } from "better-auth/plugins";
-// import { APIError } from "better-auth/api";
+import { APIError } from "better-auth/api";
 import { haveIBeenPwned } from "better-auth/plugins"
 import {
     dodopayments,
@@ -63,19 +63,19 @@ export const auth = betterAuth({
         enabled: true,
         autoSignIn: true,
         requireEmailVerification: true,
-        // validator: {
-        //     validatePassword: async (password: string) => {
-        //         const isStrong = password.length >= 8 &&
-        //             /[A-Z].*[A-Z]/.test(password) && // At least 2 capital letters
-        //             /[0-9]/.test(password);         // At least 1 number
+        validator: {
+            validatePassword: async (password: string) => {
+                const isStrong = password.length >= 8 &&
+                    /[A-Z].*[A-Z]/.test(password) && // At least 2 capital letters
+                    /[0-9]/.test(password);         // At least 1 number
 
-        //         if (!isStrong) {
-        //             throw new APIError("BAD_REQUEST", {
-        //                 message: "Your password is not strong enough. Add more words that are less common. Capitalize more than the first letter."
-        //             });
-        //         }
-        //     }
-        // }
+                if (!isStrong) {
+                    throw new APIError("BAD_REQUEST", {
+                        message: "Your password is not strong enough. Add more words that are less common. Capitalize more than the first letter."
+                    });
+                }
+            }
+        }
     },
     secondaryStorage: {
         get: async (key) => await redis.get(key),

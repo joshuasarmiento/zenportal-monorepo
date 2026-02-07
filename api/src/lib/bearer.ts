@@ -5,6 +5,7 @@ import { users } from '../db/schema.js';
 import { eq, or } from 'drizzle-orm';
 import { User } from '../types.js';
 import { redis } from './redis.js';
+import { hashApiKey } from './crypto.js';
 
 type BearerUser = {
   user: User;
@@ -18,13 +19,16 @@ const verifyApiKey = (requiredAccess: 'read' | 'write') => {
     // 1. Use Hono's helper to extract the token from the 'Authorization: Bearer <token>' header.
     const authHandler = bearerAuth({
       verifyToken: async (token) => {
+        // Hash the incoming token to match DB storage
+        const hashedToken = hashApiKey(token);
+
         // Check Redis Cache
-        const cacheKey = `auth:api-key:${token}`;
+        const cacheKey = `auth:api-key:${hashedToken}`;
         const cachedUser = await redis.get(cacheKey);
 
         if (cachedUser) {
           const parsedUser = JSON.parse(cachedUser);
-          const access: 'read' | 'write' = parsedUser.apiKeyWrite === token ? 'write' : 'read';
+          const access: 'read' | 'write' = parsedUser.apiKeyWrite === hashedToken ? 'write' : 'read';
 
           // Verify access level matches requirements (or exceeds them)
           // Write key grants both read and write. Read key only grants read.
@@ -40,8 +44,8 @@ const verifyApiKey = (requiredAccess: 'read' | 'write') => {
         // If 'write' access is required, a write key MUST be used.
         // If 'read' access is required, EITHER a read or a write key is acceptable.
         const searchConditions = requiredAccess === 'write'
-          ? [eq(users.apiKeyWrite, token)]
-          : [eq(users.apiKeyRead, token), eq(users.apiKeyWrite, token)];
+          ? [eq(users.apiKeyWrite, hashedToken)]
+          : [eq(users.apiKeyRead, hashedToken), eq(users.apiKeyWrite, hashedToken)];
 
         // 3. Find the user in the database who owns this API key.
         const user = await db.query.users.findFirst({
@@ -54,7 +58,7 @@ const verifyApiKey = (requiredAccess: 'read' | 'write') => {
         }
 
         // 5. Determine the access level granted by this specific token.
-        const access: 'read' | 'write' = user.apiKeyWrite === token ? 'write' : 'read';
+        const access: 'read' | 'write' = user.apiKeyWrite === hashedToken ? 'write' : 'read';
 
         // Cache the user in Redis for 60 seconds
         await redis.set(cacheKey, JSON.stringify(user), 'EX', 60);

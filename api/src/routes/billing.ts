@@ -14,42 +14,81 @@ app.use('*', requireAuth);
 app.get('/subscription', async (c) => {
   const userId = c.get('userId');
 
+  // 1. Fetch User
   const user = await db.query.users.findFirst({
     where: eq(users.id, userId),
-    columns: { dodoPaymentsCustomerId: true, tier: true }
+    columns: { dodoPaymentsCustomerId: true, tier: true, email: true }
   });
 
-  if (!user?.dodoPaymentsCustomerId) {
+  if (!user) return c.json({ error: 'User not found' }, 404);
+
+  let customerId = user.dodoPaymentsCustomerId;
+
+  // 2. Self-Healing: If no Customer ID, try to find by email
+  if (!customerId && user.email) {
+    try {
+      console.log(`[Billing] No Customer ID for ${userId}. Looking up by email: ${user.email}`);
+      const customers = await dodo.customers.list({ email: user.email });
+      const foundCustomer = customers.items?.[0];
+
+      if (foundCustomer) {
+        console.log(`[Billing] Found Dodo Customer ID ${foundCustomer.customer_id}. Syncing DB...`);
+        customerId = foundCustomer.customer_id;
+
+        // Update DB immediately
+        await db.update(users)
+          .set({ dodoPaymentsCustomerId: customerId })
+          .where(eq(users.id, userId));
+      }
+    } catch (err) {
+      console.error('[Billing] Customer lookup failed:', err);
+    }
+  }
+
+  // If still no customer ID, they likely haven't subscribed yet
+  if (!customerId) {
     return c.json({ subscription: null });
   }
 
   try {
-    // Fetch active subscriptions from Dodo
-    // The SDK uses pagination, result has 'items' array
+    // 3. Fetch active subscriptions from Dodo
     const response = await dodo.subscriptions.list({
-      customer_id: user.dodoPaymentsCustomerId,
+      customer_id: customerId,
       status: 'active',
       page_size: 1
     });
-    // @ts-ignore - Handle type overlap if necessary, but SDK returns items
+
+    // @ts-ignore
     const activeSub = response.items?.[0];
 
-    if (!activeSub) {
+    // 4. Synchronization Logic
+    if (activeSub) {
+      // If we found an active sub but local tier is free, fix it!
+      if (user.tier !== 'pro') {
+        console.log(`[Billing] Detected active subscription for ${userId} but Tier was Free. Upgrading...`);
+        await db.update(users).set({ tier: 'pro' }).where(eq(users.id, userId));
+      }
+
+      return c.json({
+        subscription: {
+          status: activeSub.status,
+          plan: 'pro',
+          period_end: activeSub.next_billing_date ? new Date(activeSub.next_billing_date).getTime() : null,
+          id: activeSub.subscription_id
+        }
+      });
+    } else {
+      // No active subscription found
+      // If local tier is pro, we might need to downgrade? 
+      // safer to leave it for now or check for 'past_due' etc, but strictly speacking if no active sub, they are free.
+      // For safety, let's not auto-downgrade here without more checks (could be a grace period), 
+      // but we return null subscription.
       return c.json({ subscription: null });
     }
 
-    return c.json({
-      subscription: {
-        status: activeSub.status,
-        plan: 'pro', // Assuming simple pro plan for now
-        period_end: activeSub.next_billing_date ? new Date(activeSub.next_billing_date).getTime() : null,
-        id: activeSub.subscription_id
-      }
-    });
-
   } catch (error) {
     console.error('Failed to fetch Dodo subscription:', error);
-    // Fallback to local tier status if API fails
+    // Fallback: If API fails but we locally think they are pro, let them be pro
     if (user.tier === 'pro') {
       return c.json({ subscription: { status: 'active', plan: 'pro' } });
     }

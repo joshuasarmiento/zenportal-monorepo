@@ -7,6 +7,7 @@ import { sendAuthEmail } from '../lib/email.js';
 import { z } from 'zod';
 import { zValidator } from '@hono/zod-validator';
 import { v4 as uuidv4 } from 'uuid';
+import { hashApiKey } from '../lib/crypto.js';
 
 const app = new Hono<{ Variables: AuthVariables }>();
 
@@ -75,16 +76,24 @@ app.post('/api-key', async (c) => {
     return c.json({ error: 'API access is a Pro feature. Please upgrade your account.' }, 403);
   }
 
-  const newKeys = {
-    apiKeyRead: `zen_read_${uuidv4()}`,
-    apiKeyWrite: `zen_write_${uuidv4()}`,
-  };
+  const rawReadKey = `zen_read_${uuidv4()}`;
+  const rawWriteKey = `zen_write_${uuidv4()}`;
+
+  const hashedReadKey = hashApiKey(rawReadKey);
+  const hashedWriteKey = hashApiKey(rawWriteKey);
 
   await db.update(users)
-    .set(newKeys)
+    .set({
+      apiKeyRead: hashedReadKey,
+      apiKeyWrite: hashedWriteKey
+    })
     .where(eq(users.id, userId));
 
-  return c.json(newKeys);
+  // Return RAW keys to user one-time
+  return c.json({
+    apiKeyRead: rawReadKey,
+    apiKeyWrite: rawWriteKey,
+  });
 });
 
 // POST /set-password - Set password for authenticated user (Trusted Flow)
