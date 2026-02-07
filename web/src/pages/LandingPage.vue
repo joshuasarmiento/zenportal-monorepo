@@ -570,7 +570,7 @@ useHead({
     </section>
 
     <section class="py-32 px-6 bg-foreground text-background text-center relative overflow-hidden">
-       <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-64 bg-blue-600/20 blur-[100px] pointer-events-none rounded-full"></div>
+       <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-64 bg-linear-to-r from-blue-600/20 to-purple-600/20 blur-[100px] pointer-events-none rounded-full"></div>
 
        <div class="relative z-10 max-w-3xl mx-auto">
           <Motion
