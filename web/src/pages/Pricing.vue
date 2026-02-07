@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Check, X, Sparkles } from 'lucide-vue-next'
 import BackgroundNoise from '@/components/ui/background-noise/BackgroundNoise.vue'
+import { ref, computed } from 'vue'
 
 const plans = [
   {
@@ -38,7 +39,16 @@ const plans = [
     variant: 'default',
     popular: true
   }
+  // Pro Plan is dynamic now, removed from static array to handle reactivity better in template or computed
 ]
+
+const billingInterval = ref<'monthly' | 'yearly'>('monthly')
+
+
+const proPrice = computed(() => billingInterval.value === 'monthly' ? '12' : '10')
+const proPeriod = computed(() => billingInterval.value === 'monthly' ? '/month' : '/month')
+const billingDescription = computed(() => billingInterval.value === 'yearly' ? 'billed yearly' : 'billed monthly')
+
 
 const handleSignUp = () => {
   window.open(`${import.meta.env.VITE_APP_URL}/sign-up`, '_blank')
@@ -85,6 +95,22 @@ useHead({
           anytime.
         </Motion>
       </div>
+
+      <div class="flex justify-center mb-10">
+        <div class="flex items-center gap-3 bg-muted/50 p-1.5 rounded-full border border-border/50">
+          <span class="text-sm font-medium px-3 py-1 rounded-full transition-all cursor-pointer"
+            :class="billingInterval === 'monthly' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
+            @click="billingInterval = 'monthly'">
+            Monthly
+          </span>
+          <span class="text-sm font-medium px-3 py-1 rounded-full transition-all cursor-pointer flex items-center gap-2"
+            :class="billingInterval === 'yearly' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
+            @click="billingInterval = 'yearly'">
+            Yearly <span class="text-[10px] font-bold text-green-600 bg-green-100 px-1.5 py-0.5 rounded-full dark:bg-green-900/30 dark:text-green-400">Save 17%</span>
+          </span>
+        </div>
+      </div>
+
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-start">
 
@@ -160,10 +186,14 @@ useHead({
               <CardTitle class="text-2xl font-bold">Pro</CardTitle>
               <CardDescription class="text-base text-primary-foreground/70">Scale your freelance business.
               </CardDescription>
-              <div class="mt-6 flex items-baseline gap-1">
-                <span class="text-5xl font-bold tracking-tighter">$ {{ plans[1]?.price }}</span>
-                <span class="text-primary-foreground/70 font-medium">/month</span>
+              <div class="mt-6 flex flex-col items-start">
+                 <div class="flex items-baseline gap-1">
+                  <span class="text-5xl font-bold tracking-tighter">$ {{ proPrice }}</span>
+                  <span class="text-primary-foreground/70 font-medium">{{ proPeriod }}</span>
+                 </div>
+                 <p class="text-xs text-primary-foreground/50 mt-1 font-medium capitalize">{{ billingDescription }}</p>
               </div>
+
             </CardHeader>
 
             <CardContent class="flex-1 relative z-10">
@@ -198,10 +228,9 @@ useHead({
         class="mt-16 text-center"
       >
         <p class="text-sm text-muted-foreground flex items-center justify-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-green-500"></span> 30-day money-back guarantee. No questions asked.
+          <span class="w-2 h-2 rounded-full bg-green-500"></span> No questions asked.
         </p>
       </Motion>
-
     </main>
   </div>
 </template>

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Crown, Loader2, FileText, CheckCircle2, XCircle, Download } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
@@ -19,6 +20,10 @@ const loading = ref(false)
 const loadingSubscription = ref(true)
 const subscription = ref<any>(null)
 const transactions = ref<any[]>([]) 
+const billingInterval = ref<'monthly' | 'yearly'>('monthly')
+
+const upgradeButtonText = computed(() => billingInterval.value === 'monthly' ? '$12/mo' : '$120/year')
+
 
 const isPro = computed(() => 
   subscription.value?.status === 'active' || 
@@ -70,8 +75,9 @@ const handleUpgrade = async () => {
   loading.value = true
   try {
       const { data, error } = await authClient.dodopayments.checkoutSession({
-          slug: 'pro-plan', 
+          slug: billingInterval.value === 'monthly' ? 'pro-plan' : 'pro-plan-yearly', 
       })
+
 
       if (error) {
            toast.error(error.message || "Failed to start checkout")
@@ -182,13 +188,30 @@ const formatCurrency = (amount: number, currency: string = 'USD') => {
                 </div>
                 <h4 class="text-foreground font-bold text-xl mb-3 tracking-tight">Upgrade to Agency Pro</h4>
                 <p class="text-muted-foreground text-sm mb-8 max-w-sm mx-auto leading-relaxed">
-                  Remove limits and look professional with custom brandi  ng, unlimited clients, and video uploads.
+                  Remove limits and look professional with custom branding, unlimited clients, and video uploads.
                 </p>
+
+                <div class="flex justify-center mb-6">
+                  <div class="flex items-center gap-3 bg-muted p-1 rounded-full border border-border/50">
+                    <span class="text-xs font-medium px-3 py-1 rounded-full transition-all cursor-pointer"
+                      :class="billingInterval === 'monthly' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
+                      @click="billingInterval = 'monthly'">
+                      Monthly
+                    </span>
+                    <span class="text-xs font-medium px-3 py-1 rounded-full transition-all cursor-pointer flex items-center gap-2"
+                      :class="billingInterval === 'yearly' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'"
+                      @click="billingInterval = 'yearly'">
+                      Yearly <span class="text-[9px] font-bold text-green-600 bg-green-100 px-1.5 py-0.5 rounded-full dark:bg-green-900/30 dark:text-green-400">Save 17%</span>
+                    </span>
+                  </div>
+                </div>
+
                 <Button size="lg" @click="handleUpgrade" :disabled="loading"
                   class="h-12 px-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 font-bold transition-all hover:scale-105 shadow-lg shadow-primary/20">
                   <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
-                  {{ loading ? 'Processing...' : 'Subscribe for $12/mo' }}
+                  {{ loading ? 'Processing...' : `Subscribe for ${upgradeButtonText}` }}
                 </Button>
+
                 <div class="mt-6 flex flex-col items-center gap-1">
                     <span class="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Secure payment via Dodo</span>
                 </div>
