@@ -35,7 +35,7 @@ useHead({
         <h1
           class="text-5xl md:text-7xl font-semibold tracking-tighter text-foreground mb-8 text-balance leading-[0.95]">
           Built by Filipinos, <br />
-          for the <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Global
+          for the <span class="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Global
             Economy.</span>
         </h1>
 
@@ -82,7 +82,7 @@ useHead({
 
         <div class="relative space-y-6">
           <div
-            class="absolute left-8 top-8 bottom-8 w-px bg-gradient-to-b from-blue-500/50 to-purple-500/50 hidden md:block">
+            class="absolute left-8 top-8 bottom-8 w-px bg-linear-to-b from-blue-500/50 to-purple-500/50 hidden md:block">
           </div>
 
           <Card

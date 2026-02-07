@@ -51,7 +51,7 @@ useHead({
         class="text-5xl md:text-7xl font-semibold tracking-tighter text-foreground mb-8 text-balance leading-[0.95]"
       >
         Everything you need to <br/>
-        <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">fire your micromanager.</span>
+        <span class="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">fire your micromanager.</span>
       </Motion>
       <Motion
         is="p"
@@ -75,7 +75,7 @@ useHead({
       >
         
         <div class="order-2 md:order-1 relative group perspective-1000">
-          <div class="absolute -inset-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-[2rem] blur-2xl opacity-0 group-hover:opacity-100 transition duration-700"></div>
+          <div class="absolute -inset-4 bg-linear-to-r from-blue-500/10 to-purple-500/10 rounded-4xl blur-2xl opacity-0 group-hover:opacity-100 transition duration-700"></div>
           
           
           <div class="relative bg-card border border-border rounded-xl shadow-2xl overflow-hidden ring-1 ring-border/5 transform transition-transform duration-500 group-hover:rotate-y-2">
@@ -156,7 +156,7 @@ useHead({
         </div>
 
         <div class="relative group perspective-1000">
-           <div class="absolute -inset-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-[2rem] blur-2xl opacity-0 group-hover:opacity-100 transition duration-700"></div>
+           <div class="absolute -inset-4 bg-linear-to-r from-green-500/10 to-emerald-500/10 rounded-4xl blur-2xl opacity-0 group-hover:opacity-100 transition duration-700"></div>
           
            <div class="relative bg-card border border-border rounded-xl shadow-2xl p-6 ring-1 ring-border/5 transform transition-transform duration-500 hover:rotate-x-2">
               <div class="space-y-4">
@@ -234,7 +234,7 @@ useHead({
             </Card>
 
             <Card class="md:col-span-3 bg-primary text-primary-foreground border-none overflow-hidden relative">
-                <div class="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
+                <div class="absolute inset-0 bg-linear-to-r from-blue-600/20 to-purple-600/20"></div>
                 <CardContent class="flex flex-col md:flex-row items-center justify-between p-8 md:p-12 gap-6 relative z-10">
                     <div class="text-center md:text-left">
                         <h3 class="text-2xl md:text-3xl font-bold mb-2 tracking-tight">Ready to look professional?</h3>

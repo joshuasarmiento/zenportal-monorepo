@@ -138,7 +138,7 @@ useHead({
           class="text-5xl md:text-7xl font-semibold tracking-tighter text-foreground mb-8 text-balance leading-[0.95] md:leading-[0.9]"
         >
           Hindi ka lang <span class="text-muted-foreground decoration-border line-through decoration-2">Employee.</span><br />
-          <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Business Partner</span> ka.
+          <span class="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Business Partner</span> ka.
         </Motion>
 
         <Motion
@@ -174,7 +174,7 @@ useHead({
           class="relative w-full max-w-5xl mx-auto perspective-1000 group"
           style="perspective: 1000px" 
         >
-          <div class="absolute -inset-4 bg-gradient-to-t from-blue-500/10 via-purple-500/10 to-transparent rounded-[2rem] blur-3xl opacity-0 group-hover:opacity-100 transition duration-1000"></div>
+          <div class="absolute -inset-4 bg-linear-to-t from-blue-500/10 via-purple-500/10 to-transparent rounded-4xl blur-3xl opacity-0 group-hover:opacity-100 transition duration-1000"></div>
 
           <div class="relative rounded-xl border border-border bg-card shadow-2xl overflow-hidden transform transition-all duration-700 group-hover:rotate-x-2 origin-center ring-1 ring-border/5">
             

@@ -84,7 +84,7 @@ const copyLink = (token: string) => {
       > 
         <div class="absolute inset-0 bg-orange-500/5 blur-3xl group-hover:bg-orange-500/10 transition-colors"></div>
 
-        <div class="relative w-14 h-14 bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm ring-1 ring-orange-200 dark:ring-orange-800">
+        <div class="relative w-14 h-14 bg-linear-to-br from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm ring-1 ring-orange-200 dark:ring-orange-800">
           <Crown class="h-6 w-6 text-orange-600 dark:text-orange-400" />
         </div>
         <span class="font-bold text-lg tracking-tight text-foreground mb-1">Unlock Unlimited</span>

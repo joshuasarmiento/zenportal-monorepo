@@ -172,7 +172,7 @@ onMounted(async () => {
         <main :class="activeTheme.container">
             <Card :class="activeTheme.card">
                 <div class="relative">
-                    <div :class="`h-40 w-full bg-gradient-to-r ${themeColor?.gradient} ${activeTheme.banner}`"></div>
+                    <div :class="`h-40 w-full bg-linear-to-r ${themeColor?.gradient} ${activeTheme.banner}`"></div>
 
                     <div class="px-8 pb-8 -mt-20 flex flex-col md:flex-row gap-8 items-start md:items-end relative z-10">
                         

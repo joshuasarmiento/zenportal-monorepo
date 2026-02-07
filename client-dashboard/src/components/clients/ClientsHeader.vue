@@ -66,7 +66,7 @@ const usagePercent = computed(() => {
                 class="h-9 px-4 rounded-full font-medium transition-all shadow-sm"
                 :class="[
                   isLimitReached 
-                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:opacity-90 border-0' 
+                    ? 'bg-linear-to-r from-orange-500 to-red-500 text-white hover:opacity-90 border-0' 
                     : 'bg-primary text-primary-foreground hover:bg-primary/90'
                 ]"
               >
