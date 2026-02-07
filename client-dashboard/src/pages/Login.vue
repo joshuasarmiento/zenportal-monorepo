@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Zap, Loader2, ArrowRight } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import OTPform from '@/components/OTPform.vue'
+import BackgroundNoise from '@/components/ui/background-noise/BackgroundNoise.vue'
 
 const router = useRouter()
 const isLoading = ref(false)
@@ -61,11 +62,7 @@ const handleVerifyOtp = async () => {
     <div
         class="min-h-screen flex flex-col items-center justify-center p-6 md:p-10 bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 relative overflow-hidden">
 
-        <div class="fixed inset-0 z-0 pointer-events-none">
-            <div
-                class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay">
-            </div>
-        </div>
+        <BackgroundNoise />
 
         <div class="w-full max-w-md relative z-10">
             <div class="flex flex-col gap-6">
@@ -166,14 +163,6 @@ const handleVerifyOtp = async () => {
                                         Sign up
                                     </router-link>
                                 </div>
-
-                                <p class="text-center text-xs text-zinc-500 text-balance">
-                                    By clicking continue, you agree to our <router-link to="/terms"
-                                        class="underline hover:text-zinc-900 dark:hover:text-white">Terms of Service</router-link>
-                                    and <router-link to="/privacy-policy"
-                                        class="underline hover:text-zinc-900 dark:hover:text-white">Privacy
-                                        Policy</router-link>.
-                                </p>
                             </div>
 
                         </div>

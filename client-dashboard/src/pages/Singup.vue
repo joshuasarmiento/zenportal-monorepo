@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2, Zap, ShieldCheck, UserPlus, ShieldAlert } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
+import OTPform from '@/components/OTPform.vue'
+import BackgroundNoise from '@/components/ui/background-noise/BackgroundNoise.vue'
 
 const router = useRouter()
 const isLoading = ref(false)
@@ -88,9 +90,7 @@ const handleVerifySignup = async () => {
 <template>
   <div class="min-h-screen flex flex-col items-center justify-center p-6 md:p-10 bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 relative overflow-hidden">
     
-    <div class="fixed inset-0 z-0 pointer-events-none">
-       <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
-    </div>
+    <BackgroundNoise />
 
     <div class="w-full max-w-md relative z-10">
       <div class="flex flex-col gap-6">
@@ -99,15 +99,15 @@ const handleVerifySignup = async () => {
             
             <div class="p-8 md:p-10">
               <div class="flex flex-col gap-6">
-                <div class="flex flex-col items-center gap-2 text-center">
+                <div class="flex flex-col items-center gap-2 text-center" v-if="!isOtpStep">
                   <div class="h-10 w-10 bg-zinc-900 dark:bg-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-zinc-500/20 dark:shadow-white/20">
                     <Zap class="h-5 w-5 text-white dark:text-zinc-900 fill-current" />
                   </div>
                   <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
-                    {{ isOtpStep ? 'Security Check' : 'Create Account' }}
+                    Create Account
                   </h1>
                   <p class="text-zinc-500 dark:text-zinc-400 text-sm">
-                    {{ isOtpStep ? `Confirm the code sent to ${form.email}` : 'Join ZenPortal to manage your freelance business' }}
+                    Join ZenPortal to manage your freelance business
                   </p>
                 </div>
 
@@ -142,30 +142,16 @@ const handleVerifySignup = async () => {
                   </Button>
                 </form>
 
-                <form v-else @submit.prevent="handleVerifySignup" class="grid gap-6">
-                  <div class="grid gap-2">
-                    <Label for="otp" class="text-center font-bold tracking-widest text-xs uppercase text-zinc-500">Verification Code</Label>
-                    <Input
-                      id="otp"
-                      v-model="otp"
-                      maxlength="6"
-                      placeholder="000000"
-                      class="text-center text-3xl h-16 tracking-[0.3em] font-mono rounded-2xl bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800"
-                      required
-                    />
-                  </div>
-                  <Button type="submit" class="w-full h-11 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 font-bold" :disabled="isLoading">
-                    <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
-                    <span v-else class="flex items-center justify-center">
-                      <ShieldCheck class="mr-2 h-4 w-4" /> Complete Signup
-                    </span>
-                  </Button>
-                  <button type="button" @click="isOtpStep = false" class="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-white underline underline-offset-4 transition-colors">
-                    Wait, that's the wrong email
-                  </button>
-                </form>
+                <OTPform 
+                    v-else
+                    :email="form.email"
+                    :is-loading="isLoading"
+                    @verify="(code) => { otp = code; handleVerifySignup() }"
+                    @resend="async () => { await authClient.emailOtp.sendVerificationOtp({ email: form.email, type: 'email-verification' }); toast.success('Code resent') }"
+                    @back="isOtpStep = false"
+                />
 
-                <template v-if="!isOtpStep">
+                <template v-if="isOtpStep">
                   <div class="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-zinc-200 dark:after:border-zinc-800">
                     <span class="relative z-10 bg-white dark:bg-zinc-900 px-2 text-zinc-400 uppercase text-[10px] font-bold tracking-widest">
                       Or join with

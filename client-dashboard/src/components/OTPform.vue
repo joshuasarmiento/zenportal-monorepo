@@ -64,7 +64,7 @@ const handleSubmit = (e: Event) => {
             v-model="otpValue"
             :maxlength="6"
             required
-            container-class="justify-center gap-2"
+            class="justify-center gap-2"
           >
             <InputOTPGroup>
               <InputOTPSlot :index="0" class="h-12 w-10 text-lg md:h-14 md:w-12 md:text-xl" />
@@ -92,9 +92,5 @@ const handleSubmit = (e: Event) => {
         </Field>
       </FieldGroup>
     </form>
-    <FieldDescription class="px-6 text-center text-xs">
-      By clicking verify, you agree to our <a href="/terms" class="underline hover:text-zinc-900 dark:hover:text-white">Terms of Service</a>
-      and <a href="/privacy-policy" class="underline hover:text-zinc-900 dark:hover:text-white">Privacy Policy</a>.
-    </FieldDescription>
   </div>
 </template>

@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'vue-sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Loader2, KeyRound } from 'lucide-vue-next'
+import BackgroundNoise from '@/components/ui/background-noise/BackgroundNoise.vue'
 
 const router = useRouter()
 const email = ref('')
@@ -38,9 +39,7 @@ const handleRequestReset = async () => {
 <template>
     <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 relative overflow-hidden">
         
-        <div class="fixed inset-0 z-0 pointer-events-none">
-           <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
-        </div>
+        <BackgroundNoise />
 
         <Card class="w-full max-w-sm relative z-10 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl shadow-zinc-200/50 dark:shadow-black/50">
             <CardHeader class="pb-6">
@@ -54,9 +53,9 @@ const handleRequestReset = async () => {
                 <form @submit.prevent="handleRequestReset" class="space-y-4">
                     <div class="space-y-2">
                         <Label class="font-semibold text-sm">Email Address</Label>
-                        <Input v-model="email" type="email" required placeholder="name@example.com" class="bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800 h-10" />
+                        <Input v-model="email" type="email" required placeholder="m@example.com" class="bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800 h-10" />
                     </div>
-                    <Button type="submit" class="w-full h-10 rounded-full font-bold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200" :disabled="isLoading">
+                    <Button type="submit" class="w-full h-10 rounded-md font-bold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200" :disabled="isLoading">
                         <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
                         {{ isLoading ? 'Sending...' : 'Send Reset Code' }}
                     </Button>

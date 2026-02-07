@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'vue-sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Loader2, ShieldCheck } from 'lucide-vue-next'
+import BackgroundNoise from '@/components/ui/background-noise/BackgroundNoise.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -19,7 +20,7 @@ const isLoading = ref(false)
 
 const handleCompleteReset = async () => {
     // If the URL has a token (magic link style), or if we are using OTP flow
-    const token = (route.query.token as string) || otp.value
+    const token = route.query.token as string
     
     if (!token && !otp.value) {
         toast.error("Invalid or missing reset token")
@@ -28,15 +29,24 @@ const handleCompleteReset = async () => {
 
     isLoading.value = true
     try {
-        // Depending on your auth setup, this might be `resetPassword` or `verifyEmail`
-        // Assuming standard BetterAuth reset flow with OTP or Token
-        const { error } = await authClient.resetPassword({
-            newPassword: newPassword.value,
-            token: token, // This handles both token from URL or OTP if your backend treats them similarly, otherwise adjust based on your specific authClient method signature for OTP.
-            // If using OTP specifically:
-            // otp: otp.value, 
-            // email: email.value
-        })
+        let error;
+        
+        if (token) {
+             // Link Flow
+            const res = await authClient.resetPassword({
+                newPassword: newPassword.value,
+                token: token
+            })
+            error = res.error;
+        } else {
+            // OTP Flow
+            const res = await authClient.emailOtp.resetPassword({
+                password: newPassword.value,
+                email: email.value,
+                otp: otp.value
+            })
+            error = res.error;
+        }
 
         if (error) {
             if (error.code === "PASSWORD_COMPROMISED") { 
@@ -56,11 +66,9 @@ const handleCompleteReset = async () => {
 <template>
     <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 relative overflow-hidden">
         
-        <div class="fixed inset-0 z-0 pointer-events-none">
-           <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
-        </div>
+        <BackgroundNoise />
 
-        <Card class="w-full max-w-sm relative z-10 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl shadow-zinc-200/50 dark:shadow-black/50">
+        <Card class="w-full pb-10 max-w-sm relative z-10 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl shadow-zinc-200/50 dark:shadow-black/50">
             <CardHeader class="pb-6">
                 <div class="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center mb-4">
                     <ShieldCheck class="h-5 w-5 text-zinc-900 dark:text-white" />
@@ -82,7 +90,7 @@ const handleCompleteReset = async () => {
                         <Label class="font-semibold text-sm">New Password</Label>
                         <Input v-model="newPassword" type="password" required class="bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800 h-10" />
                     </div>
-                    <Button type="submit" class="w-full h-10 rounded-full font-bold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200" :disabled="isLoading">
+                    <Button type="submit" class="w-full h-10 rounded-md font-bold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200" :disabled="isLoading">
                         <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
                         {{ isLoading ? 'Resetting...' : 'Update Password' }}
                     </Button>
