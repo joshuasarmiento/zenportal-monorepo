@@ -20,6 +20,7 @@ const handleSignUp = () => {
 }
 
 import { useHead } from '@unhead/vue'
+import { Motion } from 'motion-v'
 
 useHead({
   title: 'Features - Proof of Work, Not Spyware',
@@ -42,17 +43,36 @@ useHead({
           Product Tour
         </Badge>
       </div>
-      <h1 class="text-5xl md:text-7xl font-semibold tracking-tighter text-zinc-900 dark:text-white mb-8 text-balance leading-[0.95]">
+      <Motion
+        is="h1"
+        :initial="{ opacity: 0, y: 20 }"
+        :animate="{ opacity: 1, y: 0 }"
+        :transition="{ duration: 0.5, delay: 0.2 }"
+        class="text-5xl md:text-7xl font-semibold tracking-tighter text-zinc-900 dark:text-white mb-8 text-balance leading-[0.95]"
+      >
         Everything you need to <br/>
         <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">fire your micromanager.</span>
-      </h1>
-      <p class="text-lg md:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed text-balance">
+      </Motion>
+      <Motion
+        is="p"
+        :initial="{ opacity: 0, y: 20 }"
+        :animate="{ opacity: 1, y: 0 }"
+        :transition="{ duration: 0.5, delay: 0.3 }"
+        class="text-lg md:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed text-balance"
+      >
         Tools designed to build "Trust Capital" so you can work asynchronously and get paid what you're worth.
-      </p>
+      </Motion>
     </section>
 
     <section class="relative z-10 max-w-7xl mx-auto px-6 mb-32">
-      <div class="grid md:grid-cols-2 gap-16 items-center">
+      <Motion
+        is="div"
+        :initial="{ opacity: 0, y: 50 }"
+        :whileInView="{ opacity: 1, y: 0 }"
+        :viewport="{ once: true, margin: '-100px' }"
+        :transition="{ duration: 0.8 }"
+        class="grid md:grid-cols-2 gap-16 items-center"
+      >
         
         <div class="order-2 md:order-1 relative group perspective-1000">
           <div class="absolute -inset-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-[2rem] blur-2xl opacity-0 group-hover:opacity-100 transition duration-700"></div>
@@ -113,7 +133,7 @@ useHead({
             <li class="flex items-center gap-3"><div class="h-1.5 w-1.5 rounded-full bg-blue-500"></div> <strong>New:</strong> Direct Google Drive Embedding</li>
           </ul>
         </div>
-      </div>
+      </Motion>
     </section>
 
     <section class="relative z-10 max-w-7xl mx-auto px-6 mb-32">

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -96,6 +96,7 @@ const faqs = [
 ]
 
 import { useHead } from '@unhead/vue'
+import { Motion } from 'motion-v'
 
 useHead({
   title: 'ZenPortal - Free Client Portal for Filipino VAs & Freelancers',
@@ -116,25 +117,47 @@ useHead({
       <div class="max-w-7xl mx-auto px-6 text-center">
 
         <div class="flex justify-center mb-8">
-          <div class="group relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm transition-transform hover:scale-105 cursor-default">
+          <Motion
+            :initial="{ opacity: 0, y: -20 }"
+            :animate="{ opacity: 1, y: 0 }"
+            :transition="{ duration: 0.5, delay: 0.2 }"
+            class="group relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm transition-transform hover:scale-105 cursor-default"
+          >
             <span class="relative flex h-2 w-2">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
             </span>
             <span class="text-xs font-semibold tracking-wide text-zinc-600 dark:text-zinc-300 uppercase">Gawang Pinoy 🇵🇭</span>
-          </div>
+          </Motion>
         </div>
 
-        <h1 class="text-5xl md:text-7xl font-semibold tracking-tighter text-zinc-900 dark:text-white mb-8 text-balance leading-[0.95] md:leading-[0.9]">
+        <Motion
+          is="h1"
+          :initial="{ opacity: 0, y: 20, filter: 'blur(10px)' }"
+          :animate="{ opacity: 1, y: 0, filter: 'blur(0px)' }"
+          :transition="{ duration: 0.7, delay: 0.3, type: 'spring' }"
+          class="text-5xl md:text-7xl font-semibold tracking-tighter text-zinc-900 dark:text-white mb-8 text-balance leading-[0.95] md:leading-[0.9]"
+        >
           Hindi ka lang <span class="text-zinc-400 decoration-zinc-300 line-through decoration-2">Employee.</span><br />
           <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Business Partner</span> ka.
-        </h1>
+        </Motion>
 
-        <p class="text-lg md:text-xl text-zinc-600 dark:text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed text-balance">
+        <Motion
+          is="p"
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.7, delay: 0.5 }"
+          class="text-lg md:text-xl text-zinc-600 dark:text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed text-balance"
+        >
           Stop acting like a <span class="text-zinc-900 dark:text-white font-medium">$3/hr assistant</span>. Use the tools top-tier freelancers use to manage clients, track work, and get paid what they deserve.
-        </p>
+        </Motion>
 
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-24">
+        <Motion
+          :initial="{ opacity: 0, scale: 0.9 }"
+          :animate="{ opacity: 1, scale: 1 }"
+          :transition="{ duration: 0.5, delay: 0.7, type: 'spring' }"
+          class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-24"
+        >
           <Button size="lg"
             class="h-12 px-8 text-base rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all duration-300 shadow-[0_0_20px_-5px_rgba(0,0,0,0.3)] dark:shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]"
             as-child>
@@ -143,32 +166,18 @@ useHead({
               <ArrowRight class="ml-2 h-4 w-4" />
             </router-link>
           </Button>
-          
-          <!-- <div class="flex items-center gap-3">
-            <div class="flex -space-x-3">
-              <Avatar class="border-2 border-white dark:border-zinc-950 h-9 w-9 ring-1 ring-zinc-100 dark:ring-zinc-800">
-                <AvatarImage src="https://i.pravatar.cc/100?img=5" />
-              </Avatar>
-              <Avatar class="border-2 border-white dark:border-zinc-950 h-9 w-9 ring-1 ring-zinc-100 dark:ring-zinc-800">
-                <AvatarImage src="https://i.pravatar.cc/100?img=12" />
-              </Avatar>
-              <Avatar class="border-2 border-white dark:border-zinc-950 h-9 w-9 ring-1 ring-zinc-100 dark:ring-zinc-800">
-                <AvatarImage src="https://i.pravatar.cc/100?img=32" />
-              </Avatar>
-            </div>
-            <div class="flex flex-col items-start">
-               <div class="flex text-yellow-500 text-[10px]">
-                 <Star v-for="i in 5" :key="i" class="w-3 h-3 fill-current" />
-               </div>
-               <p class="text-xs font-medium text-zinc-600 dark:text-zinc-400">Built for Filipino VAs & Freelancers</p>
-            </div>
-          </div> -->
-        </div>
+        </Motion>
 
-        <div class="relative w-full max-w-5xl mx-auto perspective-1000 group">
+        <Motion
+          :initial="{ opacity: 0, rotateX: 10, y: 50, scale: 0.9 }"
+          :animate="{ opacity: 1, rotateX: 0, y: 0, scale: 1 }"
+          :transition="{ duration: 0.8, delay: 0.8, type: 'spring', bounce: 0.4 }"
+          class="relative w-full max-w-5xl mx-auto perspective-1000 group"
+          style="perspective: 1000px" 
+        >
           <div class="absolute -inset-4 bg-gradient-to-t from-blue-500/10 via-purple-500/10 to-transparent rounded-[2rem] blur-3xl opacity-0 group-hover:opacity-100 transition duration-1000"></div>
 
-          <div class="relative rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-2xl overflow-hidden transform transition-all duration-700 hover:rotate-x-2 origin-center ring-1 ring-black/5 dark:ring-white/10">
+          <div class="relative rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-2xl overflow-hidden transform transition-all duration-700 group-hover:rotate-x-2 origin-center ring-1 ring-black/5 dark:ring-white/10">
             
             <div class="h-10 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900/80 px-4 flex items-center justify-between backdrop-blur-md">
               <div class="flex gap-1.5">
@@ -367,7 +376,7 @@ useHead({
 
             </div>
           </div>
-        </div>
+        </Motion>
       </div>
     </section>
 
@@ -375,13 +384,38 @@ useHead({
       <div class="max-w-6xl px-6 mx-auto">
         <div class="text-center mb-16">
           <Badge variant="outline" class="mb-6 rounded-full border-red-200 text-red-600 bg-red-50 dark:bg-red-900/10 dark:text-red-400 dark:border-red-900/30">Reality Check</Badge>
-          <h2 class="text-3xl md:text-4xl font-semibold tracking-tighter text-zinc-900 dark:text-white mb-4">Anong klaseng VA ka?</h2>
-          <p class="text-zinc-600 dark:text-zinc-400">Clients pay cheap for "employees." They pay premium for "peace of mind."</p>
+          <Motion
+            is="h2"
+            :initial="{ opacity: 0, y: 20 }"
+            :whileInView="{ opacity: 1, y: 0 }"
+            :viewport="{ once: true }"
+            :transition="{ duration: 0.5 }"
+            class="text-3xl md:text-4xl font-semibold tracking-tighter text-zinc-900 dark:text-white mb-4"
+          >
+            Anong klaseng VA ka?
+          </Motion>
+          <Motion
+            is="p"
+            :initial="{ opacity: 0, y: 20 }"
+            :whileInView="{ opacity: 1, y: 0 }"
+            :viewport="{ once: true }"
+            :transition="{ duration: 0.5, delay: 0.1 }"
+            class="text-zinc-600 dark:text-zinc-400"
+          >
+            Clients pay cheap for "employees." They pay premium for "peace of mind."
+          </Motion>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-8 items-stretch">
            
-           <Card class="border-zinc-200 dark:border-zinc-800 shadow-none bg-white dark:bg-zinc-950 relative overflow-hidden group">
+           <Motion
+              is="div"
+              :initial="{ opacity: 0, x: -20 }"
+              :whileInView="{ opacity: 1, x: 0 }"
+              :viewport="{ once: true }"
+              :transition="{ duration: 0.6, delay: 0.2 }" 
+              class="border border-zinc-200 dark:border-zinc-800 shadow-none bg-white dark:bg-zinc-950 relative overflow-hidden group rounded-xl"
+           >
               <CardContent class="p-8">
                 <div class="flex items-center justify-between mb-8">
                    <h3 class="font-bold text-zinc-400 uppercase tracking-widest text-xs">The "Yes Sir" Employee</h3>
@@ -398,9 +432,16 @@ useHead({
                    </p>
                 </div>
               </CardContent>
-           </Card>
+           </Motion>
 
-           <Card class="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10 shadow-none relative overflow-hidden ring-1 ring-blue-500/20">
+           <Motion
+              is="div"
+              :initial="{ opacity: 0, x: 20 }"
+              :whileInView="{ opacity: 1, x: 0 }"
+              :viewport="{ once: true }"
+              :transition="{ duration: 0.6, delay: 0.3 }"
+              class="border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10 shadow-none relative overflow-hidden ring-1 ring-blue-500/20 rounded-xl"
+           >
               <CardContent class="p-8">
                 <div class="flex items-center justify-between mb-8">
                    <h3 class="font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest text-xs">The Strategic Partner</h3>
@@ -417,7 +458,7 @@ useHead({
                    </p>
                 </div>
               </CardContent>
-           </Card>
+           </Motion>
 
         </div>
       </div>
@@ -425,12 +466,34 @@ useHead({
 
     <section class="py-32 px-6 max-w-7xl mx-auto">
       <div class="mb-16 md:mb-24">
-         <h2 class="text-3xl md:text-5xl font-semibold tracking-tighter text-zinc-900 dark:text-white mb-6">Diskarteng Pinoy,<br/><span class="text-zinc-400">World-Class Tech.</span></h2>
-         <p class="text-lg text-zinc-600 dark:text-zinc-400 max-w-xl">Everything you need to look like a legitimate business of one.</p>
+         <Motion
+           is="h2"
+           :initial="{ opacity: 0, y: 20 }"
+           :whileInView="{ opacity: 1, y: 0 }"
+           :viewport="{ once: true }"
+           :transition="{ duration: 0.5 }"
+           class="text-3xl md:text-5xl font-semibold tracking-tighter text-zinc-900 dark:text-white mb-6"
+         >
+           Diskarteng Pinoy,<br/><span class="text-zinc-400">World-Class Tech.</span>
+         </Motion>
+         <Motion
+           is="p"
+           :initial="{ opacity: 0, y: 20 }"
+           :whileInView="{ opacity: 1, y: 0 }"
+           :viewport="{ once: true }"
+           :transition="{ duration: 0.5, delay: 0.1 }"
+           class="text-lg text-zinc-600 dark:text-zinc-400 max-w-xl"
+         >
+           Everything you need to look like a legitimate business of one.
+         </Motion>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-4">
-         <div v-for="(feature, idx) in features" :key="idx" 
+         <Motion v-for="(feature, idx) in features" :key="idx" 
+              :initial="{ opacity: 0, y: 20 }"
+              :whileInView="{ opacity: 1, y: 0 }"
+              :viewport="{ once: true, margin: '-50px' }"
+              :transition="{ duration: 0.5, delay: idx * 0.1 }"
               :class="['rounded-3xl p-8 relative overflow-hidden group transition-all duration-300 hover:-translate-y-1', feature.class]">
             
             <div class="relative z-10 flex flex-col h-full justify-between">
@@ -458,35 +521,87 @@ useHead({
                   <div class="w-8 h-8 rounded-full border-2 border-blue-50 bg-white flex items-center justify-center text-[10px] font-bold text-zinc-400">+</div>
                </div>
             </div>
-         </div>
+         </Motion>
       </div>
     </section>
 
     <section class="py-24 px-6 max-w-2xl mx-auto border-t border-zinc-100 dark:border-zinc-800">
        <div class="text-center mb-12">
-          <h2 class="text-2xl font-semibold text-zinc-900 dark:text-white mb-2">Frequently Asked Questions</h2>
-          <p class="text-zinc-500">Walang bolahan. Straight answers only.</p>
+          <Motion
+            is="h2"
+            :initial="{ opacity: 0, y: 20 }"
+            :whileInView="{ opacity: 1, y: 0 }"
+            :viewport="{ once: true }"
+            :transition="{ duration: 0.5 }"
+            class="text-2xl font-semibold text-zinc-900 dark:text-white mb-2"
+          >
+            Frequently Asked Questions
+          </Motion>
+          <Motion
+            is="p"
+            :initial="{ opacity: 0, y: 20 }"
+            :whileInView="{ opacity: 1, y: 0 }"
+            :viewport="{ once: true }"
+            :transition="{ duration: 0.5, delay: 0.1 }"
+            class="text-zinc-500"
+          >
+            Walang bolahan. Straight answers only.
+          </Motion>
        </div>
-       <Accordion type="single" collapsible class="w-full space-y-4">
-        <AccordionItem v-for="(faq, index) in faqs" :key="index" :value="`item-${index}`" class="border-b border-zinc-100 dark:border-zinc-800">
-          <AccordionTrigger class="text-left text-base font-medium text-zinc-900 dark:text-zinc-100 hover:text-zinc-600 dark:hover:text-zinc-300 hover:no-underline py-5">
-            {{ faq.question }}
-          </AccordionTrigger>
-          <AccordionContent class="text-zinc-600 dark:text-zinc-400 leading-relaxed text-base pb-6">
-            {{ faq.answer }}
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+       <Motion
+         is="div"
+         :initial="{ opacity: 0, y: 20 }"
+         :whileInView="{ opacity: 1, y: 0 }"
+         :viewport="{ once: true }"
+         :transition="{ duration: 0.5, delay: 0.2 }"
+         class="w-full"
+       >
+         <Accordion type="single" collapsible class="w-full space-y-4">
+          <AccordionItem v-for="(faq, index) in faqs" :key="index" :value="`item-${index}`" class="border-b border-zinc-100 dark:border-zinc-800">
+            <AccordionTrigger class="text-left text-base font-medium text-zinc-900 dark:text-zinc-100 hover:text-zinc-600 dark:hover:text-zinc-300 hover:no-underline py-5">
+              {{ faq.question }}
+            </AccordionTrigger>
+            <AccordionContent class="text-zinc-600 dark:text-zinc-400 leading-relaxed text-base pb-6">
+              {{ faq.answer }}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </Motion>
     </section>
 
     <section class="py-32 px-6 bg-zinc-950 text-white text-center relative overflow-hidden">
        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-64 bg-blue-600/20 blur-[100px] pointer-events-none rounded-full"></div>
 
        <div class="relative z-10 max-w-3xl mx-auto">
-          <h2 class="text-4xl md:text-6xl font-semibold tracking-tighter mb-8">Ready to upgrade your career?</h2>
-          <p class="text-zinc-400 text-lg mb-10">From "Helper" to "Partner." Start building your reputation today.</p>
+          <Motion
+            is="h2"
+            :initial="{ opacity: 0, y: 20 }"
+            :whileInView="{ opacity: 1, y: 0 }"
+            :viewport="{ once: true }"
+            :transition="{ duration: 0.5 }"
+            class="text-4xl md:text-6xl font-semibold tracking-tighter mb-8"
+          >
+            Ready to upgrade your career?
+          </Motion>
+          <Motion
+            is="p"
+            :initial="{ opacity: 0, y: 20 }"
+            :whileInView="{ opacity: 1, y: 0 }"
+            :viewport="{ once: true }"
+            :transition="{ duration: 0.5, delay: 0.1 }"
+            class="text-zinc-400 text-lg mb-10"
+          >
+            From "Helper" to "Partner." Start building your reputation today.
+          </Motion>
           
-          <div class="flex flex-col items-center gap-6">
+          <Motion
+            is="div"
+            :initial="{ opacity: 0, scale: 0.9 }"
+            :whileInView="{ opacity: 1, scale: 1 }"
+            :viewport="{ once: true }"
+            :transition="{ duration: 0.5, delay: 0.2, type: 'spring' }"
+            class="flex flex-col items-center gap-6"
+          >
             <Button size="lg" class="h-12 px-10 rounded-full bg-white text-black hover:bg-zinc-200 text-base font-medium transition-transform hover:scale-105" as-child>
               <router-link to="/pricing">Start for Free</router-link>
             </Button>
@@ -494,7 +609,7 @@ useHead({
                <span class="flex items-center gap-2"><ShieldCheck class="w-4 h-4" /> No credit card</span>
                <span class="flex items-center gap-2"><Zap class="w-4 h-4" /> Cancel anytime</span>
             </div>
-          </div>
+          </Motion>
        </div>
     </section>
 

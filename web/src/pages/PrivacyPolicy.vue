@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Eye, Server, ShieldCheck, FileLock } from 'lucide-vue-next'
+import { Motion } from 'motion-v'
 import { useHead } from '@unhead/vue'
 import BackgroundNoise from '@/components/ui/background-noise/BackgroundNoise.vue'
 
@@ -28,52 +29,78 @@ useHead({
 
       <div class="space-y-6 mb-16 text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2">
-          <Badge variant="outline"
-            class="rounded-full px-3 py-1 border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
-            Legal
-          </Badge>
+          <Motion
+            :initial="{ opacity: 0, y: -20 }"
+            :animate="{ opacity: 1, y: 0 }"
+            :transition="{ duration: 0.5 }"
+          >
+            <Badge variant="outline"
+              class="rounded-full px-3 py-1 border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+              Legal
+            </Badge>
+          </Motion>
         </div>
-        <h1 class="text-5xl md:text-6xl font-semibold tracking-tighter text-zinc-900 dark:text-white">Privacy Policy
-        </h1>
-        <p class="text-xl text-zinc-500 dark:text-zinc-400 max-w-2xl">
+        <Motion
+          is="h1"
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.5, delay: 0.1 }"
+          class="text-5xl md:text-6xl font-semibold tracking-tighter text-zinc-900 dark:text-white"
+        >
+          Privacy Policy
+        </Motion>
+        <Motion
+          is="p"
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.5, delay: 0.2 }"
+          class="text-xl text-zinc-500 dark:text-zinc-400 max-w-2xl"
+        >
           We process data. You control it. Simple as that.
-        </p>
-        <div class="flex items-center justify-center md:justify-start gap-2 text-sm text-zinc-400 font-mono">
+        </Motion>
+        <Motion
+          is="div"
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.5, delay: 0.3 }"
+          class="flex items-center justify-center md:justify-start gap-2 text-sm text-zinc-400 font-mono"
+        >
           <FileLock class="h-4 w-4" />
           <span>Last updated: {{ lastUpdated }}</span>
-        </div>
+        </Motion>
       </div>
 
       <div class="grid gap-12">
 
         <div class="grid md:grid-cols-3 gap-6">
-          <Card class="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 p-6 shadow-sm">
-            <div class="h-10 w-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
-              <Eye class="h-5 w-5 text-zinc-900 dark:text-white" />
-            </div>
-            <h3 class="font-bold text-lg mb-2 tracking-tight">No Tracking</h3>
-            <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">No tracking cookies. No ad sales. You
-              are the customer, not the product.</p>
-          </Card>
-          <Card class="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 p-6 shadow-sm">
-            <div class="h-10 w-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
-              <ShieldCheck class="h-5 w-5 text-zinc-900 dark:text-white" />
-            </div>
-            <h3 class="font-bold text-lg mb-2 tracking-tight">Data Processor</h3>
-            <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">We process Client Data solely on your
-              behalf and instructions.</p>
-          </Card>
-          <Card class="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 p-6 shadow-sm">
-            <div class="h-10 w-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
-              <Server class="h-5 w-5 text-zinc-900 dark:text-white" />
-            </div>
-            <h3 class="font-bold text-lg mb-2 tracking-tight">Encryption</h3>
-            <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">Data is encrypted at rest and in transit
-              (TLS 1.3).</p>
-          </Card>
+          <Motion
+            v-for="(_card, index) in [0, 1, 2]"
+            :key="index"
+            :initial="{ opacity: 0, y: 20 }"
+            :animate="{ opacity: 1, y: 0 }"
+            :transition="{ duration: 0.5, delay: 0.4 + (index * 0.1) }"
+          >
+            <Card class="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 p-6 shadow-sm h-full">
+              <div class="h-10 w-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                <component :is="[Eye, ShieldCheck, Server][index]" class="h-5 w-5 text-zinc-900 dark:text-white" />
+              </div>
+              <h3 class="font-bold text-lg mb-2 tracking-tight">{{ ['No Tracking', 'Data Processor', 'Encryption'][index] }}</h3>
+              <p class="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">{{ [
+                'No tracking cookies. No ad sales. You are the customer, not the product.',
+                'We process Client Data solely on your behalf and instructions.',
+                'Data is encrypted at rest and in transit (TLS 1.3).'
+              ][index] }}</p>
+            </Card>
+          </Motion>
         </div>
 
-        <div class="space-y-12 text-zinc-600 dark:text-zinc-400 leading-relaxed">
+        <Motion
+          is="div"
+          :initial="{ opacity: 0, y: 30 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.7, delay: 0.6 }"
+          class="space-y-12 text-zinc-600 dark:text-zinc-400 leading-relaxed"
+        >
 
           <section class="space-y-4">
             <h2 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">1. Your Role vs. Our Role
@@ -161,7 +188,7 @@ useHead({
             </p>
           </section>
 
-        </div>
+        </Motion>
       </div>
     </div>
   </div>

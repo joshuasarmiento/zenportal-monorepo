@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Gavel, ShieldAlert, CreditCard, Scale, Lock } from 'lucide-vue-next'
+import { Motion } from 'motion-v'
 import { useHead } from '@unhead/vue'
 import BackgroundNoise from '@/components/ui/background-noise/BackgroundNoise.vue'
 
@@ -28,23 +29,54 @@ useHead({
 
       <div class="space-y-6 mb-16 text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2">
-          <Badge variant="outline"
-            class="rounded-full px-3 py-1 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-500">
-            Agreement
-          </Badge>
+          <Motion
+            :initial="{ opacity: 0, y: -20 }"
+            :animate="{ opacity: 1, y: 0 }"
+            :transition="{ duration: 0.5 }"
+          >
+            <Badge variant="outline"
+              class="rounded-full px-3 py-1 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-500">
+              Agreement
+            </Badge>
+          </Motion>
         </div>
-        <h1 class="text-5xl md:text-6xl font-semibold tracking-tighter text-zinc-900 dark:text-white">Terms of Service
-        </h1>
-        <p class="text-xl text-zinc-500 dark:text-zinc-400 max-w-2xl">
+        <Motion
+          is="h1"
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.5, delay: 0.1 }"
+          class="text-5xl md:text-6xl font-semibold tracking-tighter text-zinc-900 dark:text-white"
+        >
+          Terms of Service
+        </Motion>
+        <Motion
+          is="p"
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.5, delay: 0.2 }"
+          class="text-xl text-zinc-500 dark:text-zinc-400 max-w-2xl"
+        >
           These terms constitute a legally binding agreement between you and ZenPortal.
-        </p>
-        <div class="flex items-center justify-center md:justify-start gap-2 text-sm text-zinc-400 font-mono">
+        </Motion>
+        <Motion
+          is="div"
+          :initial="{ opacity: 0, y: 20 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.5, delay: 0.3 }"
+          class="flex items-center justify-center md:justify-start gap-2 text-sm text-zinc-400 font-mono"
+        >
           <Gavel class="h-4 w-4" />
           <span>Last updated: {{ lastUpdated }}</span>
-        </div>
+        </Motion>
       </div>
 
-      <div class="space-y-12 text-zinc-600 dark:text-zinc-400 leading-relaxed">
+      <Motion
+        is="div"
+        :initial="{ opacity: 0, y: 40 }"
+        :animate="{ opacity: 1, y: 0 }"
+        :transition="{ duration: 0.7, delay: 0.4 }"
+        class="space-y-12 text-zinc-600 dark:text-zinc-400 leading-relaxed"
+      >
 
         <section class="space-y-4">
           <h2 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">1. Agreement to Terms</h2>
@@ -181,7 +213,7 @@ useHead({
           </Button>
         </section>
 
-      </div>
+      </Motion>
     </div>
   </div>
 </template>
