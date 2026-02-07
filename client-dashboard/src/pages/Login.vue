@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent } from "@/components/ui/card"
-import { Zap, Loader2, ArrowRight, ShieldCheck } from 'lucide-vue-next'
+import { Zap, Loader2, ArrowRight } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 import OTPform from '@/components/OTPform.vue'
 
