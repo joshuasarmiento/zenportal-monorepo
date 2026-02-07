@@ -37,30 +37,30 @@ const handleRequestReset = async () => {
 </script>
 
 <template>
-    <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 relative overflow-hidden">
+    <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-background font-sans text-foreground relative overflow-hidden">
         
         <BackgroundNoise />
 
-        <Card class="w-full max-w-sm relative z-10 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl shadow-zinc-200/50 dark:shadow-black/50">
+        <Card class="w-full max-w-sm relative z-10 border border-border bg-card shadow-2xl shadow-muted/50">
             <CardHeader class="pb-6">
-                <div class="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center mb-4">
-                    <KeyRound class="h-5 w-5 text-zinc-900 dark:text-white" />
+                <div class="h-10 w-10 bg-muted rounded-xl flex items-center justify-center mb-4">
+                    <KeyRound class="h-5 w-5 text-foreground" />
                 </div>
                 <CardTitle class="text-xl font-bold tracking-tight">Forgot Password</CardTitle>
-                <CardDescription class="text-zinc-500">Enter your email to receive a reset code.</CardDescription>
+                <CardDescription class="text-muted-foreground">Enter your email to receive a reset code.</CardDescription>
             </CardHeader>
             <CardContent>
                 <form @submit.prevent="handleRequestReset" class="space-y-4">
                     <div class="space-y-2">
                         <Label class="font-semibold text-sm">Email Address</Label>
-                        <Input v-model="email" type="email" required placeholder="m@example.com" class="bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800 h-10" />
+                        <Input v-model="email" type="email" required placeholder="m@example.com" class="bg-muted/50 border-border h-10" />
                     </div>
-                    <Button type="submit" class="w-full h-10 rounded-md font-bold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200" :disabled="isLoading">
+                    <Button type="submit" class="w-full h-10 rounded-md font-bold bg-primary text-primary-foreground hover:bg-primary/90" :disabled="isLoading">
                         <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
                         {{ isLoading ? 'Sending...' : 'Send Reset Code' }}
                     </Button>
                     <div class="text-center">
-                        <router-link to="/login" class="text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors underline underline-offset-4">
+                        <router-link to="/login" class="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4">
                             Back to Login
                         </router-link>
                     </div>

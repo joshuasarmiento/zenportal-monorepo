@@ -135,7 +135,7 @@ watch(selectedRange, () => loadStats())
 <template>
   <SidebarProvider>
     <AppSidebar />
-    <SidebarInset class="bg-zinc-50 dark:bg-black">
+    <SidebarInset class="bg-muted/50">
       
       <EarningsHeader 
         :loading="loading" 
@@ -188,6 +188,6 @@ watch(selectedRange, () => loadStats())
     padding: 0 !important; 
     width: 100% !important; 
   }
-  .bg-zinc-50, .dark\:bg-black { background-color: white !important; }
+  .bg-muted\/50 { background-color: white !important; }
 }
 </style>

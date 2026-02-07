@@ -59,7 +59,7 @@ useHead({
 
 <template>
   <div
-    class="min-h-screen font-sans bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 overflow-x-hidden pt-32 pb-20">
+    class="min-h-screen font-sans bg-background text-foreground overflow-x-hidden pt-32 pb-20">
 
     <BackgroundNoise />
 
@@ -70,7 +70,7 @@ useHead({
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.5, delay: 0.2 }"
-          class="text-5xl md:text-6xl font-semibold mb-6 tracking-tighter text-zinc-900 dark:text-white"
+          class="text-5xl md:text-6xl font-semibold mb-6 tracking-tighter text-foreground"
         >
           Simple, Transparent Pricing
         </Motion>
@@ -79,7 +79,7 @@ useHead({
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.5, delay: 0.3 }"
-          class="text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto"
+          class="text-xl text-muted-foreground max-w-2xl mx-auto"
         >
           Start for free, upgrade when you land more clients. <br class="hidden md:block" />No hidden fees. Cancel
           anytime.
@@ -95,31 +95,31 @@ useHead({
           :transition="{ duration: 0.5, delay: 0.4 }"
         >
           <Card
-            class="flex flex-col relative border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm hover:shadow-lg transition-all duration-300">
+            class="flex flex-col relative border-border bg-card shadow-sm hover:shadow-lg transition-all duration-300">
             <CardHeader class="pb-8">
-              <CardTitle class="text-2xl font-bold text-zinc-900 dark:text-white">Starter</CardTitle>
-              <CardDescription class="text-base text-zinc-500">Perfect for your first client.</CardDescription>
+              <CardTitle class="text-2xl font-bold text-foreground">Starter</CardTitle>
+              <CardDescription class="text-base text-muted-foreground">Perfect for your first client.</CardDescription>
               <div class="mt-6 flex items-baseline gap-1">
-                <span class="text-5xl font-bold tracking-tighter text-zinc-900 dark:text-white">{{ plans[0]?.price
+                <span class="text-5xl font-bold tracking-tighter text-foreground">{{ plans[0]?.price
                   }}</span>
-                <span class="text-zinc-500 font-medium">/month</span>
+                <span class="text-muted-foreground font-medium">/month</span>
               </div>
             </CardHeader>
 
             <CardContent class="flex-1">
               <ul class="space-y-4">
                 <li v-for="feature in plans[0]?.features" :key="feature"
-                  class="flex items-start gap-3 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  class="flex items-start gap-3 text-sm font-medium text-foreground">
                   <div
-                    class="h-5 w-5 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 mt-0.5">
-                    <Check class="h-3 w-3 text-zinc-900 dark:text-white" />
+                    class="h-5 w-5 rounded-full bg-muted flex items-center justify-center shrink-0 mt-0.5">
+                    <Check class="h-3 w-3 text-foreground" />
                   </div>
                   {{ feature }}
                 </li>
                 <li v-for="feature in plans[0]?.missing" :key="feature"
-                  class="flex items-start gap-3 text-sm text-zinc-400 dark:text-zinc-600">
+                  class="flex items-start gap-3 text-sm text-muted-foreground">
                   <div
-                    class="h-5 w-5 rounded-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center shrink-0 mt-0.5 border border-zinc-100 dark:border-zinc-800">
+                    class="h-5 w-5 rounded-full bg-muted flex items-center justify-center shrink-0 mt-0.5 border border-border">
                     <X class="h-3 w-3" />
                   </div>
                   {{ feature }}
@@ -129,7 +129,7 @@ useHead({
 
             <CardFooter class="pt-8">
               <Button variant="outline"
-                class="w-full h-12 text-base font-semibold rounded-full border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                class="w-full h-12 text-base font-semibold rounded-full border-border hover:bg-muted"
                 @click="handleSignUp">
                 Start for Free
               </Button>
@@ -144,7 +144,7 @@ useHead({
           :transition="{ duration: 0.5, delay: 0.5, type: 'spring' }"
         >
           <Card
-            class="flex flex-col relative border-zinc-900 dark:border-zinc-100 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-2xl scale-100 md:scale-105 z-10 overflow-hidden">
+            class="flex flex-col relative border-primary bg-primary text-primary-foreground shadow-2xl scale-100 md:scale-105 z-10 overflow-hidden">
             <div class="absolute top-0 right-0 p-4">
               <div
                 class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-linear-to-r from-blue-600 to-purple-600 text-white text-[10px] font-bold uppercase tracking-wider shadow-lg">
@@ -158,11 +158,11 @@ useHead({
 
             <CardHeader class="pb-8 relative z-10">
               <CardTitle class="text-2xl font-bold">Pro</CardTitle>
-              <CardDescription class="text-base text-zinc-400 dark:text-zinc-600">Scale your freelance business.
+              <CardDescription class="text-base text-primary-foreground/70">Scale your freelance business.
               </CardDescription>
               <div class="mt-6 flex items-baseline gap-1">
                 <span class="text-5xl font-bold tracking-tighter">$ {{ plans[1]?.price }}</span>
-                <span class="text-zinc-400 dark:text-zinc-600 font-medium">/month</span>
+                <span class="text-primary-foreground/70 font-medium">/month</span>
               </div>
             </CardHeader>
 
@@ -171,8 +171,8 @@ useHead({
                 <li v-for="feature in plans[1]?.features" :key="feature"
                   class="flex items-start gap-3 text-sm font-medium">
                   <div
-                    class="h-5 w-5 rounded-full bg-white/20 dark:bg-zinc-900/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <Check class="h-3 w-3 text-white dark:text-zinc-900" />
+                    class="h-5 w-5 rounded-full bg-background/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check class="h-3 w-3 text-primary-foreground" />
                   </div>
                   {{ feature }}
                 </li>
@@ -181,7 +181,7 @@ useHead({
 
             <CardFooter class="pt-8 relative z-10">
               <Button
-                class="w-full h-12 text-base font-bold rounded-full bg-white text-zinc-950 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-white dark:hover:bg-zinc-800 transition-all duration-300 shadow-lg shadow-white/10 dark:shadow-black/10"
+                class="w-full h-12 text-base font-bold rounded-full bg-background text-foreground hover:bg-background/90 transition-all duration-300 shadow-lg shadow-background/10"
                 @click="handleSignUp">
                 Go Pro
               </Button>
@@ -197,7 +197,7 @@ useHead({
         :transition="{ duration: 1, delay: 0.8 }"
         class="mt-16 text-center"
       >
-        <p class="text-sm text-zinc-500 flex items-center justify-center gap-2">
+        <p class="text-sm text-muted-foreground flex items-center justify-center gap-2">
           <span class="w-2 h-2 rounded-full bg-green-500"></span> 30-day money-back guarantee. No questions asked.
         </p>
       </Motion>

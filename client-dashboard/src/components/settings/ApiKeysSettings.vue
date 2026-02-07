@@ -79,21 +79,21 @@ const handleUpgrade = async () => {
 </script>
 
 <template>
-  <Card class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
-    <CardHeader class="border-b border-zinc-100 dark:border-zinc-800 pb-6">
+  <Card class="border border-border bg-card shadow-sm">
+    <CardHeader class="border-b border-border pb-6">
       <div class="flex items-center justify-between">
         <div class="space-y-1">
-           <CardTitle class="flex items-center gap-2 text-lg font-bold tracking-tight text-zinc-900 dark:text-white">
-            <div class="p-2 bg-zinc-100 dark:bg-zinc-900 rounded-lg">
+           <CardTitle class="flex items-center gap-2 text-lg font-bold tracking-tight text-foreground">
+            <div class="p-2 bg-muted rounded-lg">
                <KeyRound class="h-4 w-4" />
             </div>
             API Access
           </CardTitle>
-          <CardDescription class="text-zinc-500">
+          <CardDescription class="text-muted-foreground">
             Manage programmatic access to your ZenPortal workspace.
           </CardDescription>
         </div>
-        <Button v-if="isPro" variant="outline" size="sm" @click="generateKeys" :disabled="generating" class="<border-zinc-200 dark:border-zinc-800">
+        <Button v-if="isPro" variant="outline" size="sm" @click="generateKeys" :disabled="generating" class="border-border">
            <RefreshCw v-if="generating" class="h-3.5 w-3.5 mr-2 animate-spin" />
            <KeyRound v-else class="h-3.5 w-3.5 mr-2" />
            {{ hasExistingKeys ? 'Roll Keys' : 'Generate Keys' }}
@@ -104,13 +104,14 @@ const handleUpgrade = async () => {
     <CardContent class="pt-8">
       
       <!-- PRO UPGRADE WALL -->
-      <div v-if="!isPro" class="text-center bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 p-10 rounded-2xl">
+      <!-- PRO UPGRADE WALL -->
+      <div v-if="!isPro" class="text-center bg-muted/50 border border-border p-10 rounded-2xl">
           <div class="bg-indigo-100 dark:bg-indigo-900/30 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400">
             <Lock class="h-6 w-6" />
           </div>
-          <h3 class="font-bold text-lg mb-2 text-zinc-900 dark:text-white">API Access is a Pro Feature</h3>
-          <p class="text-zinc-500 text-sm mb-8 max-w-xs mx-auto">Upgrade to Agency Pro to generate API keys and build custom integrations.</p>
-          <Button @click="handleUpgrade" :disabled="upgrading" class="rounded-full font-bold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900">
+          <h3 class="font-bold text-lg mb-2 text-foreground">API Access is a Pro Feature</h3>
+          <p class="text-muted-foreground text-sm mb-8 max-w-xs mx-auto">Upgrade to Agency Pro to generate API keys and build custom integrations.</p>
+          <Button @click="handleUpgrade" :disabled="upgrading" class="rounded-full font-bold bg-primary text-primary-foreground">
             <Loader2 v-if="upgrading" class="h-4 w-4 mr-2 animate-spin" />
             <Sparkles v-else class="h-4 w-4 mr-2" />
             {{ upgrading ? 'Redirecting...' : 'Upgrade Now' }}
@@ -131,33 +132,33 @@ const handleUpgrade = async () => {
 
         <div class="grid gap-6 md:grid-cols-2">
             <div class="space-y-2">
-                <Label class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Read-Only Key</Label>
+                <Label class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Read-Only Key</Label>
                 <div class="relative">
-                    <Input value="zen_read_••••••••••••••••••••" readonly disabled class="font-mono text-sm bg-zinc-50 dark:bg-zinc-900/50" />
-                    <EyeOff class="h-4 w-4 absolute right-3 top-3 text-zinc-400" />
+                    <Input value="zen_read_••••••••••••••••••••" readonly disabled class="font-mono text-sm bg-muted/50" />
+                    <EyeOff class="h-4 w-4 absolute right-3 top-3 text-muted-foreground" />
                 </div>
             </div>
              <div class="space-y-2">
-                <Label class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Write-Access Key</Label>
+                <Label class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Write-Access Key</Label>
                 <div class="relative">
-                    <Input value="zen_write_••••••••••••••••••••" readonly disabled class="font-mono text-sm bg-zinc-50 dark:bg-zinc-900/50" />
-                     <EyeOff class="h-4 w-4 absolute right-3 top-3 text-zinc-400" />
+                    <Input value="zen_write_••••••••••••••••••••" readonly disabled class="font-mono text-sm bg-muted/50" />
+                     <EyeOff class="h-4 w-4 absolute right-3 top-3 text-muted-foreground" />
                 </div>
             </div>
         </div>
         
-        <p class="text-xs text-zinc-500 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+        <p class="text-xs text-muted-foreground pt-4 border-t border-border">
             Need to rotate your keys? Click <strong>Roll Keys</strong> above. This will immediately invalidate existing keys.
         </p>
       </div>
 
       <!-- EMPTY STATE -->
-      <div v-else class="text-center py-12 text-zinc-500">
-        <div class="w-16 h-16 bg-zinc-50 dark:bg-zinc-900 rounded-2xl flex items-center justify-center mx-auto mb-4 grayscale opacity-50">
-             <KeyRound class="h-8 w-8 text-zinc-400" />
+      <div v-else class="text-center py-12 text-muted-foreground">
+        <div class="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4 grayscale opacity-50">
+             <KeyRound class="h-8 w-8 text-muted-foreground" />
         </div>
-        <h3 class="text-sm font-semibold text-zinc-900 dark:text-white mb-1">No API Keys</h3>
-        <p class="text-xs text-zinc-500 max-w-sm mx-auto">Generate keys to access the ZenPortal API programmatically.</p>
+        <h3 class="text-sm font-semibold text-foreground mb-1">No API Keys</h3>
+        <p class="text-xs text-muted-foreground max-w-sm mx-auto">Generate keys to access the ZenPortal API programmatically.</p>
         <Button variant="link" @click="generateKeys" class="text-indigo-600 dark:text-indigo-400 mt-2">Generate First Key</Button>
       </div>
 
@@ -180,7 +181,7 @@ const handleUpgrade = async () => {
         
         <div v-if="newKeys" class="space-y-4 py-4">
              <div class="space-y-2">
-                <Label class="text-xs font-bold text-zinc-500 uppercase">Read-Only Key</Label>
+                <Label class="text-xs font-bold text-muted-foreground uppercase">Read-Only Key</Label>
                 <div class="flex items-center gap-2">
                     <div class="relative flex-1">
                         <Input :model-value="newKeys.apiKeyRead" readonly class="font-mono text-xs pr-10 bg-green-50/50 border-green-200 dark:bg-green-900/10 dark:border-green-800 text-zinc-600 dark:text-zinc-300" />
@@ -193,7 +194,7 @@ const handleUpgrade = async () => {
             </div>
 
             <div class="space-y-2">
-                <Label class="text-xs font-bold text-zinc-500 uppercase">Write-Access Key</Label>
+                <Label class="text-xs font-bold text-muted-foreground uppercase">Write-Access Key</Label>
                 <div class="flex items-center gap-2">
                     <div class="relative flex-1">
                         <Input :model-value="newKeys.apiKeyWrite" readonly class="font-mono text-xs pr-10 bg-green-50/50 border-green-200 dark:bg-green-900/10 dark:border-green-800 text-zinc-600 dark:text-zinc-300" />

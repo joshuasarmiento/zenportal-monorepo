@@ -241,47 +241,47 @@ const performDelete = async () => {
 <template>
     <div class="space-y-8 max-w-4xl mx-auto pb-20">
         
-        <Card class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
-            <CardHeader class="border-b border-zinc-100 dark:border-zinc-800 pb-6">
+        <Card class="border border-border bg-card shadow-sm">
+            <CardHeader class="border-b border-border pb-6">
                 <div class="flex items-center gap-2 mb-1">
-                    <div class="p-2 bg-zinc-100 dark:bg-zinc-900 rounded-lg">
-                        <User class="h-4 w-4 text-zinc-900 dark:text-white" />
+                    <div class="p-2 bg-muted rounded-lg">
+                        <User class="h-4 w-4 text-foreground" />
                     </div>
-                    <CardTitle class="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">Personal Information</CardTitle>
+                    <CardTitle class="text-lg font-bold tracking-tight text-foreground">Personal Information</CardTitle>
                 </div>
-                <CardDescription class="text-zinc-500">Update your public identity on the portal.</CardDescription>
+                <CardDescription class="text-muted-foreground">Update your public identity on the portal.</CardDescription>
             </CardHeader>
             <CardContent class="pt-8">
                 <form @submit.prevent="handleUpdateProfile" class="space-y-8">
                     <div class="flex flex-col md:flex-row items-start md:items-center gap-8">
                         <div class="relative group">
-                            <Avatar class="h-24 w-24 border-4 border-zinc-50 dark:border-zinc-900 shadow-lg">
+                            <Avatar class="h-24 w-24 border-4 border-muted shadow-lg">
                                 <AvatarImage :src="form.image" class="object-cover" />
-                                <AvatarFallback class="text-2xl font-bold bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                                <AvatarFallback class="text-2xl font-bold bg-muted text-muted-foreground">
                                     {{ userStore.initials }}
                                 </AvatarFallback>
                             </Avatar>
                         </div>
                         <div class="flex-1 w-full space-y-2">
                             <Label for="avatar" class="text-sm font-semibold">Avatar Image URL</Label>
-                            <Input id="avatar" v-model="form.image" placeholder="https://example.com/photo.jpg" class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 h-10" />
-                            <p class="text-[11px] text-zinc-400 font-medium">Paste a direct link to an image (square format recommended).</p>
+                            <Input id="avatar" v-model="form.image" placeholder="https://example.com/photo.jpg" class="bg-muted/30 border-border h-10" />
+                            <p class="text-[11px] text-muted-foreground font-medium">Paste a direct link to an image (square format recommended).</p>
                         </div>
                     </div>
 
                     <div class="grid md:grid-cols-2 gap-6">
                         <div class="grid gap-2">
                             <Label for="name" class="text-sm font-semibold">Display Name</Label>
-                            <Input id="name" v-model="form.name" class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 h-10" />
+                            <Input id="name" v-model="form.name" class="bg-muted/30 border-border h-10" />
                         </div>
                         <div class="grid gap-2">
                             <Label for="email" class="text-sm font-semibold">Email Address</Label>
-                            <Input id="email" v-model="form.email" disabled class="bg-zinc-100 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 h-10 text-zinc-500 cursor-not-allowed" />
+                            <Input id="email" v-model="form.email" disabled class="bg-muted/50 border-border h-10 text-muted-foreground cursor-not-allowed" />
                         </div>
                     </div>
 
                     <div class="flex justify-end pt-2">
-                        <Button type="submit" :disabled="isLoadingProfile" class="rounded-full px-8 font-bold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-sm">
+                        <Button type="submit" :disabled="isLoadingProfile" class="rounded-full px-8 font-bold bg-foreground text-background hover:bg-foreground/90 shadow-sm">
                             <Loader2 v-if="isLoadingProfile" class="mr-2 h-4 w-4 animate-spin" />
                             <Save v-else class="mr-2 h-4 w-4" />
                             Save Profile
@@ -291,15 +291,15 @@ const performDelete = async () => {
             </CardContent>
         </Card>
 
-        <Card class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
-            <CardHeader class="border-b border-zinc-100 dark:border-zinc-800 pb-6">
+        <Card class="border border-border bg-card shadow-sm">
+            <CardHeader class="border-b border-border pb-6">
                 <div class="flex items-center gap-2 mb-1">
-                    <div class="p-2 bg-zinc-100 dark:bg-zinc-900 rounded-lg">
-                        <Lock class="h-4 w-4 text-zinc-900 dark:text-white" />
+                    <div class="p-2 bg-muted rounded-lg">
+                        <Lock class="h-4 w-4 text-foreground" />
                     </div>
-                    <CardTitle class="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">Account Security</CardTitle>
+                    <CardTitle class="text-lg font-bold tracking-tight text-foreground">Account Security</CardTitle>
                 </div>
-                <CardDescription class="text-zinc-500">
+                <CardDescription class="text-muted-foreground">
                     {{ hasPassword ? 'Regularly update your password to keep your account safe.' : 'You currently log in via Google. Set a password to enable email login.' }}
                 </CardDescription>
             </CardHeader>
@@ -317,21 +317,21 @@ const performDelete = async () => {
                 <form @submit.prevent="handleRequestSetPassword" class="space-y-6 max-w-md">
                     <div v-if="hasPassword" class="grid gap-2">
                         <Label for="current-pass" class="text-sm font-semibold">Current Password</Label>
-                        <Input id="current-pass" type="password" v-model="passForm.currentPassword" required class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 h-10" />
+                        <Input id="current-pass" type="password" v-model="passForm.currentPassword" required class="bg-muted/30 border-border h-10" />
                     </div>
                     
                     <div class="grid gap-2">
                         <Label for="new-pass" class="text-sm font-semibold">{{ hasPassword ? 'New Password' : 'Create Password' }}</Label>
-                        <Input id="new-pass" type="password" v-model="passForm.newPassword" required class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 h-10" />
+                        <Input id="new-pass" type="password" v-model="passForm.newPassword" required class="bg-muted/30 border-border h-10" />
                     </div>
 
                     <div class="grid gap-2">
                         <Label for="confirm-pass" class="text-sm font-semibold">Confirm Password</Label>
-                        <Input id="confirm-pass" type="password" v-model="passForm.confirmPassword" required class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 h-10" />
+                        <Input id="confirm-pass" type="password" v-model="passForm.confirmPassword" required class="bg-muted/30 border-border h-10" />
                     </div>
 
                     <div class="pt-4">
-                        <Button type="submit" variant="secondary" :disabled="isLoadingPassword" class="rounded-full font-medium bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-700">
+                        <Button type="submit" variant="secondary" :disabled="isLoadingPassword" class="rounded-full font-medium bg-muted hover:bg-muted/80 text-foreground border border-border">
                             <Loader2 v-if="isLoadingPassword" class="mr-2 h-4 w-4 animate-spin" />
                             {{ hasPassword ? 'Change Password' : 'Set Account Password' }}
                         </Button>
@@ -340,38 +340,38 @@ const performDelete = async () => {
             </CardContent>
         </Card>
 
-        <Card class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
-            <CardHeader class="border-b border-zinc-100 dark:border-zinc-800 pb-6">
+        <Card class="border border-border bg-card shadow-sm">
+            <CardHeader class="border-b border-border pb-6">
                 <div class="flex items-center gap-2 mb-1">
-                    <div class="p-2 bg-zinc-100 dark:bg-zinc-900 rounded-lg">
-                        <Monitor class="h-4 w-4 text-zinc-900 dark:text-white" />
+                    <div class="p-2 bg-muted rounded-lg">
+                        <Monitor class="h-4 w-4 text-foreground" />
                     </div>
-                    <CardTitle class="text-lg font-bold tracking-tight text-zinc-900 dark:text-white">Active Sessions</CardTitle>
+                    <CardTitle class="text-lg font-bold tracking-tight text-foreground">Active Sessions</CardTitle>
                 </div>
-                <CardDescription class="text-zinc-500">
+                <CardDescription class="text-muted-foreground">
                     Manage devices where you are currently logged in.
                 </CardDescription>
             </CardHeader>
             <CardContent class="pt-8">
                 <div v-if="isLoadingSessions" class="flex justify-center py-8">
-                    <Loader2 class="h-6 w-6 animate-spin text-zinc-400" />
+                    <Loader2 class="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
                 <div v-else class="space-y-4">
-                    <div v-for="session in sessions" :key="session.token" class="flex items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                    <div v-for="session in sessions" :key="session.token" class="flex items-center justify-between p-4 rounded-xl border border-border bg-muted/30">
                         <div class="flex items-center gap-4">
-                            <div class="h-10 w-10 rounded-full bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center border border-zinc-100 dark:border-zinc-700">
-                                <Laptop v-if="(session.userAgent || '').includes('Mac') || (session.userAgent || '').includes('Windows')" class="h-5 w-5 text-zinc-500" />
-                                <Smartphone v-else-if="(session.userAgent || '').includes('iPhone') || (session.userAgent || '').includes('Android')" class="h-5 w-5 text-zinc-500" />
-                                <Globe v-else class="h-5 w-5 text-zinc-500" />
+                            <div class="h-10 w-10 rounded-full bg-card shadow-sm flex items-center justify-center border border-border">
+                                <Laptop v-if="(session.userAgent || '').includes('Mac') || (session.userAgent || '').includes('Windows')" class="h-5 w-5 text-muted-foreground" />
+                                <Smartphone v-else-if="(session.userAgent || '').includes('iPhone') || (session.userAgent || '').includes('Android')" class="h-5 w-5 text-muted-foreground" />
+                                <Globe v-else class="h-5 w-5 text-muted-foreground" />
                             </div>
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <p class="text-sm font-semibold text-zinc-900 dark:text-white">{{ session.userAgent ? session.userAgent.substring(0, 90) + '...' : 'Unknown Device' }}</p>
+                                    <p class="text-sm font-semibold text-foreground">{{ session.userAgent ? session.userAgent.substring(0, 90) + '...' : 'Unknown Device' }}</p>
                                     <span v-if="session.isCurrent" class="px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold uppercase tracking-wide">Current</span>
                                 </div>
-                                <div class="flex items-center gap-3 text-xs text-zinc-500 mt-0.5">
+                                <div class="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
                                     <span>{{ session.ipAddress || 'Unknown IP' }}</span>
-                                    <span class="text-zinc-300 dark:text-zinc-700">•</span>
+                                    <span class="text-muted-foreground/50">•</span>
                                     <span>Expires {{ new Date(session.expiresAt).toLocaleDateString() }}</span>
                                 </div>
                             </div>
@@ -387,7 +387,7 @@ const performDelete = async () => {
                         </Button>
                     </div>
                     
-                    <div v-if="sessions.length === 0" class="text-center py-8 text-zinc-500 text-sm">
+                    <div v-if="sessions.length === 0" class="text-center py-8 text-muted-foreground text-sm">
                         No active sessions found.
                     </div>
                 </div>
@@ -426,7 +426,7 @@ const performDelete = async () => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete Account</DialogTitle>
-          <DialogDescription class="pt-2 text-zinc-900 dark:text-zinc-100 font-medium">
+          <DialogDescription class="pt-2 text-foreground font-medium">
             Are you sure you want to delete your account? All logs, clients, and data will be erased forever.
           </DialogDescription>
         </DialogHeader>
@@ -440,7 +440,7 @@ const performDelete = async () => {
                     v-model="deleteInput"
                     :placeholder="deleteConfirmationStep === 1 ? 'delete' : 'delete account'"
                     @keydown.enter="confirmDelete"
-                    class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                    class="bg-muted/30 border-border"
                  />
              </div>
         </div>

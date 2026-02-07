@@ -6,7 +6,7 @@
     "config": "",
     "css": "src/style.css",
     "baseColor": "neutral",
-    "cssVariables": false,
+    "cssVariables": true,
     "prefix": ""
   },
   "iconLibrary": "lucide",

@@ -46,7 +46,7 @@ const chartOptions = computed<ApexOptions>(() => {
       strokeDashArray: 4, 
       xaxis: { lines: { show: false } }
     },
-    fill: { opacity: 1, colors: [isDark ? '#ffffff' : '#18181b'] }, // Black bars on light, White bars on dark
+    fill: { opacity: 1, colors: [isDark ? '#e4e4e7' : '#18181b'] }, // Zinc-200 on dark, Zinc-900 on light
     tooltip: {
       theme: isDark ? 'dark' : 'light',
       y: { formatter: (value: number) => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}` }
@@ -56,27 +56,27 @@ const chartOptions = computed<ApexOptions>(() => {
 </script>
 
 <template>
-  <Card class="lg:col-span-2 flex flex-col min-h-[400px] border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm hover:shadow-md transition-all duration-300">
-    <CardHeader class="flex flex-row items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-4">
-      <CardTitle class="text-base font-semibold text-zinc-900 dark:text-white">Revenue History</CardTitle>
+  <Card class="lg:col-span-2 flex flex-col min-h-[400px] border border-border bg-card shadow-sm hover:shadow-md transition-all duration-300">
+    <CardHeader class="flex flex-row items-center justify-between border-b border-border pb-4">
+      <CardTitle class="text-base font-semibold text-foreground">Revenue History</CardTitle>
       <Select 
         :model-value="selectedRange" 
         @update:model-value="emit('update:selectedRange', $event)"
       >
-        <SelectTrigger class="w-[160px] h-9 text-xs font-medium bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-lg">
+        <SelectTrigger class="w-[160px] h-9 text-xs font-medium bg-background border-border rounded-lg">
           <SelectValue placeholder="Select Range" />
         </SelectTrigger>
-        <SelectContent class="border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+        <SelectContent class="border-border bg-popover">
           <SelectItem 
             v-for="range in ranges" 
             :key="range.value" 
             :value="range.value"
             :disabled="range.pro && !isPro"
-            class="text-xs focus:bg-zinc-50 dark:focus:bg-zinc-900"
+            class="text-xs focus:bg-muted"
           >
             <div class="flex items-center justify-between w-full gap-2">
               <span>{{ range.label }}</span>
-              <div v-if="range.pro && !isPro" class="flex items-center gap-1 text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-[9px] uppercase font-bold">
+              <div v-if="range.pro && !isPro" class="flex items-center gap-1 text-muted-foreground bg-muted px-1.5 py-0.5 rounded text-[9px] uppercase font-bold">
                 <Lock class="h-2.5 w-2.5" /> Pro
               </div>
             </div>
@@ -86,7 +86,7 @@ const chartOptions = computed<ApexOptions>(() => {
     </CardHeader>
     <CardContent class="flex-1 pt-6">
       <div v-if="loading" class="w-full h-[300px] flex items-center justify-center">
-        <Loader2 class="h-6 w-6 animate-spin text-zinc-900 dark:text-white" />
+        <Loader2 class="h-6 w-6 animate-spin text-foreground" />
       </div>
       
       <div v-else-if="revenueHistory.length > 0" class="w-full h-[300px]">
@@ -99,12 +99,12 @@ const chartOptions = computed<ApexOptions>(() => {
         />
       </div>
       
-      <div v-else class="h-full flex flex-col items-center justify-center text-zinc-400 min-h-[300px]">
-        <div class="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-2xl mb-3 border border-zinc-100 dark:border-zinc-800">
+      <div v-else class="h-full flex flex-col items-center justify-center text-muted-foreground min-h-[300px]">
+        <div class="p-4 bg-muted rounded-2xl mb-3 border border-border">
           <BarChart2 class="h-6 w-6 opacity-50" />
         </div>
-        <p class="text-sm font-medium text-zinc-600 dark:text-zinc-400">No revenue data available</p>
-        <p class="text-xs text-zinc-400 mt-1">Start logging work to see your growth.</p>
+        <p class="text-sm font-medium text-muted-foreground">No revenue data available</p>
+        <p class="text-xs text-muted-foreground mt-1">Start logging work to see your growth.</p>
       </div>
     </CardContent>
   </Card>

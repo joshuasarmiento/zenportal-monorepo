@@ -21,7 +21,7 @@ useHead({
 
 <template>
   <div
-    class="min-h-screen bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black pt-32 pb-20 overflow-x-hidden">
+    class="min-h-screen bg-background font-sans text-foreground selection:bg-primary selection:text-primary-foreground pt-32 pb-20 overflow-x-hidden">
 
     <BackgroundNoise />
 
@@ -35,7 +35,7 @@ useHead({
             :transition="{ duration: 0.5 }"
           >
             <Badge variant="outline"
-              class="rounded-full px-3 py-1 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-500">
+              class="rounded-full px-3 py-1 border-border bg-muted/50 text-muted-foreground">
               Agreement
             </Badge>
           </Motion>
@@ -45,7 +45,7 @@ useHead({
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.5, delay: 0.1 }"
-          class="text-5xl md:text-6xl font-semibold tracking-tighter text-zinc-900 dark:text-white"
+          class="text-5xl md:text-6xl font-semibold tracking-tighter text-foreground"
         >
           Terms of Service
         </Motion>
@@ -54,7 +54,7 @@ useHead({
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.5, delay: 0.2 }"
-          class="text-xl text-zinc-500 dark:text-zinc-400 max-w-2xl"
+          class="text-xl text-muted-foreground max-w-2xl"
         >
           These terms constitute a legally binding agreement between you and ZenPortal.
         </Motion>
@@ -63,7 +63,7 @@ useHead({
           :initial="{ opacity: 0, y: 20 }"
           :animate="{ opacity: 1, y: 0 }"
           :transition="{ duration: 0.5, delay: 0.3 }"
-          class="flex items-center justify-center md:justify-start gap-2 text-sm text-zinc-400 font-mono"
+          class="flex items-center justify-center md:justify-start gap-2 text-sm text-muted-foreground font-mono"
         >
           <Gavel class="h-4 w-4" />
           <span>Last updated: {{ lastUpdated }}</span>
@@ -75,54 +75,54 @@ useHead({
         :initial="{ opacity: 0, y: 40 }"
         :animate="{ opacity: 1, y: 0 }"
         :transition="{ duration: 0.7, delay: 0.4 }"
-        class="space-y-12 text-zinc-600 dark:text-zinc-400 leading-relaxed"
+        class="space-y-12 text-muted-foreground leading-relaxed"
       >
 
         <section class="space-y-4">
-          <h2 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">1. Agreement to Terms</h2>
+          <h2 class="text-2xl font-semibold tracking-tight text-foreground">1. Agreement to Terms</h2>
           <p>
             By accessing or using ZenPortal ("Service"), you agree to be bound by these Terms. If you disagree with any
             part of the terms, you are strictly prohibited from using the Service.
-            <strong class="text-zinc-900 dark:text-white">ZenPortal</strong> is a proprietary service operated by
-            <strong class="text-zinc-900 dark:text-white">ZenPortal</strong> ("Provider").
+            <strong class="text-foreground">ZenPortal</strong> is a proprietary service operated by
+            <strong class="text-foreground">ZenPortal</strong> ("Provider").
           </p>
         </section>
 
         <section class="space-y-4">
-          <h2 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">2. Use of Service &
+          <h2 class="text-2xl font-semibold tracking-tight text-foreground">2. Use of Service &
             Restrictions</h2>
-          <ul class="list-disc pl-5 space-y-2 marker:text-zinc-300 dark:marker:text-zinc-700">
-            <li><strong class="text-zinc-900 dark:text-white">Sole Responsibility:</strong> You are fully responsible
+          <ul class="list-disc pl-5 space-y-2 marker:text-muted-foreground">
+            <li><strong class="text-foreground">Sole Responsibility:</strong> You are fully responsible
               for all activities that occur under your account. The Provider accepts no liability for any loss or damage
               from your failure to maintain security.</li>
-            <li><strong class="text-zinc-900 dark:text-white">Magic Links:</strong> You acknowledge that "Client
+            <li><strong class="text-foreground">Magic Links:</strong> You acknowledge that "Client
               Portals" and "Reports" are accessed via unauthenticated secure links ("Magic Links"). You bear the sole
               burden of ensuring these links are shared only with intended recipients.</li>
-            <li><strong class="text-zinc-900 dark:text-white">Public Profiles:</strong> You are responsible for the
+            <li><strong class="text-foreground">Public Profiles:</strong> You are responsible for the
               content displayed on your Public Profile.</li>
-            <li><strong class="text-zinc-900 dark:text-white">Fair Use:</strong> The Provider reserves the right to
+            <li><strong class="text-foreground">Fair Use:</strong> The Provider reserves the right to
               terminate accounts that place an unreasonable load on the Service's infrastructure (e.g., automated
               scraping).</li>
           </ul>
         </section>
 
         <section class="space-y-4">
-          <h2 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">3. Service Tiers</h2>
+          <h2 class="text-2xl font-semibold tracking-tight text-foreground">3. Service Tiers</h2>
           <p>
-            <strong class="text-zinc-900 dark:text-white">Free Tier Enforcement:</strong> The Provider strictly enforces
+            <strong class="text-foreground">Free Tier Enforcement:</strong> The Provider strictly enforces
             the one (1) Active Client limit. Circumventing this limit via multiple accounts is a breach of contract and
             will result in immediate termination and data deletion.
           </p>
         </section>
 
         <section
-          class="space-y-6 p-8 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-200 dark:border-zinc-800">
-          <h2 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white flex items-center gap-3">
+          class="space-y-6 p-8 bg-muted/50 rounded-xl border border-border">
+          <h2 class="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-3">
             <CreditCard class="h-6 w-6 text-blue-600 dark:text-blue-400" />
             4. Billing & No Refunds
           </h2>
           <div class="space-y-4 text-sm md:text-base">
-            <p><strong class="text-zinc-900 dark:text-white">4.1 Subscription:</strong> The Service is billed in advance
+            <p><strong class="text-foreground">4.1 Subscription:</strong> The Service is billed in advance
               on a monthly basis. The fee is stated on the Pricing page (currently $12 USD/mo) and is subject to
               change with notice.</p>
             <div
@@ -132,25 +132,25 @@ useHead({
                 or accidental renewals. You must cancel before your renewal date.
               </p>
             </div>
-            <p><strong class="text-zinc-900 dark:text-white">4.3 Chargebacks:</strong> Initiation of a chargeback or
+            <p><strong class="text-foreground">4.3 Chargebacks:</strong> Initiation of a chargeback or
               dispute for valid services is a material breach of this Agreement. You agree to reimburse the Provider for
               all dispute fees plus a ₱1500 administrative penalty.</p>
           </div>
         </section>
 
         <section class="space-y-4">
-          <h2 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">5. Service Availability ("As
+          <h2 class="text-2xl font-semibold tracking-tight text-foreground">5. Service Availability ("As
             Is")</h2>
           <p>
             The Service is provided by a solo developer on an "AS IS" and "AS AVAILABLE" basis. We do not guarantee 100%
             uptime.
-            <strong class="text-zinc-900 dark:text-white">Platform Risk:</strong> In the event of a permanent shutdown,
+            <strong class="text-foreground">Platform Risk:</strong> In the event of a permanent shutdown,
             the Provider's sole obligation is to provide a method for data export (CSV/JSON) for 30 days.
           </p>
         </section>
 
         <section class="space-y-4">
-          <h2 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white">6. Intellectual Property</h2>
+          <h2 class="text-2xl font-semibold tracking-tight text-foreground">6. Intellectual Property</h2>
           <p>
             You retain ownership of your data. You grant the Provider a license to host and backup your data. The
             Provider owns all rights to the ZenPortal code, design, and brand.
@@ -174,25 +174,25 @@ useHead({
         </section>
 
         <section
-          class="space-y-6 p-8 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-200 dark:border-zinc-800">
-          <h2 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white flex items-center gap-3">
-            <Scale class="h-6 w-6 text-zinc-900 dark:text-white" />
+          class="space-y-6 p-8 bg-muted/50 rounded-xl border border-border">
+          <h2 class="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-3">
+            <Scale class="h-6 w-6 text-foreground" />
             8. Dispute Resolution
           </h2>
           <div class="space-y-4 text-sm md:text-base">
-            <p><strong class="text-zinc-900 dark:text-white">8.1 Binding Arbitration:</strong> Any dispute shall be
+            <p><strong class="text-foreground">8.1 Binding Arbitration:</strong> Any dispute shall be
               resolved exclusively through binding arbitration in <strong
-                class="text-zinc-900 dark:text-white">Camarines Sur, Philippines</strong>. You waive your right to a
+                class="text-foreground">Camarines Sur, Philippines</strong>. You waive your right to a
               court trial.</p>
-            <p><strong class="text-zinc-900 dark:text-white">8.2 Class Action Waiver:</strong> YOU MAY BRING CLAIMS ONLY
+            <p><strong class="text-foreground">8.2 Class Action Waiver:</strong> YOU MAY BRING CLAIMS ONLY
               IN YOUR INDIVIDUAL CAPACITY, NOT AS A PLAINTIFF OR CLASS MEMBER IN ANY CLASS ACTION.</p>
-            <p><strong class="text-zinc-900 dark:text-white">8.3 Fee Shifting:</strong> If you bring a claim against the
+            <p><strong class="text-foreground">8.3 Fee Shifting:</strong> If you bring a claim against the
               Provider and fail to prevail, you agree to pay the Provider's reasonable attorneys' fees and costs.</p>
           </div>
         </section>
 
         <section class="space-y-4">
-          <h2 class="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-white flex items-center gap-2">
+          <h2 class="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2">
             <Lock class="h-5 w-5" /> 9. Allocation of Risk
           </h2>
           <p>
@@ -202,12 +202,12 @@ useHead({
           </p>
         </section>
 
-        <Separator class="my-12 bg-zinc-200 dark:bg-zinc-800" />
+        <Separator class="my-12 bg-border" />
 
         <section class="text-center pb-8">
-          <p class="text-zinc-500 mb-6">Questions about the Terms?</p>
+          <p class="text-muted-foreground mb-6">Questions about the Terms?</p>
           <Button variant="outline"
-            class="rounded-full border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 px-8"
+            class="rounded-full border-border hover:bg-muted px-8"
             as-child>
             <a href="mailto:support@zenportal.com.ph">Contact Support</a>
           </Button>

@@ -60,14 +60,14 @@ const handleVerifyOtp = async () => {
 
 <template>
     <div
-        class="min-h-screen flex flex-col items-center justify-center p-6 md:p-10 bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 relative overflow-hidden">
+        class="min-h-screen flex flex-col items-center justify-center p-6 md:p-10 bg-background font-sans text-foreground relative overflow-hidden">
 
         <BackgroundNoise />
 
         <div class="w-full max-w-md relative z-10">
             <div class="flex flex-col gap-6">
                 <Card
-                    class="overflow-hidden border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl shadow-zinc-200/50 dark:shadow-black/50">
+                    class="overflow-hidden border-border bg-card shadow-2xl shadow-muted/50">
                     <CardContent class="grid p-0">
                         <div class="p-8 md:p-10">
                             
@@ -85,13 +85,13 @@ const handleVerifyOtp = async () => {
                             <div v-else class="flex flex-col gap-6">
                                 <div class="flex flex-col items-center gap-2 text-center">
                                     <div
-                                        class="h-10 w-10 bg-zinc-900 dark:bg-white rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-zinc-500/20 dark:shadow-white/20">
-                                        <Zap class="h-5 w-5 text-white dark:text-zinc-900 fill-current" />
+                                        class="h-10 w-10 bg-primary rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-muted/20">
+                                        <Zap class="h-5 w-5 text-primary-foreground fill-current" />
                                     </div>
-                                    <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                                    <h1 class="text-2xl font-bold tracking-tight text-foreground">
                                         Welcome back
                                     </h1>
-                                    <p class="text-zinc-500 dark:text-zinc-400 text-sm">
+                                    <p class="text-muted-foreground text-sm">
                                         Login to your ZenPortal account
                                     </p>
                                 </div>
@@ -101,25 +101,25 @@ const handleVerifyOtp = async () => {
                                         <Label for="email" class="font-medium">Email</Label>
                                         <Input id="email" v-model="email" type="email" placeholder="m@example.com"
                                             required
-                                            class="h-10 bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800" />
+                                            class="h-10 bg-muted/50 border-border" />
                                     </div>
                                     <div class="grid gap-2">
                                         <div class="flex items-center">
                                             <Label for="password" class="font-medium">Password</Label>
                                             <router-link to="/forgot-password"
-                                                class="ml-auto text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-white underline-offset-4 hover:underline">
+                                                class="ml-auto text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline">
                                                 Forgot password?
                                             </router-link>
                                         </div>
                                         <Input id="password" v-model="password" type="password" required
-                                            class="h-10 bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800" />
+                                            class="h-10 bg-muted/50 border-border" />
                                     </div>
 
                                     <div class="flex items-center space-x-2 py-1">
                                         <Checkbox id="rem" :checked="rememberMe"
                                             @update:checked="(v: any) => rememberMe = v" />
                                         <label for="rem"
-                                            class="text-sm text-zinc-500 font-medium cursor-pointer select-none">
+                                            class="text-sm text-muted-foreground font-medium cursor-pointer select-none">
                                             Stay signed in
                                         </label>
                                     </div>
@@ -135,16 +135,16 @@ const handleVerifyOtp = async () => {
                                 </form>
 
                                 <div
-                                    class="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-zinc-200 dark:after:border-zinc-800">
+                                    class="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
                                     <span
-                                        class="relative z-10 bg-white dark:bg-zinc-900 px-2 text-zinc-400 uppercase text-[10px] font-bold tracking-widest">
+                                        class="relative z-10 bg-card px-2 text-muted-foreground uppercase text-[10px] font-bold tracking-widest">
                                         Or continue with
                                     </span>
                                 </div>
 
                                 <div class="grid grid-cols-1 gap-4">
                                     <Button variant="outline" type="button"
-                                        class="w-full h-10 relative bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                                        class="w-full h-10 relative bg-card border-border hover:bg-muted/50"
                                         @click="loginWithGoogle">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                             class="mr-2 h-4 w-4">
@@ -156,10 +156,10 @@ const handleVerifyOtp = async () => {
                                     </Button>
                                 </div>
 
-                                <div class="text-center text-sm text-zinc-500">
+                                <div class="text-center text-sm text-muted-foreground">
                                     Don't have an account?
                                     <router-link to="/sign-up"
-                                        class="underline underline-offset-4 text-zinc-900 dark:text-white font-medium hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                        class="underline underline-offset-4 text-foreground font-medium hover:text-primary transition-colors">
                                         Sign up
                                     </router-link>
                                 </div>
@@ -169,11 +169,11 @@ const handleVerifyOtp = async () => {
                     </CardContent>
                 </Card>
 
-                <p class="px-6 text-center text-xs text-zinc-500 text-balance">
+                <p class="px-6 text-center text-xs text-muted-foreground text-balance">
                     By clicking continue, you agree to our <router-link to="/terms"
-                        class="underline hover:text-zinc-900 dark:hover:text-white">Terms of Service</router-link>
+                        class="underline hover:text-foreground">Terms of Service</router-link>
                     and <router-link to="/privacy-policy"
-                        class="underline hover:text-zinc-900 dark:hover:text-white">Privacy
+                        class="underline hover:text-foreground">Privacy
                         Policy</router-link>.
                 </p>
             </div>

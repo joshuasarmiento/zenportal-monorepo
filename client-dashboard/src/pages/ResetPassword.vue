@@ -64,33 +64,33 @@ const handleCompleteReset = async () => {
 </script>
 
 <template>
-    <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 relative overflow-hidden">
+    <div class="min-h-screen flex flex-col items-center justify-center p-6 bg-background font-sans text-foreground relative overflow-hidden">
         
         <BackgroundNoise />
 
-        <Card class="w-full pb-10 max-w-sm relative z-10 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl shadow-zinc-200/50 dark:shadow-black/50">
+        <Card class="w-full pb-10 max-w-sm relative z-10 border border-border bg-card shadow-2xl shadow-muted/50">
             <CardHeader class="pb-6">
-                <div class="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center mb-4">
-                    <ShieldCheck class="h-5 w-5 text-zinc-900 dark:text-white" />
+                <div class="h-10 w-10 bg-muted rounded-xl flex items-center justify-center mb-4">
+                    <ShieldCheck class="h-5 w-5 text-foreground" />
                 </div>
                 <CardTitle class="text-xl font-bold tracking-tight">Reset Password</CardTitle>
-                <CardDescription class="text-zinc-500">Secure your account with a new password.</CardDescription>
+                <CardDescription class="text-muted-foreground">Secure your account with a new password.</CardDescription>
             </CardHeader>
             <CardContent>
                 <form @submit.prevent="handleCompleteReset" class="space-y-4">
                     <div class="space-y-2">
                         <Label class="font-semibold text-sm">Email</Label>
-                        <Input v-model="email" type="email" disabled class="bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-zinc-200 dark:border-zinc-700 h-10 cursor-not-allowed" />
+                        <Input v-model="email" type="email" disabled class="bg-muted text-muted-foreground border-border h-10 cursor-not-allowed" />
                     </div>
                     <div v-if="!route.query.token" class="space-y-2">
                         <Label class="font-semibold text-sm">Verification Code</Label>
-                        <Input v-model="otp" placeholder="123456" required class="text-center font-mono text-lg tracking-widest bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800 h-12" />
+                        <Input v-model="otp" placeholder="123456" required class="text-center font-mono text-lg tracking-widest bg-muted/50 border-border h-12" />
                     </div>
                     <div class="space-y-2">
                         <Label class="font-semibold text-sm">New Password</Label>
-                        <Input v-model="newPassword" type="password" required class="bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800 h-10" />
+                        <Input v-model="newPassword" type="password" required class="bg-muted/50 border-border h-10" />
                     </div>
-                    <Button type="submit" class="w-full h-10 rounded-md font-bold bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200" :disabled="isLoading">
+                    <Button type="submit" class="w-full h-10 rounded-md font-bold bg-primary text-primary-foreground hover:bg-primary/90" :disabled="isLoading">
                         <Loader2 v-if="isLoading" class="mr-2 h-4 w-4 animate-spin" />
                         {{ isLoading ? 'Resetting...' : 'Update Password' }}
                     </Button>

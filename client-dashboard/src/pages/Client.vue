@@ -92,7 +92,7 @@ const goToUpgrade = async () => {
 <template>
   <SidebarProvider>
     <AppSidebar />
-    <SidebarInset class="bg-zinc-50 dark:bg-black">
+    <SidebarInset class="bg-muted/50">
       
       <ClientsHeader 
         :loading="loading"

@@ -10,15 +10,15 @@ import { MessageCircle, ArrowRight } from 'lucide-vue-next'
 <template>
   <SidebarProvider>
     <AppSidebar />
-    <SidebarInset class="bg-zinc-50 dark:bg-black">
-      <header class="flex h-16 shrink-0 items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-6 sticky top-0 z-10">
+    <SidebarInset class="bg-muted/50">
+      <header class="flex h-16 shrink-0 items-center gap-2 border-b border-border bg-background px-6 sticky top-0 z-10">
         <div class="flex items-center gap-2">
-          <SidebarTrigger class="-ml-1 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors" />
-          <Separator orientation="vertical" class="mr-2 h-4 bg-zinc-200 dark:bg-zinc-800" />
+          <SidebarTrigger class="-ml-1 text-muted-foreground hover:text-foreground transition-colors" />
+          <Separator orientation="vertical" class="mr-2 h-4 bg-border" />
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbPage class="font-semibold text-zinc-900 dark:text-white tracking-tight">User Guide</BreadcrumbPage>
+                <BreadcrumbPage class="font-semibold text-foreground tracking-tight">User Guide</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -29,8 +29,8 @@ import { MessageCircle, ArrowRight } from 'lucide-vue-next'
         <div class="max-w-3xl mx-auto w-full space-y-16 pb-20">
       
           <section class="text-center space-y-6 pt-8">
-            <h1 class="text-4xl md:text-5xl font-bold tracking-tighter text-zinc-900 dark:text-white">How to use ZenPortal</h1>
-            <p class="text-lg text-zinc-500 dark:text-zinc-400 max-w-xl mx-auto leading-relaxed">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tighter text-foreground">How to use ZenPortal</h1>
+            <p class="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
               The complete guide to managing clients, logging "Proof of Work," and getting paid faster.
             </p>
           </section>
@@ -39,15 +39,15 @@ import { MessageCircle, ArrowRight } from 'lucide-vue-next'
              <router-view />
           </div>
 
-          <Separator class="bg-zinc-200 dark:bg-zinc-800" />
+          <Separator class="bg-border" />
 
-          <section class="flex flex-col items-center justify-center py-8 text-center bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8">
-            <div class="h-12 w-12 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">
-               <MessageCircle class="h-6 w-6 text-zinc-900 dark:text-white" />
+          <section class="flex flex-col items-center justify-center py-8 text-center bg-card border border-border rounded-2xl p-8">
+            <div class="h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
+               <MessageCircle class="h-6 w-6 text-foreground" />
             </div>
-            <h3 class="text-lg font-bold mb-2 text-zinc-900 dark:text-white tracking-tight">Still have questions?</h3>
-            <p class="text-zinc-500 dark:text-zinc-400 mb-6 max-w-sm">Priority support is available for Agency Pro users.</p>
-            <Button size="lg" class="rounded-full px-8 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold hover:scale-105 transition-transform" as-child>
+            <h3 class="text-lg font-bold mb-2 text-foreground tracking-tight">Still have questions?</h3>
+            <p class="text-muted-foreground mb-6 max-w-sm">Priority support is available for Agency Pro users.</p>
+            <Button size="lg" class="rounded-full px-8 bg-primary text-primary-foreground font-bold hover:scale-105 transition-transform" as-child>
                <a href="mailto:support@zenportal.com.ph">Contact Support <ArrowRight class="ml-2 h-4 w-4" /></a>
             </Button>
           </section>

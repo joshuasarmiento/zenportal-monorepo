@@ -56,15 +56,15 @@ const save = async () => {
 </script>
 
 <template>
-  <Card class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
-    <CardHeader class="border-b border-zinc-100 dark:border-zinc-800 pb-6">
+  <Card class="border border-border bg-card shadow-sm">
+    <CardHeader class="border-b border-border pb-6">
       <div class="flex items-center gap-2 mb-1">
-        <div class="p-2 bg-zinc-100 dark:bg-zinc-900 rounded-lg">
-           <BellRing class="h-4 w-4 text-zinc-900 dark:text-white" />
+        <div class="p-2 bg-muted rounded-lg">
+           <BellRing class="h-4 w-4 text-foreground" />
         </div>
-        <CardTitle class="text-lg font-bold text-zinc-900 dark:text-white tracking-tight">Email Alerts</CardTitle>
+        <CardTitle class="text-lg font-bold text-foreground tracking-tight">Email Alerts</CardTitle>
       </div>
-      <CardDescription class="text-zinc-500">Control when ZenPortal sends you emails.</CardDescription>
+      <CardDescription class="text-muted-foreground">Control when ZenPortal sends you emails.</CardDescription>
     </CardHeader>
 
     <CardContent class="space-y-8 pt-8">
@@ -75,10 +75,10 @@ const save = async () => {
             <Eye class="h-5 w-5" />
           </div>
           <div class="space-y-1">
-            <Label class="text-base font-semibold text-zinc-900 dark:text-white">Client Views Report</Label>
-            <p class="text-sm text-zinc-500 max-w-sm leading-relaxed">
+            <Label class="text-base font-semibold text-foreground">Client Views Report</Label>
+            <p class="text-sm text-muted-foreground max-w-sm leading-relaxed">
               Get notified when a client opens their magic link.
-              <span class="text-xs text-zinc-400 block mt-1">(Includes a 6-hour cooldown to prevent spam)</span>
+              <span class="text-xs text-muted-foreground/80 block mt-1">(Includes a 6-hour cooldown to prevent spam)</span>
             </p>
           </div>
         </div>
@@ -91,8 +91,8 @@ const save = async () => {
             <Mail class="h-5 w-5" />
           </div>
           <div class="space-y-1">
-            <Label class="text-base font-semibold text-zinc-900 dark:text-white">Email Clients on Log</Label>
-            <p class="text-sm text-zinc-500 max-w-sm leading-relaxed">
+            <Label class="text-base font-semibold text-foreground">Email Clients on Log</Label>
+            <p class="text-sm text-muted-foreground max-w-sm leading-relaxed">
               Automatically send an email summary to clients when you add a new work log.
             </p>
           </div>
@@ -106,8 +106,8 @@ const save = async () => {
             <Calendar class="h-5 w-5" />
           </div>
           <div class="space-y-1">
-            <Label class="text-base font-semibold text-zinc-900 dark:text-white">Weekly Earnings Recap</Label>
-            <p class="text-sm text-zinc-500 max-w-sm leading-relaxed">
+            <Label class="text-base font-semibold text-foreground">Weekly Earnings Recap</Label>
+            <p class="text-sm text-muted-foreground max-w-sm leading-relaxed">
               Receive a summary of hours logged and total earnings every Sunday.
             </p>
           </div>
@@ -121,8 +121,8 @@ const save = async () => {
             <Megaphone class="h-5 w-5" />
           </div>
           <div class="space-y-1">
-            <Label class="text-base font-semibold text-zinc-900 dark:text-white">Marketing & Tips</Label>
-            <p class="text-sm text-zinc-500 max-w-sm leading-relaxed">
+            <Label class="text-base font-semibold text-foreground">Marketing & Tips</Label>
+            <p class="text-sm text-muted-foreground max-w-sm leading-relaxed">
               Occasional news about new features and freelance tips.
             </p>
           </div>
@@ -132,8 +132,8 @@ const save = async () => {
 
     </CardContent>
     
-    <CardFooter class="border-t border-zinc-100 dark:border-zinc-800 pt-6 flex justify-end bg-zinc-50/50 dark:bg-zinc-900/50">
-      <Button variant="default" @click="save" :disabled="saving" class="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 rounded-full px-6 font-bold shadow-sm">
+    <CardFooter class="border-t border-border pt-6 flex justify-end bg-muted/50">
+      <Button variant="default" @click="save" :disabled="saving" class="bg-foreground text-background hover:bg-foreground/90 rounded-full px-6 font-bold shadow-sm">
         <Loader2 v-if="saving" class="mr-2 h-4 w-4 animate-spin" />
         {{ saving ? 'Saving Preferences...' : 'Save Changes' }}
       </Button>

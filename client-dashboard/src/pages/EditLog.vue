@@ -103,23 +103,23 @@ const handleUpgrade = async () => {
 <template>
   <SidebarProvider>
     <AppSidebar />
-    <SidebarInset class="bg-zinc-50 dark:bg-black">
-      <header class="flex h-16 shrink-0 items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-6 sticky top-0 z-10">
+    <SidebarInset class="bg-muted/50">
+      <header class="flex h-16 shrink-0 items-center gap-2 border-b border-border bg-background px-6 sticky top-0 z-10">
         <div class="flex items-center gap-2">
-          <SidebarTrigger class="-ml-1 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors" />
-          <Separator orientation="vertical" class="mr-2 h-4 bg-zinc-200 dark:bg-zinc-800" />
+          <SidebarTrigger class="-ml-1 text-muted-foreground hover:text-foreground transition-colors" />
+          <Separator orientation="vertical" class="mr-2 h-4 bg-border" />
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem class="hidden md:block">
-                <BreadcrumbLink href="/dashboard" class="text-zinc-500 hover:text-zinc-900 dark:hover:text-white">Dashboard</BreadcrumbLink>
+                <BreadcrumbLink href="/dashboard" class="text-muted-foreground hover:text-foreground">Dashboard</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator class="hidden md:block" />
               <BreadcrumbItem class="hidden md:block">
-                <BreadcrumbLink :href="`/log/${logId}`" class="text-zinc-500 hover:text-zinc-900 dark:hover:text-white">Log Detail</BreadcrumbLink>
+                <BreadcrumbLink :href="`/log/${logId}`" class="text-muted-foreground hover:text-foreground">Log Detail</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator class="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage class="font-semibold text-zinc-900 dark:text-white tracking-tight">Edit Log</BreadcrumbPage>
+                <BreadcrumbPage class="font-semibold text-foreground tracking-tight">Edit Log</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -128,16 +128,16 @@ const handleUpgrade = async () => {
 
       <div class="flex flex-1 flex-col p-6 md:p-10 overflow-y-auto">
         <div class="max-w-2xl mx-auto w-full">
-          <Card class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm">
-            <CardHeader class="flex flex-row items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-6">
-              <CardTitle class="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">Edit Log Entry</CardTitle>
-              <Button variant="ghost" size="icon" @click="router.back()" class="text-zinc-500 hover:text-zinc-900 dark:hover:text-white">
+          <Card class="border border-border bg-card shadow-sm">
+            <CardHeader class="flex flex-row items-center justify-between border-b border-border/50 pb-6">
+              <CardTitle class="text-xl font-bold tracking-tight text-foreground">Edit Log Entry</CardTitle>
+              <Button variant="ghost" size="icon" @click="router.back()" class="text-muted-foreground hover:text-foreground">
                 <X class="h-4 w-4" />
               </Button>
             </CardHeader>
 
             <div v-if="loading" class="p-20 flex justify-center">
-              <Loader2 class="h-8 w-8 animate-spin text-zinc-400" />
+              <Loader2 class="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
 
             <CardContent v-else class="pt-8">
@@ -145,18 +145,18 @@ const handleUpgrade = async () => {
 
                 <div class="space-y-2">
                   <Label class="text-sm font-semibold">Client</Label>
-                  <Input v-model="form.clientName" disabled class="bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 h-10" />
+                  <Input v-model="form.clientName" disabled class="bg-muted text-muted-foreground border-border h-10" />
                 </div>
 
                 <div class="space-y-2">
                   <Label class="text-sm font-semibold">Accomplishments</Label>
-                  <Textarea v-model="form.summary" rows="5" class="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 resize-none" />
+                  <Textarea v-model="form.summary" rows="5" class="bg-background border-border resize-none" />
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div class="space-y-2 relative">
                     <div class="flex items-center justify-between">
-                        <Label class="text-sm font-semibold" :class="{'text-zinc-400': !isPro}">Video Update (Loom / Drive)</Label>
+                        <Label class="text-sm font-semibold" :class="{'text-muted-foreground': !isPro}">Video Update (Loom / Drive)</Label>
                         <span v-if="!isPro" class="text-[10px] font-bold bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300 px-1.5 py-0.5 rounded flex items-center gap-1">
                             <Lock class="h-2.5 w-2.5" /> PRO
                         </span>
@@ -167,10 +167,10 @@ const handleUpgrade = async () => {
                             v-model="form.videoUrl" 
                             :disabled="!isPro"
                             :placeholder="isPro ? 'Paste Loom or Drive link here...' : 'Upgrade to attach videos'" 
-                            class="h-10 border-zinc-200 dark:border-zinc-800"
-                            :class="!isPro ? 'pl-9 bg-zinc-100 dark:bg-zinc-900 text-zinc-400 cursor-not-allowed' : 'bg-zinc-50 dark:bg-zinc-900'"
+                            class="h-10 border-border"
+                            :class="!isPro ? 'pl-9 bg-muted text-muted-foreground cursor-not-allowed' : 'bg-background'"
                         />
-                        <div v-if="!isPro" class="absolute left-3 top-3 text-zinc-400">
+                        <div v-if="!isPro" class="absolute left-3 top-3 text-muted-foreground">
                              <Video class="h-4 w-4" />
                         </div>
                     </div>
@@ -182,34 +182,34 @@ const handleUpgrade = async () => {
 
                   <div class="space-y-2">
                     <Label class="text-sm font-semibold">Attachment Link</Label>
-                    <Input v-model="form.attachmentUrl" class="h-10 bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800" />
+                    <Input v-model="form.attachmentUrl" class="h-10 bg-background border-border" />
                   </div>
                 </div>
 
                 <div class="space-y-2">
                   <Label class="text-sm font-semibold">Hours Worked</Label>
-                  <Input v-model="form.hoursWorked" type="number" step="0.5" class="h-10 bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800" />
+                  <Input v-model="form.hoursWorked" type="number" step="0.5" class="h-10 bg-background border-border" />
                 </div>
 
                 <div class="rounded-xl p-5 border transition-all duration-300" 
-                     :class="form.isBlocked ? 'bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-900/30' : 'bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800'">
+                     :class="form.isBlocked ? 'bg-destructive/10 border-destructive/20' : 'bg-muted/50 border-border'">
                   <label class="flex items-center gap-3 cursor-pointer">
                     <input type="checkbox" v-model="form.isBlocked"
-                      class="w-4 h-4 text-red-600 rounded focus:ring-red-500 border-zinc-300">
+                      class="w-4 h-4 text-destructive rounded focus:ring-destructive border-input">
                       <span class="font-bold text-sm"
-                        :class="form.isBlocked ? 'text-red-700 dark:text-red-400' : 'text-zinc-600 dark:text-zinc-400'">
+                        :class="form.isBlocked ? 'text-destructive' : 'text-muted-foreground'">
                         I am Blocked / Stuck
                       </span>
                   </label>
                   <div v-if="form.isBlocked" class="mt-4 animate-in slide-in-from-top-2">
-                    <Label class="text-xs font-bold text-red-700 dark:text-red-400 mb-1.5 block uppercase tracking-wider">Blocker Reason</Label>
-                    <Input v-model="form.blockerDetails" class="bg-white dark:bg-zinc-900 border-red-200 dark:border-red-900/30 text-zinc-900 dark:text-white placeholder:text-red-300 dark:placeholder:text-red-900/50"
+                    <Label class="text-xs font-bold text-destructive mb-1.5 block uppercase tracking-wider">Blocker Reason</Label>
+                    <Input v-model="form.blockerDetails" class="bg-background border-destructive/20 text-foreground placeholder:text-destructive/50"
                       placeholder="What do you need from the client?" />
                   </div>
                 </div>
 
-                <div class="flex justify-end pt-6 border-t border-zinc-100 dark:border-zinc-800">
-                  <Button :disabled="saving" class="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 rounded-full px-8 font-bold shadow-sm">
+                <div class="flex justify-end pt-6 border-t border-border/50">
+                  <Button :disabled="saving" class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 font-bold shadow-sm">
                     <Loader2 v-if="saving" class="mr-2 h-4 w-4 animate-spin" />
                     <span v-else class="flex items-center gap-2">
                       <Save class="h-4 w-4" /> Save Changes

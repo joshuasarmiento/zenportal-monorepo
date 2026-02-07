@@ -84,7 +84,7 @@ const goToUpgrade = async () => {
 <template>
   <SidebarProvider>
     <AppSidebar />
-    <SidebarInset class="bg-zinc-50 dark:bg-black">
+    <SidebarInset class="bg-muted/50">
       
       <DashboardHeader 
         :loading="loading"
@@ -99,7 +99,7 @@ const goToUpgrade = async () => {
         
         <DashboardStats :stats="stats" />
 
-        <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden shadow-sm">
+        <div class="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
            <RecentLogsTable 
              :loading="loading" 
              :logs="logs" 

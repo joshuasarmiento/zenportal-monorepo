@@ -45,14 +45,14 @@ const handleSubmit = (e: Event) => {
     <form @submit="handleSubmit">
       <FieldGroup>
         <div class="flex flex-col items-center gap-2 text-center">
-          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <Zap class="size-5 fill-current" />
           </div>
           <h1 class="text-xl font-bold">
             Verify Identity
           </h1>
           <FieldDescription>
-            Enter the 6-digit code sent to <br> <span class="font-medium text-zinc-900 dark:text-white">{{ email || 'your email' }}</span>
+            Enter the 6-digit code sent to <br> <span class="font-medium text-foreground">{{ email || 'your email' }}</span>
           </FieldDescription>
         </div>
         <Field>
@@ -79,9 +79,9 @@ const handleSubmit = (e: Event) => {
             </InputOTPGroup>
           </InputOTP>
           <div class="text-center text-sm">
-            <button type="button" @click="emit('resend')" class="underline underline-offset-4 hover:text-zinc-900 dark:hover:text-white">Resend code</button>
-            <span class="mx-2 text-zinc-300">|</span>
-            <button type="button" @click="emit('back')" class="underline underline-offset-4 hover:text-zinc-900 dark:hover:text-white">Change email</button>
+            <button type="button" @click="emit('resend')" class="underline underline-offset-4 hover:text-foreground">Resend code</button>
+            <span class="mx-2 text-muted-foreground">|</span>
+            <button type="button" @click="emit('back')" class="underline underline-offset-4 hover:text-foreground">Change email</button>
           </div>
         </Field>
         <Field>

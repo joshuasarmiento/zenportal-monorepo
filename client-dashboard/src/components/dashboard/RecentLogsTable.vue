@@ -12,38 +12,38 @@ const emit = defineEmits(['view', 'create']) // Added 'create' for empty state
 </script>
 
 <template>
-  <Card class="flex-1 flex flex-col min-h-[500px] border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-none">
-    <CardHeader class="border-b border-zinc-100 dark:border-zinc-800 px-6 py-5">
+  <Card class="flex-1 flex flex-col min-h-[500px] border border-border bg-card shadow-none">
+    <CardHeader class="border-b border-border px-6 py-5">
       <div class="flex items-center justify-between">
-         <CardTitle class="text-base font-semibold text-zinc-900 dark:text-white">Recent Work Logs</CardTitle>
+         <CardTitle class="text-base font-semibold text-foreground">Recent Work Logs</CardTitle>
          </div>
     </CardHeader>
     <CardContent class="p-0 flex-1 flex flex-col">
       
       <div v-if="loading" class="flex-1 flex flex-col items-center justify-center py-20">
-        <div class="animate-spin w-6 h-6 border-2 border-zinc-900 dark:border-white border-t-transparent rounded-full mb-4"></div>
-        <p class="text-sm text-zinc-500 font-medium">Syncing data...</p>
+        <div class="animate-spin w-6 h-6 border-2 border-foreground border-t-transparent rounded-full mb-4"></div>
+        <p class="text-sm text-muted-foreground font-medium">Syncing data...</p>
       </div>
 
       <div v-else-if="logs.length === 0" class="flex-1 flex flex-col items-center justify-center py-24 text-center">
-        <div class="h-16 w-16 bg-zinc-50 dark:bg-zinc-900 rounded-2xl flex items-center justify-center mb-6 border border-zinc-100 dark:border-zinc-800">
-            <FileText class="h-8 w-8 text-zinc-300 dark:text-zinc-600" />
+        <div class="h-16 w-16 bg-muted rounded-2xl flex items-center justify-center mb-6 border border-border">
+            <FileText class="h-8 w-8 text-muted-foreground" />
         </div>
-        <h3 class="text-lg font-bold text-zinc-900 dark:text-white mb-2">No work logged yet</h3>
-        <p class="text-zinc-500 dark:text-zinc-400 max-w-sm mb-8 text-sm">
+        <h3 class="text-lg font-bold text-foreground mb-2">No work logged yet</h3>
+        <p class="text-muted-foreground max-w-sm mb-8 text-sm">
            Your logs will appear here. Create your first entry to start building trust with your client.
         </p>
       </div>
 
       <div v-else class="overflow-x-auto">
         <Table>
-          <TableHeader class="bg-zinc-50/50 dark:bg-zinc-900/50">
-            <TableRow class="hover:bg-transparent border-b border-zinc-100 dark:border-zinc-800">
-              <TableHead class="w-[150px] pl-6 text-xs font-bold text-zinc-400 uppercase tracking-wider">Date</TableHead>
-              <TableHead class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Client</TableHead>
-              <TableHead class="w-1/3 text-xs font-bold text-zinc-400 uppercase tracking-wider">Summary</TableHead>
-              <TableHead class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Evidence</TableHead>
-              <TableHead class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Status</TableHead>
+          <TableHeader class="bg-muted/50">
+            <TableRow class="hover:bg-transparent border-b border-border">
+              <TableHead class="w-[150px] pl-6 text-xs font-bold text-muted-foreground uppercase tracking-wider">Date</TableHead>
+              <TableHead class="text-xs font-bold text-muted-foreground uppercase tracking-wider">Client</TableHead>
+              <TableHead class="w-1/3 text-xs font-bold text-muted-foreground uppercase tracking-wider">Summary</TableHead>
+              <TableHead class="text-xs font-bold text-muted-foreground uppercase tracking-wider">Evidence</TableHead>
+              <TableHead class="text-xs font-bold text-muted-foreground uppercase tracking-wider">Status</TableHead>
               <TableHead class="text-right pr-6"></TableHead>
             </TableRow>
           </TableHeader>
@@ -52,18 +52,18 @@ const emit = defineEmits(['view', 'create']) // Added 'create' for empty state
               v-for="log in logs" 
               :key="log.id" 
               @click="emit('view', log.id)"
-              class="cursor-pointer group border-b border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900/60 transition-colors last:border-0"
+              class="cursor-pointer group border-b border-border hover:bg-muted/60 transition-colors last:border-0"
             >
-              <TableCell class="pl-6 font-medium text-zinc-600 dark:text-zinc-400 text-sm py-4">{{ log.date }}</TableCell>
+              <TableCell class="pl-6 font-medium text-muted-foreground text-sm py-4">{{ log.date }}</TableCell>
               
               <TableCell class="py-4">
-                <div class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
+                <div class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-muted text-muted-foreground border border-border">
                   {{ log.client?.companyName || 'Unknown' }}
                 </div>
               </TableCell>
               
               <TableCell class="py-4">
-                 <div class="truncate max-w-[280px] font-medium text-zinc-900 dark:text-zinc-200 text-sm">
+                 <div class="truncate max-w-[280px] font-medium text-foreground text-sm">
                     {{ log.summary }}
                  </div>
               </TableCell>
@@ -76,7 +76,7 @@ const emit = defineEmits(['view', 'create']) // Added 'create' for empty state
                   <div v-else-if="log.attachmentUrl" class="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 text-xs font-bold bg-indigo-50 dark:bg-indigo-900/10 px-2 py-1 rounded-md">
                     <Paperclip class="h-3 w-3" /> File
                   </div>
-                  <span v-else class="text-zinc-400 text-xs italic">No evidence</span>
+                  <span v-else class="text-muted-foreground text-xs italic">No evidence</span>
                 </div>
               </TableCell>
               
@@ -90,7 +90,7 @@ const emit = defineEmits(['view', 'create']) // Added 'create' for empty state
               </TableCell>
               
               <TableCell class="text-right pr-6 py-4">
-                <ChevronRight class="h-4 w-4 text-zinc-300 group-hover:text-zinc-500 dark:text-zinc-700 dark:group-hover:text-zinc-400 transition-colors inline-block" />
+                <ChevronRight class="h-4 w-4 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors inline-block" />
               </TableCell>
             </TableRow>
           </TableBody>

@@ -13,12 +13,12 @@ defineProps<{
 
 <template>
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <Card class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm hover:shadow-md transition-shadow duration-300">
+    <Card class="border border-border bg-card shadow-sm hover:shadow-md transition-shadow duration-300">
       <CardContent class="p-6 flex items-start justify-between">
         <div>
-           <p class="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Total Hours</p>
-           <div class="text-3xl font-semibold tracking-tighter text-zinc-900 dark:text-white">
-             {{ stats.hoursThisMonth }} <span class="text-lg text-zinc-400 font-medium">h</span>
+           <p class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Total Hours</p>
+           <div class="text-3xl font-semibold tracking-tighter text-foreground">
+             {{ stats.hoursThisMonth }} <span class="text-lg text-muted-foreground font-medium">h</span>
            </div>
         </div>
         <div class="h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center border border-blue-100 dark:border-blue-800">
@@ -27,11 +27,11 @@ defineProps<{
       </CardContent>
     </Card>
 
-    <Card class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm hover:shadow-md transition-shadow duration-300">
+    <Card class="border border-border bg-card shadow-sm hover:shadow-md transition-shadow duration-300">
       <CardContent class="p-6 flex items-start justify-between">
         <div>
-           <p class="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Active Clients</p>
-           <div class="text-3xl font-semibold tracking-tighter text-zinc-900 dark:text-white">
+           <p class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Active Clients</p>
+           <div class="text-3xl font-semibold tracking-tighter text-foreground">
              {{ stats.activeClients }}
            </div>
         </div>
@@ -41,19 +41,19 @@ defineProps<{
       </CardContent>
     </Card>
 
-    <Card class="border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm hover:shadow-md transition-shadow duration-300">
+    <Card class="border border-border bg-card shadow-sm hover:shadow-md transition-shadow duration-300">
       <CardContent class="p-6 flex items-start justify-between">
         <div>
-           <p class="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Active Blockers</p>
-           <div class="text-3xl font-semibold tracking-tighter" :class="stats.pendingBlockersCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-zinc-900 dark:text-white'">
+           <p class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Active Blockers</p>
+           <div class="text-3xl font-semibold tracking-tighter" :class="stats.pendingBlockersCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-foreground'">
              {{ stats.pendingBlockersCount }}
            </div>
         </div>
         <div class="h-10 w-10 rounded-xl flex items-center justify-center border transition-colors"
              :class="stats.pendingBlockersCount > 0 
                 ? 'bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-800' 
-                : 'bg-zinc-50 dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800'">
-           <AlertTriangle class="h-5 w-5" :class="stats.pendingBlockersCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-zinc-400'" />
+                : 'bg-muted/50 border-border'">
+           <AlertTriangle class="h-5 w-5" :class="stats.pendingBlockersCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'" />
         </div>
       </CardContent>
     </Card>

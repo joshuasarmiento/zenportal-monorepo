@@ -21,6 +21,7 @@ import {
   ArrowUpRight
 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
+import BackgroundNoise from '@/components/ui/background-noise/BackgroundNoise.vue'
 
 const route = useRoute()
 const token = route.params.token as string
@@ -135,9 +136,7 @@ onMounted(async () => {
   </div>
 
   <div v-else-if="error" class="h-screen flex items-center justify-center p-4 bg-white dark:bg-zinc-950 relative overflow-hidden">
-     <div class="fixed inset-0 z-0 pointer-events-none">
-       <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
-    </div>
+    <BackgroundNoise />
 
     <Card class="max-w-md w-full border border-zinc-200 dark:border-zinc-800 shadow-2xl bg-white dark:bg-zinc-900 relative z-10">
       <CardContent class="p-10 flex flex-col items-center text-center">
@@ -152,9 +151,7 @@ onMounted(async () => {
 
   <div v-else-if="data" class="min-h-screen bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 selection:bg-zinc-900 dark:selection:bg-zinc-100 selection:text-white dark:selection:text-zinc-900 pb-32 transition-colors duration-300 relative overflow-hidden">
     
-    <div class="fixed inset-0 z-0 pointer-events-none">
-       <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
-    </div>
+    <BackgroundNoise />
 
     <div class="fixed top-6 left-0 right-0 z-50 px-4 md:px-0 pointer-events-none">
       <div class="max-w-4xl mx-auto flex justify-between items-center bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-zinc-200 dark:border-zinc-800 shadow-lg rounded-full p-1.5 pl-2 pr-2 pointer-events-auto">

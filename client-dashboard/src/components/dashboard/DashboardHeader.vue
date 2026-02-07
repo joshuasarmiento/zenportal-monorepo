@@ -21,14 +21,14 @@ const logUsagePercent = computed(() => Math.min(100, (props.logCount / props.log
 </script>
 
 <template>
-  <header class="flex h-16 shrink-0 items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-6 sticky top-0 z-10">
+  <header class="flex h-16 shrink-0 items-center gap-2 border-b border-border bg-background px-6 sticky top-0 z-10">
     <div class="flex items-center gap-2">
-      <SidebarTrigger class="-ml-1 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors" />
-      <Separator orientation="vertical" class="mr-2 h-4 bg-zinc-200 dark:bg-zinc-800" />
+      <SidebarTrigger class="-ml-1 text-muted-foreground hover:text-foreground transition-colors" />
+      <Separator orientation="vertical" class="mr-2 h-4 bg-border" />
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbPage class="font-semibold text-zinc-900 dark:text-white tracking-tight">Dashboard</BreadcrumbPage>
+            <BreadcrumbPage class="font-semibold text-foreground tracking-tight">Dashboard</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -36,16 +36,16 @@ const logUsagePercent = computed(() => Math.min(100, (props.logCount / props.log
 
     <div class="ml-auto flex items-center gap-6">
       <div v-if="!loading && !isPro" class="hidden md:flex flex-col items-end gap-1.5 w-40">
-        <div class="flex justify-between w-full text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+        <div class="flex justify-between w-full text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
           <span>Monthly Limit</span>
-          <span :class="{'text-orange-600 dark:text-orange-400': isLimitReached, 'text-zinc-900 dark:text-white': !isLimitReached}">
+          <span :class="{'text-orange-600 dark:text-orange-400': isLimitReached, 'text-foreground': !isLimitReached}">
             {{ logCount }} / {{ logLimit }}
           </span>
         </div>
         <Progress 
           :model-value="logUsagePercent" 
-          class="h-1 bg-zinc-100 dark:bg-zinc-800" 
-          :class="{'[&>div]:bg-orange-500': isLimitReached, '[&>div]:bg-zinc-900 dark:[&>div]:bg-white': !isLimitReached}" 
+          class="h-1 bg-muted" 
+          :class="{'[&>div]:bg-orange-500': isLimitReached, '[&>div]:bg-foreground': !isLimitReached}" 
         />
       </div>
 
@@ -55,7 +55,7 @@ const logUsagePercent = computed(() => Math.min(100, (props.logCount / props.log
         :class="[
             isLimitReached 
                 ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:opacity-90 border-0' 
-                : 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200'
+                : 'bg-primary text-primary-foreground hover:bg-primary/90'
         ]"
       >
         <Crown v-if="isLimitReached" class="h-3.5 w-3.5 mr-2" />
