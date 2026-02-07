@@ -109,11 +109,11 @@ useHead({
 </script>
 
 <template>
-  <div class="min-h-screen font-sans bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black overflow-x-hidden">
+  <div class="min-h-screen font-sans bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black">
     
     <BackgroundNoise />
 
-    <section class="relative pt-32 pb-20 z-10">
+    <section class="relative pt-32 pb-20 z-10 overflow-hidden">
       <div class="max-w-7xl mx-auto px-6 text-center">
 
         <div class="flex justify-center mb-8">
@@ -307,7 +307,8 @@ useHead({
                         <h3 class="font-semibold text-zinc-900 dark:text-white text-sm">Recent Proof of Work</h3>
                       </div>
                       <div class="p-0">
-                        <div class="w-full">
+                        <div class="w-full overflow-x-auto">
+                          <div class="min-w-[600px]">
                             <div class="grid grid-cols-12 px-6 py-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
                               <div class="col-span-2">Date</div>
                               <div class="col-span-2">Client</div>
@@ -367,7 +368,7 @@ useHead({
                                   </div>
                               </div>
                             </div>
-
+                          </div>
                         </div>
                       </div>
                   </div>

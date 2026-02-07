@@ -4,6 +4,7 @@ import AppFooter from './components/AppFooter.vue'
 import { SpeedInsights } from '@vercel/speed-insights/vue';
 import { useHead } from '@unhead/vue'
 import { Motion, AnimatePresence } from 'motion-v'
+import BackgroundNoise from './components/ui/background-noise/BackgroundNoise.vue'
 
 useHead({
   title: 'ZenPortal - Modern Client Portal Solution',
@@ -19,12 +20,9 @@ useHead({
 
 <template>
   <SpeedInsights />
-  <div class="min-h-screen bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50">
-    <div class="pointer-events-none fixed inset-0 z-100 h-full w-full opacity-20 mix-blend-overlay">
-      <div
-        class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-100 brightness-100 contrast-150">
-      </div>
-    </div>
+  <div class="min-h-screen bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 overflow-hidden">
+    
+    <BackgroundNoise />
 
     <AppHeader />
 
