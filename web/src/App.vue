@@ -20,7 +20,7 @@ useHead({
 
 <template>
   <SpeedInsights />
-  <div class="min-h-screen bg-white dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-50 overflow-hidden">
+  <div class="min-h-screen bg-background font-sans text-foreground overflow-hidden">
     
     <BackgroundNoise />
 

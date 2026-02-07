@@ -170,7 +170,7 @@ const formatCurrency = (amount: number, currency: string = 'USD') => {
                 Manage Billing
               </Button>
             </div>
-            <div class="absolute right-0 top-0 w-64 h-64 bg-gradient-to-br from-white/5 to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            <div class="absolute right-0 top-0 w-64 h-64 bg-linear-to-br from-white/5 to-transparent rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
           </div>
 
           <div v-else

@@ -109,7 +109,7 @@ useHead({
 </script>
 
 <template>
-  <div class="min-h-screen font-sans bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black">
+  <div class="min-h-screen font-sans bg-background text-foreground selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black">
     
     <BackgroundNoise />
 

@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarGroup, SidebarGroupLabel } from '@/components/ui/sidebar'
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, SidebarGroup, SidebarGroupLabel, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from '@/components/ui/sidebar'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuPortal } from '@/components/ui/dropdown-menu'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
@@ -23,9 +23,8 @@ import {
   ChevronRight
 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
-import { useApi } from '@/lib/api'
+import { authClient } from '@/lib/auth-client'
 
-const { fetchApi } = useApi()
 const mode = useColorMode()
 const route = useRoute()
 const userStore = useUserStore()
@@ -45,16 +44,20 @@ const handleLogout = async () => {
 const handleUpgrade = async () => {
   loading.value = true
   try {
-    const response = await fetchApi('/api/billing/subscribe', { method: 'POST' })
-    const session = response.data
-    if (session?.attributes?.checkout_url) {
-      localStorage.setItem('pending_checkout_id', session.id)
-      window.location.href = session.attributes.checkout_url
-    } else {
-      toast.error('Failed to get checkout URL')
+    const { data, error } = await authClient.dodopayments.checkoutSession({
+      slug: 'pro-plan',
+    })
+
+    if (error) {
+      toast.error(error.message || "Failed to start checkout")
+      return
+    }
+
+    if (data?.url) {
+      window.location.href = data.url
     }
   } catch (err: any) {
-    toast.error('An unexpected error occurred during upgrade.', {
+    toast.error('Failed to start checkout', {
       description: err.message
     })
   } finally {
@@ -62,8 +65,24 @@ const handleUpgrade = async () => {
   }
 }
 
-const handlePortal = () => {
-  toast.info("Manage Subscription", { description: "Contact support to modify your plan." })
+const handlePortal = async () => {
+  loading.value = true
+  try {
+    const { data, error } = await authClient.dodopayments.customer.portal()
+    
+    if (error) {
+      toast.error(error.message || "Failed to open portal")
+      return
+    }
+
+    if (data?.url) {
+      window.location.href = data.url
+    }
+  } catch(err) {
+    toast.error("Failed to redirect to portal")
+  } finally {
+    loading.value = false
+  }
 }
 
 const menuItems = [
@@ -157,15 +176,15 @@ const isGroupActive = (children: { path: string }[]) => {
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <SidebarMenu class="ml-2 w-3/4 mt-2.5 border-l border-zinc-200 dark:border-zinc-800 pl-2">
-                    <SidebarMenuItem v-for="child in item.children" :key="child.name">
+                  <SidebarMenuSub>
+                    <SidebarMenuSubItem v-for="child in item.children" :key="child.name">
                       <router-link :to="child.path" custom v-slot="{ href, navigate, isActive }">
-                        <SidebarMenuButton :href="href" @click="navigate" :isActive="isActive" size="sm" class="text-zinc-500 dark:text-zinc-500 data-[active=true]:text-zinc-900 dark:data-[active=true]:text-white h-8 text-xs font-medium">
-                          {{ child.name }}
-                        </SidebarMenuButton>
+                        <SidebarMenuSubButton :href="href" @click="navigate" :isActive="isActive" class="text-zinc-500 dark:text-zinc-500 data-[active=true]:text-zinc-900 dark:data-[active=true]:text-white cursor-pointer">
+                          <span>{{ child.name }}</span>
+                        </SidebarMenuSubButton>
                       </router-link>
-                    </SidebarMenuItem>
-                  </SidebarMenu>
+                    </SidebarMenuSubItem>
+                  </SidebarMenuSub>
                 </CollapsibleContent>
               </SidebarMenuItem>
             </Collapsible>

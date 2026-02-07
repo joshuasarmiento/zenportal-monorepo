@@ -11,6 +11,8 @@ import { Lock, Copy, Check, Loader2, Sparkles, Paintbrush } from 'lucide-vue-nex
 import { Separator } from '@/components/ui/separator'
 import { toast } from 'vue-sonner' 
 
+import { authClient } from '@/lib/auth-client'
+
 const { fetchApi } = useApi()
 const userStore = useUserStore()
 const saving = ref(false)
@@ -128,10 +130,17 @@ const copyLink = () => {
 const handleUpgrade = async () => {
   upgrading.value = true
   try {
-    const res = await fetchApi('/api/billing/subscribe', { method: 'POST' })
-    const session = res.data
-    if (session?.attributes?.checkout_url) {
-      window.location.href = session.attributes.checkout_url;
+    const { data, error } = await authClient.dodopayments.checkoutSession({
+      slug: 'pro-plan',
+    })
+
+    if (error) {
+      toast.error(error.message || "Failed to initiate upgrade")
+      return
+    }
+
+    if (data?.url) {
+      window.location.href = data.url
     }
   } catch (err) {
     toast.error('Failed to initiate upgrade.')

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useApi } from '../lib/api'
 import { useUserStore } from '@/stores/userStore'
 import { toast } from 'vue-sonner'
+import { authClient } from '@/lib/auth-client'
 
 // Components
 import AppSidebar from '@/components/AppSidebar.vue'
@@ -66,13 +67,17 @@ const goToEdit = (id: string) => router.push(`/clients/${id}/edit`)
 const goToUpgrade = async () => {
   loading.value = true
   try {
-    const res = await fetchApi('/api/billing/subscribe', { method: 'POST' })
-    const session = res.data
-    if (session?.attributes?.checkout_url) {
-      localStorage.setItem('pending_checkout_id', session.id);
-      window.location.href = session.attributes.checkout_url;
-    } else {
-      toast.error('Failed to create checkout session');
+    const { data, error } = await authClient.dodopayments.checkoutSession({
+      slug: 'pro-plan',
+    })
+
+    if (error) {
+      toast.error(error.message || "Failed to create checkout session")
+      return
+    }
+
+    if (data?.url) {
+      window.location.href = data.url
     }
   } catch (err: any) {
     toast.error('Failed to start checkout.', {
