@@ -9,9 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Lock, Copy, Check, Loader2, Sparkles, Paintbrush } from 'lucide-vue-next'
 import { Separator } from '@/components/ui/separator'
-import { toast } from 'vue-sonner' 
-
-import { authClient } from '@/lib/auth-client'
+import { toast } from 'vue-sonner'
 
 const { fetchApi } = useApi()
 const userStore = useUserStore()
@@ -127,26 +125,11 @@ const copyLink = () => {
   })
 }
 
-const handleUpgrade = async () => {
-  upgrading.value = true
-  try {
-    const { data, error } = await authClient.dodopayments.checkoutSession({
-      slug: 'pro-plan',
-    })
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
-    if (error) {
-      toast.error(error.message || "Failed to initiate upgrade")
-      return
-    }
-
-    if (data?.url) {
-      window.location.href = data.url
-    }
-  } catch (err) {
-    toast.error('Failed to initiate upgrade.')
-  } finally {
-    upgrading.value = false
-  }
+const handleUpgrade = () => {
+  router.push('/settings/billing')
 }
 </script>
 

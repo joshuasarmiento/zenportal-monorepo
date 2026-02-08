@@ -10,7 +10,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Loader2, Copy, Check, KeyRound, AlertTriangle, Sparkles, Lock, RefreshCw, EyeOff } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
-import { authClient } from '@/lib/auth-client'
 
 const { fetchApi } = useApi()
 const userStore = useUserStore()
@@ -55,26 +54,11 @@ const copyToClipboard = (keyType: 'read' | 'write') => {
   setTimeout(() => { copiedKey.value = null }, 2000)
 }
 
-const handleUpgrade = async () => {
-  upgrading.value = true
-  try {
-    const { data, error } = await authClient.dodopayments.checkoutSession({
-      slug: 'pro-plan',
-    })
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
-    if (error) {
-      toast.error(error.message || "Failed to start upgrade")
-      return
-    }
-
-    if (data?.url) {
-      window.location.href = data.url
-    }
-  } catch (err: any) {
-    toast.error('Failed to start upgrade.', { description: err.message })
-  } finally {
-    upgrading.value = false
-  }
+const handleUpgrade = () => {
+  router.push('/settings/billing')
 }
 </script>
 

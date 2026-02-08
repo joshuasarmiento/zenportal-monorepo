@@ -15,7 +15,6 @@ import { Separator } from "@/components/ui/separator"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { X, Loader2, Lock, Video, CheckCircle2 } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
-import { authClient } from '@/lib/auth-client'
 
 const router = useRouter()
 const { fetchApi } = useApi()
@@ -66,28 +65,8 @@ const submit = async () => {
   }
 }
 
-const handleUpgrade = async () => {
-  loading.value = true
-  try {
-    const { data, error } = await authClient.dodopayments.checkoutSession({
-      slug: 'pro-plan',
-    })
-
-    if (error) {
-      toast.error(error.message || "Failed to create checkout session")
-      return
-    }
-
-    if (data?.url) {
-      window.location.href = data.url
-    }
-  } catch (err: any) {
-    toast.error('Failed to start checkout.', {
-      description: err.message
-    })
-  } finally {
-    loading.value = false
-  }
+const handleUpgrade = () => {
+  router.push('/settings/billing')
 }
 </script>
 

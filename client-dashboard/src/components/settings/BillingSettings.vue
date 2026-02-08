@@ -75,7 +75,10 @@ const handleUpgrade = async () => {
   loading.value = true
   try {
       const { data, error } = await authClient.dodopayments.checkoutSession({
-          slug: billingInterval.value === 'monthly' ? 'pro-plan' : 'pro-plan-yearly', 
+          product_cart: [{
+            product_id: billingInterval.value === 'monthly' ? env.VITE_DODO_PRODUCT_ID_MONTHLY : env.VITE_DODO_PRODUCT_ID_YEARLY,
+            quantity: 1
+          }]
       })
 
 
